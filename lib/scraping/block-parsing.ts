@@ -1,7 +1,7 @@
 import { AbiInput } from "web3-utils";
 import { Log } from "web3-core/types";
 import Web3 from "web3";
-import { ExtendedBlock } from "./ethereum.service";
+import { ExtendedBlock } from "../ethereum.service";
 
 export interface BlockchainEvent<A> {
   signature: string;
