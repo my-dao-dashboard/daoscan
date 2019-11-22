@@ -14,6 +14,7 @@ export interface OrganisationCreatedEvent {
   address: string;
   txid: string;
   blockNumber: number;
+  timestamp: number;
 }
 
 export interface AppInstalledEvent {
@@ -24,6 +25,7 @@ export interface AppInstalledEvent {
   proxyAddress: string;
   txid: string;
   blockNumber: number;
+  timestamp: number;
 }
 
 export type OrganisationEvent = OrganisationCreatedEvent | AppInstalledEvent;

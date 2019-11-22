@@ -57,7 +57,8 @@ export class AragonScraper implements Scraper {
             name: ensName,
             address: address,
             txid: t.transactionHash,
-            blockNumber: t.blockNumber
+            blockNumber: t.blockNumber,
+            timestamp: Number(block.timestamp)
           };
           return event;
         })
@@ -73,7 +74,8 @@ export class AragonScraper implements Scraper {
         appId: e.appId,
         proxyAddress: e.proxy,
         txid: e.txid,
-        blockNumber: e.blockNumber
+        blockNumber: e.blockNumber,
+        timestamp: Number(block.timestamp)
       };
     });
     return Promise.all(appInstalledPromised);
@@ -89,7 +91,7 @@ export class AragonScraper implements Scraper {
         return {
           ...(this.web3.eth.abi.decodeLog(event.abi, log.data, log.topics) as A),
           txid: log.transactionHash,
-          blockNumber: log.blockNumber
+          blockNumber: block.number
         };
       });
   }
