@@ -9,6 +9,26 @@ provider:
   name: aws
   runtime: nodejs12.x
   region: 'us-east-1'
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - "Fn::GetAtt": [ OrganisationsTable, Arn ]
+    - Effect: Allow
+      Action:
+        - sqs:SendMessageBatch
+        - sqs:SendMessage
+      Resource:
+        - Fn::GetAtt:
+            - ScrapingQueue
+            - Arn
 
 plugins:
   - serverless-plugin-typescript
@@ -19,24 +39,22 @@ functions:
     handler: functions/scraping.block
     environment:
       INFURA_PROJECT_ID: '7e19ece913ca433cadb164942a0b3e2e'
+      SQS_URL:
+        Ref: ScrapingQueue
     events:
       - http:
           path: block
           method: post
           cors: true
-
-iamRoleStatements:
-  - Effect: Allow
-    Action:
-      - dynamodb:DescribeTable
-      - dynamodb:Query
-      - dynamodb:Scan
-      - dynamodb:GetItem
-      - dynamodb:PutItem
-      - dynamodb:UpdateItem
-      - dynamodb:DeleteItem
-    Resource:
-      - "Fn::GetAtt": [ OrganisationsTable, Arn ]
+  storage-save-ogranisation-event:
+    handler: functions/storage.saveOrganisationEvent
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - ScrapingQueue
+              - Arn
 
 resources:
   - ${file(resources/dynamodb.yml)}
+  - ${file(resources/sqs.yml)}

@@ -1,0 +1,6 @@
+---
+Resources:
+  ScrapingQueue:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      QueueName: "ScrapingQueue"
