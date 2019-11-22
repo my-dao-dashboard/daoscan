@@ -1,6 +1,8 @@
 service: daoscan
 app: daoscan
 org: ukstv
+custom:
+  stage: ${opt:stage, self:provider.stage}
 provider:
   name: aws
   runtime: nodejs12.x
@@ -56,24 +58,19 @@ functions:
 #    Define function environment variables here
 #    environment:
 #      variable2: value2
-
+#  iamRoleStatements:
+#    - Effect: Allow
+#      Action:
+#        - dynamodb:DescribeTable
+#        - dynamodb:Query
+#        - dynamodb:Scan
+#        - dynamodb:GetItem
+#        - dynamodb:PutItem
+#        - dynamodb:UpdateItem
+#        - dynamodb:DeleteItem
+#      # Restrict our IAM role permissions to
+#      # the specific table for the stage
+#      Resource:
+#        - "Fn::GetAtt": [ OrganisationsTable, Arn ]
 resources:
-  Parameters:
-    DBAllocatedStorage:
-      Default: 5
-      Description: The size of the database (Gb)
-      Type: Number
-      MinValue: 5
-      MaxValue: 6144
-      ConstraintDescription: must be ges 5
-  Resources:
-    Postgres:
-      Type: AWS::RDS::DBInstance
-      Properties:
-        DBName: daoscan
-        AllocatedStorage:
-          Ref: DBAllocatedStorage
-        DBInstanceClass: db.t3.micro
-        Engine: postgres
-        MasterUsername: daostack
-        MasterUserPassword: dd82bab67647f92649d578d4adf0f3eb
+  - ${file(resources/dynamodb.yml)}
