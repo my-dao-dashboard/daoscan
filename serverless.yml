@@ -57,14 +57,23 @@ functions:
 #    environment:
 #      variable2: value2
 
-# you can add CloudFormation resource templates here
-#resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
-#  Outputs:
-#     NewOutput:
-#       Description: "Description for the output"
-#       Value: "Some output value"
+resources:
+  Parameters:
+    DBAllocatedStorage:
+      Default: 5
+      Description: The size of the database (Gb)
+      Type: Number
+      MinValue: 5
+      MaxValue: 6144
+      ConstraintDescription: must be ges 5
+  Resources:
+    Postgres:
+      Type: AWS::RDS::DBInstance
+      Properties:
+        DBName: daoscan
+        AllocatedStorage:
+          Ref: DBAllocatedStorage
+        DBInstanceClass: db.t3.micro
+        Engine: postgres
+        MasterUsername: daostack
+        MasterUserPassword: dd82bab67647f92649d578d4adf0f3eb
