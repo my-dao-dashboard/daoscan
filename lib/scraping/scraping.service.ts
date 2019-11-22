@@ -1,10 +1,10 @@
 import { EthereumService } from "../ethereum.service";
-import { IScraper } from "./scraper.interface";
+import { Scraper } from "./scraper.interface";
 import { AragonScraper } from "./aragon.scraper";
 import * as _ from "lodash";
 
 export class ScrapingService {
-  private readonly scrapers: IScraper[];
+  private readonly scrapers: Scraper[];
 
   constructor(private readonly ethereum: EthereumService) {
     this.scrapers = [new AragonScraper(this.ethereum.web3)];

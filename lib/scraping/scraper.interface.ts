@@ -1,6 +1,6 @@
-import {ExtendedBlock} from "../ethereum.service";
-import {OrganisationEvent} from "../organisation";
+import { ExtendedBlock } from "../ethereum.service";
+import { OrganisationEvent } from "../organisation-events";
 
-export interface IScraper {
-  fromBlock(block: ExtendedBlock): Promise<OrganisationEvent[]>
+export interface Scraper {
+  fromBlock(block: ExtendedBlock): Promise<OrganisationEvent[]>;
 }

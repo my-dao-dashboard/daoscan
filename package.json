@@ -4,8 +4,8 @@
   "license": "UNLICENSED",
   "scripts": {
     "deploy": "serverless deploy",
-    "lint": "prettier --check *.ts",
-    "lint:fix": "prettier --write *.ts"
+    "lint": "prettier --check ./**/*.ts",
+    "lint:fix": "prettier --write ./**/*.ts"
   },
   "dependencies": {
     "aws-sdk": "^2.575.0",

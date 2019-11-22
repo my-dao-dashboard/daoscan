@@ -3,10 +3,10 @@ export function ok(data?: object) {
     return {
       statusCode: 200,
       body: JSON.stringify(data)
-    }
+    };
   } else {
     return {
       statusCode: 200
-    }
+    };
   }
 }

@@ -1,5 +1,5 @@
-import { BlockchainEvent } from "./block-parsing";
 import { AbiInput } from "web3-utils";
+import { BlockchainEvent } from "./blockchain-event.interface";
 
 export interface NewAppProxyParams {
   proxy: string;
@@ -27,34 +27,36 @@ export const NEW_APP_PROXY_EVENT: BlockchainEvent<NewAppProxyParams> = {
   ]
 };
 
-export const KIT_ADDRESSES = new Set([
-  // Democracy 1 (0.6)
-  "0x705Cd9a00b87Bb019a87beEB9a50334219aC4444",
+export const KIT_ADDRESSES = new Set(
+  [
+    // Democracy 1 (0.6)
+    "0x705Cd9a00b87Bb019a87beEB9a50334219aC4444",
 
-  // Multisig 1 (0.6)
-  "0x41bbaf498226b68415f1C78ED541c45A18fd7696",
+    // Multisig 1 (0.6)
+    "0x41bbaf498226b68415f1C78ED541c45A18fd7696",
 
-  // Democracy 2 (0.7)
-  "0x7f3ed10366826a1227025445D4f4e3e14BBfc91d",
+    // Democracy 2 (0.7)
+    "0x7f3ed10366826a1227025445D4f4e3e14BBfc91d",
 
-  // Multisig 2 (0.7)
-  "0x87aa2980dde7d2D4e57191f16BB57cF80bf6E5A6",
+    // Multisig 2 (0.7)
+    "0x87aa2980dde7d2D4e57191f16BB57cF80bf6E5A6",
 
-  // Company Board (0.8)
-  "0x4d1A892f42c947fa952b57bc6939b27A96215CfA",
+    // Company Board (0.8)
+    "0x4d1A892f42c947fa952b57bc6939b27A96215CfA",
 
-  // Company (0.8)
-  "0xd737632caC4d039C9B0EEcc94C12267407a271b5",
+    // Company (0.8)
+    "0xd737632caC4d039C9B0EEcc94C12267407a271b5",
 
-  // Membership (0.8)
-  "0x67430642C0c3B5E6538049B9E9eE719f2a4BeE7c",
+    // Membership (0.8)
+    "0x67430642C0c3B5E6538049B9E9eE719f2a4BeE7c",
 
-  // Reputation (0.8)
-  "0x3a06A6544e48708142508D9042f94DDdA769d04F",
+    // Reputation (0.8)
+    "0x3a06A6544e48708142508D9042f94DDdA769d04F",
 
-  // Open Enterprise (0.8.4)
-  "0xc54c5dB63aB0E79FBb9555373B969093dEb17859"
-].map(a => a.toLowerCase()));
+    // Open Enterprise (0.8.4)
+    "0xc54c5dB63aB0E79FBb9555373B969093dEb17859"
+  ].map(a => a.toLowerCase())
+);
 
 export const KIT_SIGNATURES = new Map<string, AbiInput[]>([
   // Democracy (0.6-0.7)

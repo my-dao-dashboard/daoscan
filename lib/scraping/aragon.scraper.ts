@@ -1,22 +1,43 @@
 import { ExtendedBlock } from "../ethereum.service";
-import { KIT_ADDRESSES, KIT_SIGNATURES } from "./aragon.constants";
+import { KIT_ADDRESSES, KIT_SIGNATURES, NEW_APP_PROXY_EVENT } from "./aragon.constants";
 import {
   ORGANISATION_EVENT,
   ORGANISATION_PLATFORM,
   OrganisationCreatedEvent,
   OrganisationEvent
-} from "../organisation";
+} from "../organisation-events";
 import Web3 from "web3";
-import { IScraper } from "./scraper.interface";
+import { Scraper } from "./scraper.interface";
+import { Indexed } from "../indexed.interface";
+import { BlockchainEvent } from "./blockchain-event.interface";
 
-export class AragonScraper implements IScraper {
+export class AragonScraper implements Scraper {
   constructor(private readonly web3: Web3) {}
 
   async fromBlock(block: ExtendedBlock): Promise<OrganisationEvent[]> {
-    return this.createdEvents(block);
+    const created = await this.createdFromTransactions(block);
+    const appInstalled = await this.appInstalledEvents(block);
+
+    return created.concat(appInstalled);
   }
 
-  async createdEvents(block: ExtendedBlock): Promise<OrganisationCreatedEvent[]> {
+  async kernelAddress(proxy: string): Promise<string> {
+    const data = this.web3.eth.abi.encodeFunctionCall(
+      {
+        name: "kernel",
+        type: "function",
+        inputs: []
+      },
+      []
+    );
+    const result = await this.web3.eth.call({
+      to: proxy,
+      data
+    });
+    return this.web3.eth.abi.decodeParameter("address", result) as any;
+  }
+
+  async createdFromTransactions(block: ExtendedBlock): Promise<OrganisationEvent[]> {
     const whitelist = KIT_ADDRESSES;
     const abiMap = KIT_SIGNATURES;
     return Promise.all(
@@ -35,10 +56,41 @@ export class AragonScraper implements IScraper {
             platform: ORGANISATION_PLATFORM.ARAGON,
             name: ensName,
             address: address,
-            txid: t.transactionHash
+            txid: t.transactionHash,
+            blockNumber: t.blockNumber
           };
           return event;
         })
     );
+  }
+
+  async appInstalledEvents(block: ExtendedBlock): Promise<OrganisationEvent[]> {
+    const appInstalledPromised = this.logEvents(block, NEW_APP_PROXY_EVENT).map<Promise<OrganisationEvent>>(async e => {
+      return {
+        kind: ORGANISATION_EVENT.APP_INSTALLED,
+        platform: ORGANISATION_PLATFORM.ARAGON,
+        organisationAddress: await this.kernelAddress(e.proxy),
+        appId: e.appId,
+        proxyAddress: e.proxy,
+        txid: e.txid,
+        blockNumber: e.blockNumber
+      };
+    });
+    return Promise.all(appInstalledPromised);
+  }
+
+  logEvents<A extends Indexed<string>>(
+    block: ExtendedBlock,
+    event: BlockchainEvent<A>
+  ): (A & { txid: string; blockNumber: number })[] {
+    return block.logs
+      .filter(log => log.topics[0] === event.signature)
+      .map(log => {
+        return {
+          ...(this.web3.eth.abi.decodeLog(event.abi, log.data, log.topics) as A),
+          txid: log.transactionHash,
+          blockNumber: log.blockNumber
+        };
+      });
   }
 }
