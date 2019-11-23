@@ -25,7 +25,7 @@ export async function saveOrganisationEvent(event: SqsEvent, context: any) {
                     platform: event.platform,
                     txid: event.txid,
                     timestamp: event.timestamp,
-                    blockNumber: event.blockNumber,
+                    blockNumber: event.blockNumber
                   }
                 }
               }
@@ -43,13 +43,13 @@ export async function saveOrganisationEvent(event: SqsEvent, context: any) {
     return new Promise((resolve, reject) => {
       if (q) {
         dynamo.batchWrite(q, (error, ok) => {
-          error ? reject(error) : resolve(ok)
-        })
+          error ? reject(error) : resolve(ok);
+        });
       } else {
-        resolve()
+        resolve();
       }
-    })
-  })
+    });
+  });
 
-  await Promise.all(writings)
+  await Promise.all(writings);
 }
