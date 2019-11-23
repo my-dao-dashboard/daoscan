@@ -48,6 +48,8 @@ functions:
           cors: true
   storage-save-ogranisation-event:
     handler: functions/storage.saveOrganisationEvent
+    environment:
+      ORGANISATIONS_TABLE: ${self:custom.stage}-organisations
     events:
       - sqs:
           arn:
