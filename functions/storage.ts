@@ -15,14 +15,21 @@ export async function saveOrganisationEvent(event: SqsEvent, context: any) {
     switch (event.kind) {
       case ORGANISATION_EVENT.CREATED:
         return {
-          TableName: ORGANISATIONS_TABLE,
-          Item: {
-            address: event.address,
-            name: event.name,
-            platform: event.platform,
-            txid: event.txid,
-            timestamp: event.timestamp,
-            blockNumber: event.blockNumber,
+          RequestItems: {
+            [ORGANISATIONS_TABLE]: [
+              {
+                PutRequest: {
+                  Item: {
+                    address: event.address,
+                    name: event.name,
+                    platform: event.platform,
+                    txid: event.txid,
+                    timestamp: event.timestamp,
+                    blockNumber: event.blockNumber,
+                  }
+                }
+              }
+            ]
           }
         };
       case ORGANISATION_EVENT.APP_INSTALLED:
@@ -35,7 +42,7 @@ export async function saveOrganisationEvent(event: SqsEvent, context: any) {
   const writings = queries.map(q => {
     return new Promise((resolve, reject) => {
       if (q) {
-        dynamo.put(q, (error, ok) => {
+        dynamo.batchWrite(q, (error, ok) => {
           error ? reject(error) : resolve(ok)
         })
       } else {
