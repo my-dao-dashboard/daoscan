@@ -4,19 +4,23 @@ import { DocumentClient } from "aws-sdk/lib/dynamodb/document_client";
 export class DynamoService {
   private readonly client = new AWS.DynamoDB.DocumentClient();
 
-  put (payload: DocumentClient.PutItemInput): Promise<DocumentClient.PutItemOutput> {
-    return new Promise((resolve, reject) => {
-      this.client.put(payload, (error, result) => {
-        error ? reject(error) : resolve(result)
-      })
-    })
+  createSet(list: number[] | string[] | DocumentClient.binaryType[], options?: DocumentClient.CreateSetOptions): DocumentClient.StringSet | DocumentClient.NumberSet | DocumentClient.BinarySet {
+    return this.client.createSet(list, options);
   }
 
-  update (payload: DocumentClient.UpdateItemInput): Promise<DocumentClient.UpdateItemOutput> {
+  put(payload: DocumentClient.PutItemInput): Promise<DocumentClient.PutItemOutput> {
+    return new Promise((resolve, reject) => {
+      this.client.put(payload, (error, result) => {
+        error ? reject(error) : resolve(result);
+      });
+    });
+  }
+
+  update(payload: DocumentClient.UpdateItemInput): Promise<DocumentClient.UpdateItemOutput> {
     return new Promise((resolve, reject) => {
       this.client.update(payload, (error, result) => {
-        error ? reject(error) : resolve(result)
-      })
-    })
+        error ? reject(error) : resolve(result);
+      });
+    });
   }
 }

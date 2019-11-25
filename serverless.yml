@@ -22,6 +22,7 @@ provider:
         - dynamodb:BatchWriteItem
       Resource:
         - "Fn::GetAtt": [ OrganisationsTable, Arn ]
+        - "Fn::GetAtt": [ ApplicationsTable, Arn ]
     - Effect: Allow
       Action:
         - sqs:SendMessageBatch
@@ -51,6 +52,7 @@ functions:
     handler: functions/storage.saveOrganisationEvent
     environment:
       ORGANISATIONS_TABLE: ${self:custom.stage}-organisations
+      APPLICATIONS_TABLE: ${self:custom.stage}-applications
     events:
       - sqs:
           arn:
