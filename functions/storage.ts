@@ -4,8 +4,8 @@ import {
   OrganisationCreatedEvent,
   OrganisationEvent
 } from "../lib/organisation-events";
-import { UnreachableCaseError } from "../lib/unreachable-case-error";
-import { DynamoService } from "../lib/dynamo.service";
+import {UnreachableCaseError} from "../lib/unreachable-case-error";
+import {DynamoService} from "../lib/dynamo.service";
 
 interface SqsEvent {
   Records: { body: string }[];
@@ -30,9 +30,10 @@ async function handleCreateOrganisation(event: OrganisationCreatedEvent): Promis
 }
 
 async function handleInstallApplication(event: AppInstalledEvent): Promise<void> {
-   await dynamo.put({
+  await dynamo.put({
     TableName: APPLICATIONS_TABLE,
     Item: {
+      organisationAddress: event.organisationAddress,
       appId: event.appId,
       proxyAddress: event.proxyAddress,
       platform: event.platform,
@@ -41,16 +42,6 @@ async function handleInstallApplication(event: AppInstalledEvent): Promise<void>
       timestamp: event.timestamp
     }
   });
-  await dynamo.update({
-    TableName: ORGANISATIONS_TABLE,
-    Key: {
-      address: event.organisationAddress
-    },
-    UpdateExpression: 'ADD applications :app',
-    ExpressionAttributeValues: {
-      ":app": dynamo.createSet([event.proxyAddress])
-    },
-  })
 }
 
 export async function saveOrganisationEvent(event: SqsEvent, context: any) {
