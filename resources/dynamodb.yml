@@ -10,3 +10,18 @@ Resources:
         - AttributeName: address
           KeyType: HASH
       BillingMode: PAY_PER_REQUEST
+  ApplicationsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ${self:custom.stage}-applications
+      AttributeDefinitions:
+        - AttributeName: appId
+          AttributeType: S
+        - AttributeName: proxyAddress
+          AttributeType: S
+      KeySchema:
+        - AttributeName: appId
+          KeyType: HASH
+        - AttributeName: proxyAddress
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
