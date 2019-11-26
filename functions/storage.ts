@@ -7,6 +7,7 @@ import {
 } from "../lib/organisation-events";
 import { UnreachableCaseError } from "../lib/unreachable-case-error";
 import { DynamoService } from "../lib/dynamo.service";
+import { ok } from "../lib/response";
 
 interface SqsEvent {
   Records: { body: string }[];
@@ -47,14 +48,14 @@ async function handleInstallApplication(event: AppInstalledEvent): Promise<void>
 }
 
 async function handleAddParticipant(event: AddParticipantEvent) {
-  console.log('trying to put', {
+  console.log("trying to put", {
     TableName: PARTICIPANTS_TABLE,
     Item: {
       organisationAddress: event.organisationAddress,
       participantAddress: event.participant,
       updatedAt: new Date().valueOf()
     }
-  })
+  });
   await dynamo.put({
     TableName: PARTICIPANTS_TABLE,
     Item: {
@@ -81,4 +82,45 @@ export async function saveOrganisationEvent(event: SqsEvent, context: any) {
   });
 
   await Promise.all(loop);
+}
+
+export async function getParticipants(event: any, context: any) {
+  const organisationAddress = event.pathParameters.organisationAddress;
+  const items = await dynamo.query({
+    TableName: PARTICIPANTS_TABLE,
+    ProjectionExpression: "organisationAddress, participantAddress, updatedAt",
+    KeyConditionExpression: "organisationAddress = :organisationAddress",
+    ExpressionAttributeValues: {
+      ":organisationAddress": organisationAddress
+    }
+  });
+  const participants = items.Items?.map(item => {
+    return {
+      participantAddress: item.participantAddress,
+      updatedAt: item.updatedAt
+    };
+  });
+
+  return ok({
+    participants
+  });
+}
+
+export async function getOrganisations(event: any, context: any) {
+  const participantAddress = event.pathParameters.participantAddress?.toLowerCase();
+  const items = await dynamo.scan({
+    TableName: PARTICIPANTS_TABLE,
+    FilterExpression: "participantAddress = :participantAddress",
+    ExpressionAttributeValues: {
+      ":participantAddress": participantAddress
+    }
+  });
+  const organisations = items.Items?.map(item => {
+    return {
+      organisationAddress: item.organisationAddress,
+      updatedAt: item.updatedAt
+    };
+  });
+
+  return ok({ participantAddress, organisations });
 }

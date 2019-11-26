@@ -8,6 +8,22 @@ export class DynamoService {
     return this.client.createSet(list, options);
   }
 
+  scan (payload: DocumentClient.ScanInput): Promise<DocumentClient.ScanOutput> {
+    return new Promise<DocumentClient.ScanOutput>((resolve, reject) => {
+      this.client.scan(payload, (err, data) => {
+        err ? reject(err) : resolve(data)
+      })
+    })
+  }
+
+  query (payload: DocumentClient.QueryInput): Promise<DocumentClient.QueryOutput> {
+    return new Promise<DocumentClient.QueryOutput>((resolve, reject) => {
+      this.client.query(payload, (err, data) => {
+        err ? reject(err) : resolve(data)
+      })
+    })
+  }
+
   get (payload: DocumentClient.GetItemInput): Promise<DocumentClient.GetItemOutput> {
     return new Promise<DocumentClient.GetItemOutput>((resolve, reject) => {
       this.client.get(payload, (error, result) => {
