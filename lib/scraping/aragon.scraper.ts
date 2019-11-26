@@ -55,7 +55,7 @@ export class AragonScraper implements Scraper {
             kind: ORGANISATION_EVENT.CREATED,
             platform: ORGANISATION_PLATFORM.ARAGON,
             name: ensName,
-            address: address,
+            address: address.toLowerCase(),
             txid: t.transactionHash,
             blockNumber: t.blockNumber,
             timestamp: Number(block.timestamp)
@@ -67,10 +67,11 @@ export class AragonScraper implements Scraper {
 
   async appInstalledEvents(block: ExtendedBlock): Promise<OrganisationEvent[]> {
     const appInstalledPromised = this.logEvents(block, NEW_APP_PROXY_EVENT).map<Promise<OrganisationEvent>>(async e => {
+      const organisationAddress = await this.kernelAddress(e.proxy)
       return {
         kind: ORGANISATION_EVENT.APP_INSTALLED,
         platform: ORGANISATION_PLATFORM.ARAGON,
-        organisationAddress: await this.kernelAddress(e.proxy),
+        organisationAddress: organisationAddress.toLowerCase(),
         appId: e.appId,
         proxyAddress: e.proxy,
         txid: e.txid,
