@@ -4,7 +4,8 @@ export enum ORGANISATION_PLATFORM {
 
 export enum ORGANISATION_EVENT {
   CREATED = "CREATED",
-  APP_INSTALLED = "APP_INSTALLED"
+  APP_INSTALLED = "APP_INSTALLED",
+  ADD_PARTICIPANT = "ADD_PARTICIPANT"
 }
 
 export interface OrganisationCreatedEvent {
@@ -28,4 +29,11 @@ export interface AppInstalledEvent {
   timestamp: number;
 }
 
-export type OrganisationEvent = OrganisationCreatedEvent | AppInstalledEvent;
+export interface AddParticipantEvent {
+  kind: ORGANISATION_EVENT.ADD_PARTICIPANT,
+  platform: ORGANISATION_PLATFORM.ARAGON,
+  organisationAddress: string;
+  participant: string;
+}
+
+export type OrganisationEvent = OrganisationCreatedEvent | AppInstalledEvent | AddParticipantEvent;

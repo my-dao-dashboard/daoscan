@@ -23,6 +23,7 @@ provider:
       Resource:
         - "Fn::GetAtt": [ OrganisationsTable, Arn ]
         - "Fn::GetAtt": [ ApplicationsTable, Arn ]
+        - "Fn::GetAtt": [ ParticipantsTable, Arn ]
     - Effect: Allow
       Action:
         - sqs:SendMessageBatch
@@ -65,6 +66,7 @@ functions:
     environment:
       ORGANISATIONS_TABLE: ${self:custom.stage}-organisations
       APPLICATIONS_TABLE: ${self:custom.stage}-applications
+      PARTICIPANTS_TABLE: ${self:custom.stage}-participants
     events:
       - sqs:
           arn:
