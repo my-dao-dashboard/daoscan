@@ -25,3 +25,18 @@ Resources:
         - AttributeName: appId
           KeyType: RANGE
       BillingMode: PAY_PER_REQUEST
+  ParticipantsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ${self:custom.stage}-participants
+      AttributeDefinitions:
+        - AttributeName: organisationAddress
+          AttributeType: S
+        - AttributeName: participantAddress
+          AttributeType: S
+      KeySchema:
+        - AttributeName: organisationAddress
+          KeyType: HASH
+        - AttributeName: participantAddress
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST

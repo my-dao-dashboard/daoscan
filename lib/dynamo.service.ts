@@ -8,6 +8,14 @@ export class DynamoService {
     return this.client.createSet(list, options);
   }
 
+  get (payload: DocumentClient.GetItemInput): Promise<DocumentClient.GetItemOutput> {
+    return new Promise<DocumentClient.GetItemOutput>((resolve, reject) => {
+      this.client.get(payload, (error, result) => {
+        error ? reject(error) : resolve(result)
+      })
+    })
+  }
+
   put(payload: DocumentClient.PutItemInput): Promise<DocumentClient.PutItemOutput> {
     return new Promise((resolve, reject) => {
       this.client.put(payload, (error, result) => {

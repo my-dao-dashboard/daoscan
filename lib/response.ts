@@ -10,3 +10,16 @@ export function ok(data?: object) {
     };
   }
 }
+
+export function notFound(data?: object) {
+  if (data) {
+    return {
+      statusCode: 404,
+      body: JSON.stringify(data)
+    };
+  } else {
+    return {
+      statusCode: 404
+    };
+  }
+}

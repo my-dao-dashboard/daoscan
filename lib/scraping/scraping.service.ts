@@ -6,7 +6,7 @@ import * as _ from "lodash";
 export class ScrapingService {
   private readonly scrapers: Scraper[];
 
-  constructor(private readonly ethereum: EthereumService) {
+  constructor(readonly ethereum: EthereumService) {
     this.scrapers = [new AragonScraper(this.ethereum.web3)];
   }
 

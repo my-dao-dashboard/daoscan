@@ -48,6 +48,18 @@ functions:
           path: block
           method: post
           cors: true
+  scraping-update-participants:
+    handler: functions/scraping.updateParticipants
+    environment:
+      APPLICATIONS_TABLE: ${self:custom.stage}-applications
+      INFURA_PROJECT_ID: '7e19ece913ca433cadb164942a0b3e2e'
+      SQS_URL:
+        Ref: ScrapingQueue
+    events:
+      - http:
+          path: update-participants
+          method: post
+          cors: true
   storage-save-ogranisation-event:
     handler: functions/storage.saveOrganisationEvent
     environment:
