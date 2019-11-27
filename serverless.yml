@@ -9,6 +9,13 @@ provider:
   name: aws
   runtime: nodejs12.x
   region: 'us-east-1'
+  environment:
+    INFURA_PROJECT_ID: '7e19ece913ca433cadb164942a0b3e2e'
+    SQS_URL:
+      Ref: ScrapingQueue
+    ORGANISATIONS_TABLE: ${self:custom.stage}-organisations
+    APPLICATIONS_TABLE: ${self:custom.stage}-applications
+    PARTICIPANTS_TABLE: ${self:custom.stage}-participants
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -40,10 +47,6 @@ plugins:
 functions:
   scraping-block:
     handler: functions/scraping.block
-    environment:
-      INFURA_PROJECT_ID: '7e19ece913ca433cadb164942a0b3e2e'
-      SQS_URL:
-        Ref: ScrapingQueue
     events:
       - http:
           path: block
@@ -51,11 +54,6 @@ functions:
           cors: true
   scraping-update-participants:
     handler: functions/scraping.updateParticipants
-    environment:
-      APPLICATIONS_TABLE: ${self:custom.stage}-applications
-      INFURA_PROJECT_ID: '7e19ece913ca433cadb164942a0b3e2e'
-      SQS_URL:
-        Ref: ScrapingQueue
     events:
       - http:
           path: update-participants
@@ -63,10 +61,6 @@ functions:
           cors: true
   storage-save-ogranisation-event:
     handler: functions/storage.saveOrganisationEvent
-    environment:
-      ORGANISATIONS_TABLE: ${self:custom.stage}-organisations
-      APPLICATIONS_TABLE: ${self:custom.stage}-applications
-      PARTICIPANTS_TABLE: ${self:custom.stage}-participants
     events:
       - sqs:
           arn:
@@ -75,16 +69,12 @@ functions:
               - Arn
   storage-get-participants:
     handler: functions/storage.getParticipants
-    environment:
-      PARTICIPANTS_TABLE: ${self:custom.stage}-participants
     events:
       - http:
           path: get-participants/{organisationAddress}
           method: get
   storage-get-organisations:
     handler: functions/storage.getOrganisations
-    environment:
-      PARTICIPANTS_TABLE: ${self:custom.stage}-participants
     events:
       - http:
           path: get-organisations/{participantAddress}

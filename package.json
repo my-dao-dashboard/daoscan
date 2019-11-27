@@ -8,15 +8,15 @@
     "lint:fix": "prettier --write ./**/*.ts"
   },
   "dependencies": {
-    "aws-sdk": "^2.575.0",
+    "aws-sdk": "^2.580.0",
     "lodash": "^4.17.15",
     "web3": "^1.2.4"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.149",
-    "@types/node": "^12.12.11",
+    "@types/node": "^12.12.14",
     "prettier": "^1.19.1",
-    "serverless": "^1.48.1",
+    "serverless": "^1.58.0",
     "serverless-offline": "^5.12.0",
     "serverless-plugin-typescript": "^1.1.9",
     "ts-node": "^8.5.2",
