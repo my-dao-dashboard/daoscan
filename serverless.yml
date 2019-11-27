@@ -11,11 +11,14 @@ provider:
   region: 'us-east-1'
   environment:
     INFURA_PROJECT_ID: '7e19ece913ca433cadb164942a0b3e2e'
-    SQS_URL:
+    SCRAPING_SQS_URL:
       Ref: ScrapingQueue
+    BLOCKS_SQS_URL:
+      Ref: BlocksQueue
     ORGANISATIONS_TABLE: ${self:custom.stage}-organisations
     APPLICATIONS_TABLE: ${self:custom.stage}-applications
     PARTICIPANTS_TABLE: ${self:custom.stage}-participants
+    BLOCKS_TABLE: ${self:custom.stage}-blocks
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -31,6 +34,7 @@ provider:
         - "Fn::GetAtt": [ OrganisationsTable, Arn ]
         - "Fn::GetAtt": [ ApplicationsTable, Arn ]
         - "Fn::GetAtt": [ ParticipantsTable, Arn ]
+        - "Fn::GetAtt": [ BlocksTable, Arn ]
     - Effect: Allow
       Action:
         - sqs:SendMessageBatch
@@ -39,12 +43,19 @@ provider:
         - Fn::GetAtt:
             - ScrapingQueue
             - Arn
+        - Fn::GetAtt:
+            - BlocksQueue
+            - Arn
 
 plugins:
   - serverless-plugin-typescript
   - serverless-offline
 
 functions:
+  scraping-tick-block:
+    handler: functions/scraping.tickBlock
+    events:
+      - schedule: rate(1 minute)
   scraping-parse-block:
     handler: functions/scraping.parseBlock
     events:

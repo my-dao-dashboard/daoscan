@@ -4,6 +4,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "deploy": "serverless deploy",
+    "start": "serverless offline",
     "lint": "prettier --check ./**/*.ts",
     "lint:fix": "prettier --write ./**/*.ts"
   },

@@ -40,3 +40,14 @@ Resources:
         - AttributeName: participantAddress
           KeyType: RANGE
       BillingMode: PAY_PER_REQUEST
+  BlocksTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ${self:custom.stage}-blocks
+      AttributeDefinitions:
+        - AttributeName: blockNumber
+          AttributeType: N
+      KeySchema:
+        - AttributeName: blockNumber
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST

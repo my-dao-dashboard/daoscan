@@ -42,7 +42,7 @@ export class AragonScraper implements Scraper {
     const abiMap = KIT_SIGNATURES;
     return Promise.all(
       block.receipts
-        .filter(t => whitelist.has(t.to.toLowerCase()) || whitelist.size === 0)
+        .filter(t => t.to && (whitelist.has(t.to.toLowerCase()) || whitelist.size === 0))
         .filter(t => abiMap.has(t.input.slice(0, 10)))
         .map(async t => {
           const signature = t.input.slice(0, 10);

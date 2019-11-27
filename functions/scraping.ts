@@ -6,9 +6,13 @@ import { DynamoService } from "../lib/dynamo.service";
 import { TOKEN_ABI, TOKEN_CONTROLLER_ABI } from "../lib/scraping/aragon.constants";
 import { AddParticipantEvent, ORGANISATION_EVENT, ORGANISATION_PLATFORM } from "../lib/organisation-events";
 
-const SQS_URL = String(process.env.SQS_URL);
+const BLOCKS_SQS_URL = String(process.env.BLOCKS_SQS_URL);
+const SCRAPING_SQS_URL = String(process.env.SCRAPING_SQS_URL);
+
 const INFURA_PROJECT_ID = String(process.env.INFURA_PROJECT_ID);
+
 const APPLICATIONS_TABLE = String(process.env.APPLICATIONS_TABLE);
+const BLOCKS_TABLE = String(process.env.BLOCKS_TABLE);
 
 const ethereum = new EthereumService(INFURA_PROJECT_ID);
 const scraping = new ScrapingService(ethereum);
@@ -18,12 +22,13 @@ const sqs = new AWS.SQS();
 async function parseBlockImpl(body: any) {
   const data = JSON.parse(body);
   const id = Number(data.id);
+  console.log(`Starting parsing block #${id}...`);
   const events = await scraping.fromBlock(id);
 
   const sendings = events.map(e => {
     return new Promise((resolve, reject) => {
       const message = {
-        QueueUrl: SQS_URL,
+        QueueUrl: SCRAPING_SQS_URL,
         MessageBody: JSON.stringify(e)
       };
       sqs.sendMessage(message, (error, result) => {
@@ -34,9 +39,44 @@ async function parseBlockImpl(body: any) {
 
   await Promise.all(sendings);
 
+  await dynamo.put({
+    TableName: BLOCKS_TABLE,
+    Item: {
+      blockNumber: id
+    }
+  });
+
+  console.log(`Parsed block #${id}: events=${events.length}`);
   return ok({
     events: events
   });
+}
+
+export async function tickBlock(event: any, context: any) {
+  const block = await ethereum.block("latest");
+  const latest = block.number;
+  const previous = latest - 50;
+  for (let i = previous; i <= latest; i++) {
+    const items = await dynamo.get({
+      TableName: BLOCKS_TABLE,
+      ProjectionExpression: 'blockNumber',
+      Key: {
+        blockNumber: i
+      }
+    });
+    if (!items.Item) {
+      const sending = new Promise((resolve, reject) => {
+        const message = {
+          QueueUrl: BLOCKS_SQS_URL,
+          MessageBody: JSON.stringify({ id: i })
+        };
+        sqs.sendMessage(message, (err, data) => {
+          err ? reject(err) : resolve(data);
+        });
+      });
+      await sending;
+    }
+  }
 }
 
 export async function parseBlock(event: any, context: any) {
@@ -88,7 +128,7 @@ export async function parseParticipants(event: any, context: any) {
         participant: participant
       };
       const message = {
-        QueueUrl: SQS_URL,
+        QueueUrl: SCRAPING_SQS_URL,
         MessageBody: JSON.stringify(e)
       };
       return new Promise((resolve, reject) => {
