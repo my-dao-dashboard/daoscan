@@ -45,15 +45,15 @@ plugins:
   - serverless-offline
 
 functions:
-  scraping-block:
-    handler: functions/scraping.block
+  scraping-parse-block:
+    handler: functions/scraping.parseBlock
     events:
       - http:
           path: block
           method: post
           cors: true
-  scraping-update-participants:
-    handler: functions/scraping.updateParticipants
+  scraping-parse-participants:
+    handler: functions/scraping.parseParticipants
     events:
       - http:
           path: update-participants
@@ -67,14 +67,14 @@ functions:
             Fn::GetAtt:
               - ScrapingQueue
               - Arn
-  storage-get-participants:
-    handler: functions/storage.getParticipants
+  storage-read-participants-by-organisation:
+    handler: functions/storage.readParticipants
     events:
       - http:
           path: get-participants/{organisationAddress}
           method: get
-  storage-get-organisations:
-    handler: functions/storage.getOrganisations
+  storage-read-organisations-by-participant:
+    handler: functions/storage.readOrganisations
     events:
       - http:
           path: get-organisations/{participantAddress}

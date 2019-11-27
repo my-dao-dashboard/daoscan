@@ -15,7 +15,7 @@ const scraping = new ScrapingService(ethereum);
 const dynamo = new DynamoService();
 const sqs = new AWS.SQS();
 
-export async function block(event: any, context: any) {
+export async function parseBlock(event: any, context: any) {
   const data = JSON.parse(event.body);
   const id = Number(data.id);
 
@@ -36,12 +36,11 @@ export async function block(event: any, context: any) {
   await Promise.all(sendings);
 
   return ok({
-    length: events.length,
     events: events
   });
 }
 
-export async function updateParticipants(event: any, context: any) {
+export async function parseParticipants(event: any, context: any) {
   const data = JSON.parse(event.body);
   const organisationAddress = data.organisationAddress;
   const tokenApplication = await dynamo.get({

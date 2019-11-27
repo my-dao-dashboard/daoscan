@@ -84,7 +84,7 @@ export async function saveOrganisationEvent(event: SqsEvent, context: any) {
   await Promise.all(loop);
 }
 
-export async function getParticipants(event: any, context: any) {
+export async function readParticipants(event: any, context: any) {
   const organisationAddress = event.pathParameters.organisationAddress;
   const items = await dynamo.query({
     TableName: PARTICIPANTS_TABLE,
@@ -106,7 +106,7 @@ export async function getParticipants(event: any, context: any) {
   });
 }
 
-export async function getOrganisations(event: any, context: any) {
+export async function readOrganisations(event: any, context: any) {
   const participantAddress = event.pathParameters.participantAddress?.toLowerCase();
   const items = await dynamo.scan({
     TableName: PARTICIPANTS_TABLE,
