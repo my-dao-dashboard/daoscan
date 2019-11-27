@@ -3,4 +3,8 @@ Resources:
   ScrapingQueue:
     Type: "AWS::SQS::Queue"
     Properties:
-      QueueName: "ScrapingQueue"
+      QueueName: ScrapingQueue
+  BlocksQueue:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      QueueName: BlocksQueue

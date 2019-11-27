@@ -52,6 +52,11 @@ functions:
           path: block
           method: post
           cors: true
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - BlocksQueue
+              - Arn
   scraping-parse-participants:
     handler: functions/scraping.parseParticipants
     events:

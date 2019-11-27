@@ -15,10 +15,9 @@ const scraping = new ScrapingService(ethereum);
 const dynamo = new DynamoService();
 const sqs = new AWS.SQS();
 
-export async function parseBlock(event: any, context: any) {
-  const data = JSON.parse(event.body);
+async function parseBlockImpl(body: any) {
+  const data = JSON.parse(body);
   const id = Number(data.id);
-
   const events = await scraping.fromBlock(id);
 
   const sendings = events.map(e => {
@@ -38,6 +37,18 @@ export async function parseBlock(event: any, context: any) {
   return ok({
     events: events
   });
+}
+
+export async function parseBlock(event: any, context: any) {
+  if (event.body) {
+    return parseBlockImpl(event.body);
+  } else {
+    await Promise.all(
+      event.Records.map(async (record: any) => {
+        await parseBlockImpl(record.body);
+      })
+    );
+  }
 }
 
 export async function parseParticipants(event: any, context: any) {
