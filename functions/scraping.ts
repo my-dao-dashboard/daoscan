@@ -55,7 +55,7 @@ async function parseBlockImpl(body: any) {
 export async function tickBlock(event: any, context: any) {
   const block = await ethereum.block("latest");
   const latest = block.number;
-  const previous = latest - 50;
+  const previous = latest - 20;
   for (let i = previous; i <= latest; i++) {
     const items = await dynamo.get({
       TableName: BLOCKS_TABLE,
