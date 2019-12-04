@@ -40,6 +40,17 @@ Resources:
         - AttributeName: participantAddress
           KeyType: RANGE
       BillingMode: PAY_PER_REQUEST
+      GlobalSecondaryIndexes:
+        - IndexName: ${self:custom.stage}-participants-index
+          KeySchema:
+            - AttributeName: participantAddress
+              KeyType: HASH
+            - AttributeName: organisationAddress
+              KeyType: RANGE
+          Projection:
+            NonKeyAttributes:
+              - updatedAt
+            ProjectionType: INCLUDE
   BlocksTable:
     Type: AWS::DynamoDB::Table
     Properties:
