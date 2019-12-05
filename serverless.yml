@@ -18,6 +18,7 @@ provider:
     ORGANISATIONS_TABLE: ${self:custom.stage}-organisations
     APPLICATIONS_TABLE: ${self:custom.stage}-applications
     PARTICIPANTS_TABLE: ${self:custom.stage}-participants
+    PARTICIPANTS_INDEX: by-participant
     BLOCKS_TABLE: ${self:custom.stage}-blocks
   iamRoleStatements:
     - Effect: Allow
@@ -35,6 +36,7 @@ provider:
         - "Fn::GetAtt": [ ApplicationsTable, Arn ]
         - "Fn::GetAtt": [ ParticipantsTable, Arn ]
         - "Fn::GetAtt": [ BlocksTable, Arn ]
+        - "Fn::Join": [ "/", [{ "Fn::GetAtt": ["ParticipantsTable", "Arn" ] }, "index", "by-participant"]]
     - Effect: Allow
       Action:
         - sqs:SendMessageBatch

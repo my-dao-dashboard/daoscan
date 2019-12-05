@@ -16,6 +16,7 @@ interface SqsEvent {
 const ORGANISATIONS_TABLE = String(process.env.ORGANISATIONS_TABLE);
 const APPLICATIONS_TABLE = String(process.env.APPLICATIONS_TABLE);
 const PARTICIPANTS_TABLE = String(process.env.PARTICIPANTS_TABLE);
+const PARTICIPANTS_INDEX = String(process.env.PARTICIPANTS_INDEX);
 const dynamo = new DynamoService();
 
 async function handleCreateOrganisation(event: OrganisationCreatedEvent): Promise<void> {
@@ -108,9 +109,11 @@ export async function readParticipants(event: any, context: any) {
 
 export async function readOrganisations(event: any, context: any) {
   const participantAddress = event.pathParameters.participantAddress?.toLowerCase();
-  const items = await dynamo.scan({
+  const items = await dynamo.query({
     TableName: PARTICIPANTS_TABLE,
-    FilterExpression: "participantAddress = :participantAddress",
+    IndexName: PARTICIPANTS_INDEX,
+    ProjectionExpression: "organisationAddress, participantAddress, updatedAt",
+    KeyConditionExpression: "participantAddress = :participantAddress",
     ExpressionAttributeValues: {
       ":participantAddress": participantAddress
     }
