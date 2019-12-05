@@ -10,11 +10,13 @@ const aa = JSON.parse(fs.readFileSync('./a.json').toString())
 const blocks = aa.items.Items.map((e: any) => e.blockNumber)
 
 async function main() {
-  for (let i = 0; i < blocks.length; i = i + 10) {
+  for (let i = 800; i < blocks.length; i = i + 10) {
     const promises = _.times(10).map(async j => {
-      return axios.post('https://d2revro29l.execute-api.us-east-1.amazonaws.com/dev/block', {
-        id: blocks[i + j]
-      })
+      if (blocks[i + j]) {
+        return axios.post('https://d2revro29l.execute-api.us-east-1.amazonaws.com/dev/block', {
+          id: blocks[i + j]
+        })
+      }
     })
     await Promise.all(promises)
     console.log(`Done ${i} out of ${blocks.length}`)
