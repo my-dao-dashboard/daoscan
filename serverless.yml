@@ -97,6 +97,12 @@ functions:
       - http:
           path: get-organisations/{participantAddress}
           method: get
+  tmp-all-orgs:
+    handler: functions/storage.allOrgs
+    events:
+      - http:
+          path: all-orgs
+          method: get
 
 resources:
   - ${file(resources/dynamodb.yml)}

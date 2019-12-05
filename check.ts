@@ -11,7 +11,7 @@ const infura = "https://mainnet.infura.io/v3/7e19ece913ca433cadb164942a0b3e2e";
 
 const web3 = new Web3(new Web3.providers.HttpProvider(infura));
 
-const TOKEN_CONTROLLER_ADDRESS = "0x189445c662f5c74ed8da964dc0e56a9657d8e16f";
+const TOKEN_CONTROLLER_ADDRESS = "0xB06e27d502D6A43D3Fbf1e9587FA95563F8ceFf2";
 
 const TOKEN_CONTROLLER_ABI = [
   {

@@ -127,3 +127,13 @@ export async function readOrganisations(event: any, context: any) {
 
   return ok({ participantAddress, organisations });
 }
+
+
+export async function allOrgs(event: any, context: any) {
+  const items = await dynamo.scan({
+    TableName: ORGANISATIONS_TABLE,
+    ProjectionExpression: "organisationAddress, blockNumber",
+  });
+
+  return ok({ items });
+}
