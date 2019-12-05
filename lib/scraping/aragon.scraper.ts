@@ -1,6 +1,13 @@
 import { ExtendedBlock } from "../ethereum.service";
-import { KIT_ADDRESSES, KIT_SIGNATURES, NEW_APP_PROXY_EVENT } from "./aragon.constants";
 import {
+  KIT_ADDRESSES,
+  KIT_SIGNATURES,
+  NEW_APP_PROXY_EVENT,
+  TOKEN_ABI,
+  TOKEN_CONTROLLER_ABI
+} from "./aragon.constants";
+import {
+  AppInstalledEvent,
   ORGANISATION_EVENT,
   ORGANISATION_PLATFORM,
   OrganisationCreatedEvent,
@@ -66,8 +73,8 @@ export class AragonScraper implements Scraper {
   }
 
   async appInstalledEvents(block: ExtendedBlock): Promise<OrganisationEvent[]> {
-    const appInstalledPromised = this.logEvents(block, NEW_APP_PROXY_EVENT).map<Promise<OrganisationEvent>>(async e => {
-      const organisationAddress = await this.kernelAddress(e.proxy)
+    const appInstalledPromised = this.logEvents(block, NEW_APP_PROXY_EVENT).map<Promise<AppInstalledEvent>>(async e => {
+      const organisationAddress = await this.kernelAddress(e.proxy);
       return {
         kind: ORGANISATION_EVENT.APP_INSTALLED,
         platform: ORGANISATION_PLATFORM.ARAGON,
@@ -79,7 +86,27 @@ export class AragonScraper implements Scraper {
         timestamp: Number(block.timestamp)
       };
     });
-    return Promise.all(appInstalledPromised);
+    const appsInstalled = await Promise.all(appInstalledPromised);
+    const tokenControllerEvents = appsInstalled.filter(e => {
+      return e.appId === "0x6b20a3010614eeebf2138ccec99f028a61c811b3b1a3343b6ff635985c75c91f";
+    });
+    for (let e of tokenControllerEvents) {
+      const tokenControllerAddress = e.proxyAddress;
+      const tokenController = new this.web3.eth.Contract(TOKEN_CONTROLLER_ABI, tokenControllerAddress);
+      const tokenAddress = await tokenController.methods.token().call();
+      const tokenEvent: AppInstalledEvent = {
+        kind: ORGANISATION_EVENT.APP_INSTALLED,
+        platform: ORGANISATION_PLATFORM.ARAGON,
+        organisationAddress: e.organisationAddress,
+        appId: "ds:share",
+        proxyAddress: tokenAddress,
+        txid: e.txid,
+        blockNumber: e.blockNumber,
+        timestamp: e.timestamp
+      };
+      appsInstalled.push(tokenEvent);
+    }
+    return appsInstalled;
   }
 
   logEvents<A extends Indexed<string>>(
