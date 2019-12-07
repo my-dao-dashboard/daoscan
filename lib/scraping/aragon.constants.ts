@@ -27,6 +27,21 @@ export const NEW_APP_PROXY_EVENT: BlockchainEvent<NewAppProxyParams> = {
   ]
 };
 
+export interface TransferParams {
+  _from: string;
+  _to: string;
+  _amount: string;
+}
+
+export const TRANSFER_EVENT: BlockchainEvent<TransferParams> = {
+  signature: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+  abi: [
+    { indexed: true, name: "_from", type: "address" },
+    { indexed: true, name: "_to", type: "address" },
+    { indexed: false, name: "_amount", type: "uint256" }
+  ]
+};
+
 export const KIT_ADDRESSES = new Set(
   [
     // Democracy 1 (0.6)

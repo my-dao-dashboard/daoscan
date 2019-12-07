@@ -152,5 +152,6 @@ export async function parseParticipants(event: any, context: any) {
 export async function readExtendedBlock(event: any) {
   const id = Number(event.pathParameters.id)
   const block = await ethereum.extendedBlock(id)
-  return ok({block})
+  const events = await scraping.fromBlock(id);
+  return ok({block, events})
 }

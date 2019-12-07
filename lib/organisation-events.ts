@@ -31,19 +31,19 @@ export interface AppInstalledEvent {
 }
 
 export interface AddParticipantEvent {
-  kind: ORGANISATION_EVENT.ADD_PARTICIPANT,
-  platform: ORGANISATION_PLATFORM.ARAGON,
+  kind: ORGANISATION_EVENT.ADD_PARTICIPANT;
+  platform: ORGANISATION_PLATFORM.ARAGON;
   organisationAddress: string;
   participant: string;
 }
 
 export interface ShareTransferEvent {
-  kind: ORGANISATION_EVENT.TRANSFER_SHARE,
-  platform: ORGANISATION_PLATFORM.ARAGON,
-  shareAddress: string,
-  from: string,
-  to: string,
-  amount: string
+  kind: ORGANISATION_EVENT.TRANSFER_SHARE;
+  platform: ORGANISATION_PLATFORM.ARAGON;
+  shareAddress: string;
+  from: string;
+  to: string;
+  amount: string;
 }
 
-export type OrganisationEvent = OrganisationCreatedEvent | AppInstalledEvent | AddParticipantEvent | ShareTransferEvent
+export type OrganisationEvent = OrganisationCreatedEvent | AppInstalledEvent | AddParticipantEvent | ShareTransferEvent;

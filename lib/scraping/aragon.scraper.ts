@@ -4,14 +4,15 @@ import {
   KIT_SIGNATURES,
   NEW_APP_PROXY_EVENT,
   TOKEN_ABI,
-  TOKEN_CONTROLLER_ABI
+  TOKEN_CONTROLLER_ABI, TRANSFER_EVENT
 } from "./aragon.constants";
 import {
   AppInstalledEvent,
   ORGANISATION_EVENT,
   ORGANISATION_PLATFORM,
   OrganisationCreatedEvent,
-  OrganisationEvent
+  OrganisationEvent,
+  ShareTransferEvent
 } from "../organisation-events";
 import Web3 from "web3";
 import { Scraper } from "./scraper.interface";
@@ -24,8 +25,24 @@ export class AragonScraper implements Scraper {
   async fromBlock(block: ExtendedBlock): Promise<OrganisationEvent[]> {
     const created = await this.createdFromTransactions(block);
     const appInstalled = await this.appInstalledEvents(block);
+    const transfers = await this.transfers(block);
 
-    return created.concat(appInstalled);
+    return created.concat(appInstalled).concat(transfers);
+  }
+
+  async transfers(block: ExtendedBlock): Promise<OrganisationEvent[]> {
+    const logs = block.logs;
+    // is Transfer event
+    return this.logEvents(block, TRANSFER_EVENT).map(e => {
+      return {
+        kind: ORGANISATION_EVENT.TRANSFER_SHARE,
+        platform: ORGANISATION_PLATFORM.ARAGON,
+        shareAddress: e.address,
+        from: e._from,
+        to: e._to,
+        amount: e._amount
+      }
+    })
   }
 
   async kernelAddress(proxy: string): Promise<string> {
@@ -112,12 +129,13 @@ export class AragonScraper implements Scraper {
   logEvents<A extends Indexed<string>>(
     block: ExtendedBlock,
     event: BlockchainEvent<A>
-  ): (A & { txid: string; blockNumber: number })[] {
+  ): (A & { txid: string; blockNumber: number, address: string })[] {
     return block.logs
       .filter(log => log.topics[0] === event.signature)
       .map(log => {
         return {
           ...(this.web3.eth.abi.decodeLog(event.abi, log.data, log.topics) as A),
+          address: log.address,
           txid: log.transactionHash,
           blockNumber: block.number
         };

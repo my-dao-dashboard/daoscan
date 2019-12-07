@@ -77,6 +77,8 @@ export async function saveOrganisationEvent(event: SqsEvent, context: any) {
         return handleCreateOrganisation(event);
       case ORGANISATION_EVENT.ADD_PARTICIPANT:
         return handleAddParticipant(event);
+      case ORGANISATION_EVENT.TRANSFER_SHARE:
+        return;
       default:
         throw new UnreachableCaseError(event);
     }
@@ -128,11 +130,10 @@ export async function readOrganisations(event: any, context: any) {
   return ok({ participantAddress, organisations });
 }
 
-
 export async function allOrgs(event: any, context: any) {
   const items = await dynamo.scan({
     TableName: ORGANISATIONS_TABLE,
-    ProjectionExpression: "organisationAddress, blockNumber",
+    ProjectionExpression: "organisationAddress, blockNumber"
   });
 
   return ok({ items });
