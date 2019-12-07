@@ -15,8 +15,8 @@ const APPLICATIONS_TABLE = String(process.env.APPLICATIONS_TABLE);
 const BLOCKS_TABLE = String(process.env.BLOCKS_TABLE);
 
 const ethereum = new EthereumService(INFURA_PROJECT_ID);
-const scraping = new ScrapingService(ethereum);
 const dynamo = new DynamoService();
+const scraping = new ScrapingService(ethereum, dynamo);
 const sqs = new AWS.SQS();
 
 async function parseBlockImpl(body: any) {

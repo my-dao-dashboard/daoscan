@@ -3,8 +3,8 @@ import {
   KIT_ADDRESSES,
   KIT_SIGNATURES,
   NEW_APP_PROXY_EVENT,
-  TOKEN_ABI,
-  TOKEN_CONTROLLER_ABI, TRANSFER_EVENT
+  TOKEN_CONTROLLER_ABI,
+  TRANSFER_EVENT
 } from "./aragon.constants";
 import {
   AppInstalledEvent,
@@ -18,9 +18,10 @@ import Web3 from "web3";
 import { Scraper } from "./scraper.interface";
 import { Indexed } from "../indexed.interface";
 import { BlockchainEvent } from "./blockchain-event.interface";
+import { DynamoService } from "../dynamo.service";
 
 export class AragonScraper implements Scraper {
-  constructor(private readonly web3: Web3) {}
+  constructor(private readonly web3: Web3, private readonly dynamo: DynamoService) {}
 
   async fromBlock(block: ExtendedBlock): Promise<OrganisationEvent[]> {
     const created = await this.createdFromTransactions(block);
@@ -31,9 +32,8 @@ export class AragonScraper implements Scraper {
   }
 
   async transfers(block: ExtendedBlock): Promise<OrganisationEvent[]> {
-    const logs = block.logs;
     // is Transfer event
-    return this.logEvents(block, TRANSFER_EVENT).map(e => {
+    const promises = this.logEvents(block, TRANSFER_EVENT).map<Promise<ShareTransferEvent>>(async e => {
       return {
         kind: ORGANISATION_EVENT.TRANSFER_SHARE,
         platform: ORGANISATION_PLATFORM.ARAGON,
@@ -41,8 +41,9 @@ export class AragonScraper implements Scraper {
         from: e._from,
         to: e._to,
         amount: e._amount
-      }
-    })
+      };
+    });
+    return Promise.all(promises);
   }
 
   async kernelAddress(proxy: string): Promise<string> {
@@ -129,7 +130,7 @@ export class AragonScraper implements Scraper {
   logEvents<A extends Indexed<string>>(
     block: ExtendedBlock,
     event: BlockchainEvent<A>
-  ): (A & { txid: string; blockNumber: number, address: string })[] {
+  ): (A & { txid: string; blockNumber: number; address: string })[] {
     return block.logs
       .filter(log => log.topics[0] === event.signature)
       .map(log => {
