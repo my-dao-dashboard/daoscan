@@ -40,6 +40,8 @@ export interface AddParticipantEvent {
 export interface ShareTransferEvent {
   kind: ORGANISATION_EVENT.TRANSFER_SHARE;
   platform: ORGANISATION_PLATFORM.ARAGON;
+  organisationAddress: string;
+  txid: string;
   shareAddress: string;
   from: string;
   to: string;

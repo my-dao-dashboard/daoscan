@@ -17,6 +17,7 @@ provider:
       Ref: BlocksQueue
     ORGANISATIONS_TABLE: ${self:custom.stage}-organisations
     APPLICATIONS_TABLE: ${self:custom.stage}-applications
+    APPLICATIONS_PER_ADDRESS_INDEX: byProxyAddress
     PARTICIPANTS_TABLE: ${self:custom.stage}-participants
     PARTICIPANTS_INDEX: by-participant
     BLOCKS_TABLE: ${self:custom.stage}-blocks

@@ -19,6 +19,10 @@ import { Scraper } from "./scraper.interface";
 import { Indexed } from "../indexed.interface";
 import { BlockchainEvent } from "./blockchain-event.interface";
 import { DynamoService } from "../dynamo.service";
+import * as _ from 'lodash'
+
+const APPLICATIONS_TABLE = String(process.env.APPLICATIONS_TABLE);
+const APPLICATIONS_PER_ADDRESS_INDEX = String(process.env.APPLICATIONS_PER_ADDRESS_INDEX);
 
 export class AragonScraper implements Scraper {
   constructor(private readonly web3: Web3, private readonly dynamo: DynamoService) {}
@@ -33,17 +37,35 @@ export class AragonScraper implements Scraper {
 
   async transfers(block: ExtendedBlock): Promise<OrganisationEvent[]> {
     // is Transfer event
-    const promises = this.logEvents(block, TRANSFER_EVENT).map<Promise<ShareTransferEvent>>(async e => {
-      return {
-        kind: ORGANISATION_EVENT.TRANSFER_SHARE,
-        platform: ORGANISATION_PLATFORM.ARAGON,
-        shareAddress: e.address,
-        from: e._from,
-        to: e._to,
-        amount: e._amount
-      };
+    const promises = this.logEvents(block, TRANSFER_EVENT).map<Promise<ShareTransferEvent | null>>(async e => {
+      const dynamoResponse = await this.dynamo.query({
+        TableName: APPLICATIONS_TABLE,
+        IndexName: APPLICATIONS_PER_ADDRESS_INDEX,
+        ProjectionExpression: "proxyAddress, appId, organisationAddress",
+        KeyConditionExpression: "proxyAddress = :proxyAddress",
+        ExpressionAttributeValues: {
+          ":proxyAddress": e.address
+        }
+      })
+      const items = dynamoResponse.Items;
+      if (items?.length) {
+        const found = items[0]
+        return {
+          kind: ORGANISATION_EVENT.TRANSFER_SHARE,
+          platform: ORGANISATION_PLATFORM.ARAGON,
+          organisationAddress: found.organisationAddress,
+          txid: e.txid,
+          shareAddress: e.address,
+          from: e._from,
+          to: e._to,
+          amount: e._amount
+        };
+      } else {
+        return null
+      }
     });
-    return Promise.all(promises);
+    const transfers = await Promise.all(promises);
+    return _.compact(_.flatten(transfers));
   }
 
   async kernelAddress(proxy: string): Promise<string> {
@@ -135,7 +157,7 @@ export class AragonScraper implements Scraper {
       .filter(log => log.topics[0] === event.signature)
       .map(log => {
         return {
-          ...(this.web3.eth.abi.decodeLog(event.abi, log.data, log.topics) as A),
+          ...(this.web3.eth.abi.decodeLog(event.abi, log.data, log.topics.slice(1)) as A),
           address: log.address,
           txid: log.transactionHash,
           blockNumber: block.number
