@@ -42,6 +42,7 @@ export interface ShareTransferEvent {
   platform: ORGANISATION_PLATFORM.ARAGON;
   organisationAddress: string;
   txid: string;
+  logIndex: number;
   shareAddress: string;
   from: string;
   to: string;

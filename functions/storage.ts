@@ -3,21 +3,24 @@ import {
   AppInstalledEvent,
   ORGANISATION_EVENT,
   OrganisationCreatedEvent,
-  OrganisationEvent
+  OrganisationEvent, ShareTransferEvent
 } from "../lib/organisation-events";
 import { UnreachableCaseError } from "../lib/unreachable-case-error";
 import { DynamoService } from "../lib/dynamo.service";
 import { ok } from "../lib/response";
+import {EthereumService} from "../lib/ethereum.service";
 
 interface SqsEvent {
   Records: { body: string }[];
 }
 
+const INFURA_PROJECT_ID = String(process.env.INFURA_PROJECT_ID);
 const ORGANISATIONS_TABLE = String(process.env.ORGANISATIONS_TABLE);
 const APPLICATIONS_TABLE = String(process.env.APPLICATIONS_TABLE);
 const PARTICIPANTS_TABLE = String(process.env.PARTICIPANTS_TABLE);
 const PARTICIPANTS_INDEX = String(process.env.PARTICIPANTS_INDEX);
 const dynamo = new DynamoService();
+const ethereum = new EthereumService(INFURA_PROJECT_ID);
 
 async function handleCreateOrganisation(event: OrganisationCreatedEvent): Promise<void> {
   await dynamo.put({
@@ -67,7 +70,19 @@ async function handleAddParticipant(event: AddParticipantEvent) {
   });
 }
 
-export async function saveOrganisationEvent(event: SqsEvent, context: any) {
+async function handleTransferShare(event: ShareTransferEvent) {
+  await dynamo.put({
+    TableName: PARTICIPANTS_TABLE,
+    Item: {
+      organisationAddress: event.organisationAddress,
+      participantAddress: event.from,
+      updatedAt: new Date().valueOf()
+
+    }
+  });
+}
+
+export async function saveOrganisationEvent(event: SqsEvent, context: any): Promise<void> {
   const loop = event.Records.map(async r => {
     const event = JSON.parse(r.body) as OrganisationEvent;
     switch (event.kind) {
@@ -78,7 +93,7 @@ export async function saveOrganisationEvent(event: SqsEvent, context: any) {
       case ORGANISATION_EVENT.ADD_PARTICIPANT:
         return handleAddParticipant(event);
       case ORGANISATION_EVENT.TRANSFER_SHARE:
-        return;
+        return handleTransferShare(event);
       default:
         throw new UnreachableCaseError(event);
     }

@@ -19,7 +19,7 @@ import { Scraper } from "./scraper.interface";
 import { Indexed } from "../indexed.interface";
 import { BlockchainEvent } from "./blockchain-event.interface";
 import { DynamoService } from "../dynamo.service";
-import * as _ from 'lodash'
+import * as _ from "lodash";
 
 const APPLICATIONS_TABLE = String(process.env.APPLICATIONS_TABLE);
 const APPLICATIONS_PER_ADDRESS_INDEX = String(process.env.APPLICATIONS_PER_ADDRESS_INDEX);
@@ -46,14 +46,15 @@ export class AragonScraper implements Scraper {
         ExpressionAttributeValues: {
           ":proxyAddress": e.address
         }
-      })
+      });
       const items = dynamoResponse.Items;
       if (items?.length) {
-        const found = items[0]
+        const found = items[0];
         return {
           kind: ORGANISATION_EVENT.TRANSFER_SHARE,
           platform: ORGANISATION_PLATFORM.ARAGON,
           organisationAddress: found.organisationAddress,
+          logIndex: e.logIndex,
           txid: e.txid,
           shareAddress: e.address,
           from: e._from,
@@ -61,7 +62,7 @@ export class AragonScraper implements Scraper {
           amount: e._amount
         };
       } else {
-        return null
+        return null;
       }
     });
     const transfers = await Promise.all(promises);
@@ -152,7 +153,7 @@ export class AragonScraper implements Scraper {
   logEvents<A extends Indexed<string>>(
     block: ExtendedBlock,
     event: BlockchainEvent<A>
-  ): (A & { txid: string; blockNumber: number; address: string })[] {
+  ): (A & { txid: string; blockNumber: number; address: string; logIndex: number })[] {
     return block.logs
       .filter(log => log.topics[0] === event.signature)
       .map(log => {
@@ -160,6 +161,7 @@ export class AragonScraper implements Scraper {
           ...(this.web3.eth.abi.decodeLog(event.abi, log.data, log.topics.slice(1)) as A),
           address: log.address,
           txid: log.transactionHash,
+          logIndex: log.logIndex,
           blockNumber: block.number
         };
       });
