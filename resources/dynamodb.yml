@@ -19,12 +19,21 @@ Resources:
           AttributeType: S
         - AttributeName: appId
           AttributeType: S
+        - AttributeName: proxyAddress
+          AttributeType: S
       KeySchema:
         - AttributeName: organisationAddress
           KeyType: HASH
         - AttributeName: appId
           KeyType: RANGE
       BillingMode: PAY_PER_REQUEST
+      GlobalSecondaryIndexes:
+        - IndexName: byProxyAddress
+          KeySchema:
+            - AttributeName: proxyAddress
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
   ParticipantsTable:
     Type: AWS::DynamoDB::Table
     Properties:
