@@ -5,7 +5,8 @@ export enum ORGANISATION_PLATFORM {
 export enum ORGANISATION_EVENT {
   CREATED = "CREATED",
   APP_INSTALLED = "APP_INSTALLED",
-  ADD_PARTICIPANT = "ADD_PARTICIPANT"
+  ADD_PARTICIPANT = "ADD_PARTICIPANT",
+  TRANSFER_SHARE = "TRANSFER_SHARE"
 }
 
 export interface OrganisationCreatedEvent {
@@ -36,4 +37,13 @@ export interface AddParticipantEvent {
   participant: string;
 }
 
-export type OrganisationEvent = OrganisationCreatedEvent | AppInstalledEvent | AddParticipantEvent;
+export interface ShareTransferEvent {
+  kind: ORGANISATION_EVENT.TRANSFER_SHARE,
+  platform: ORGANISATION_PLATFORM.ARAGON,
+  shareAddress: string,
+  from: string,
+  to: string,
+  amount: string
+}
+
+export type OrganisationEvent = OrganisationCreatedEvent | AppInstalledEvent | AddParticipantEvent | ShareTransferEvent

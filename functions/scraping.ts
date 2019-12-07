@@ -148,3 +148,9 @@ export async function parseParticipants(event: any, context: any) {
     return notFound();
   }
 }
+
+export async function readExtendedBlock(event: any) {
+  const id = Number(event.pathParameters.id)
+  const block = await ethereum.extendedBlock(id)
+  return ok({block})
+}

@@ -103,6 +103,12 @@ functions:
       - http:
           path: all-orgs
           method: get
+  tmpExtendedBlock:
+    handler: functions/scraping.readExtendedBlock
+    events:
+      - http:
+          path: extended-block/{id}
+          method: get
 
 resources:
   - ${file(resources/dynamodb.yml)}
