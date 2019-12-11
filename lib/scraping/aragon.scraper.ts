@@ -30,9 +30,9 @@ export class AragonScraper implements Scraper {
   async fromBlock(block: ExtendedBlock): Promise<OrganisationEvent[]> {
     const created = await this.createdFromTransactions(block);
     const appInstalled = await this.appInstalledEvents(block);
-    const transfers = await this.transfers(block);
+    // const transfers = await this.transfers(block);
 
-    return created.concat(appInstalled).concat(transfers);
+    return created.concat(appInstalled);
   }
 
   async transfers(block: ExtendedBlock): Promise<OrganisationEvent[]> {
