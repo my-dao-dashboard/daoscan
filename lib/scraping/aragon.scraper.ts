@@ -30,9 +30,9 @@ export class AragonScraper implements Scraper {
   async fromBlock(block: ExtendedBlock): Promise<OrganisationEvent[]> {
     const created = await this.createdFromTransactions(block);
     const appInstalled = await this.appInstalledEvents(block);
-    // const transfers = await this.transfers(block);
+    const transfers = await this.transfers(block);
 
-    return created.concat(appInstalled);
+    return created.concat(appInstalled).concat(transfers);
   }
 
   async transfers(block: ExtendedBlock): Promise<OrganisationEvent[]> {
@@ -155,7 +155,7 @@ export class AragonScraper implements Scraper {
     event: BlockchainEvent<A>
   ): (A & { txid: string; blockNumber: number; address: string; logIndex: number })[] {
     return block.logs
-      .filter(log => log.topics[0] === event.signature)
+      .filter(log => log.topics[0] === event.signature && log.topics.length === 3)
       .map(log => {
         return {
           ...(this.web3.eth.abi.decodeLog(event.abi, log.data, log.topics.slice(1)) as A),
