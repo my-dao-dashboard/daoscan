@@ -38,6 +38,7 @@ provider:
         - "Fn::GetAtt": [ ParticipantsTable, Arn ]
         - "Fn::GetAtt": [ BlocksTable, Arn ]
         - "Fn::Join": [ "/", [{ "Fn::GetAtt": ["ParticipantsTable", "Arn" ] }, "index", "by-participant"]]
+        - "Fn::Join": [ "/", [{ "Fn::GetAtt": ["ApplicationsTable", "Arn" ] }, "index", "byProxyAddress"]]
     - Effect: Allow
       Action:
         - sqs:SendMessageBatch

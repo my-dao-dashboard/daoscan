@@ -3,7 +3,7 @@
   "version": "1.0.0-alpha.0",
   "license": "UNLICENSED",
   "scripts": {
-    "deploy": "serverless deploy",
+    "deploy": "rm -rf .build/ && serverless deploy",
     "start": "serverless offline",
     "lint": "prettier --check ./**/*.ts",
     "lint:fix": "prettier --write ./**/*.ts"

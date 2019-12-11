@@ -70,16 +70,21 @@ async function handleAddParticipant(event: AddParticipantEvent) {
   });
 }
 
-async function handleTransferShare(event: ShareTransferEvent) {
-  await dynamo.put({
-    TableName: PARTICIPANTS_TABLE,
-    Item: {
-      organisationAddress: event.organisationAddress,
-      participantAddress: event.from,
-      updatedAt: new Date().valueOf()
+async function putParticipant(event: ShareTransferEvent, account: string) {
+  if (account !== '0x0000000000000000000000000000000000000000') {
+    await dynamo.put({
+      TableName: PARTICIPANTS_TABLE,
+      Item: {
+        organisationAddress: event.organisationAddress,
+        participantAddress: account
+      }
+    })
+  }
+}
 
-    }
-  });
+async function handleTransferShare(event: ShareTransferEvent) {
+  await putParticipant(event, event.from);
+  await putParticipant(event, event.to);
 }
 
 export async function saveOrganisationEvent(event: SqsEvent, context: any): Promise<void> {

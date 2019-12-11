@@ -41,6 +41,7 @@ export interface ShareTransferEvent {
   kind: ORGANISATION_EVENT.TRANSFER_SHARE;
   platform: ORGANISATION_PLATFORM.ARAGON;
   organisationAddress: string;
+  blockNumber: number;
   txid: string;
   logIndex: number;
   shareAddress: string;

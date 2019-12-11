@@ -20,6 +20,7 @@ import { Indexed } from "../indexed.interface";
 import { BlockchainEvent } from "./blockchain-event.interface";
 import { DynamoService } from "../dynamo.service";
 import * as _ from "lodash";
+import { Log } from "web3-core";
 
 const APPLICATIONS_TABLE = String(process.env.APPLICATIONS_TABLE);
 const APPLICATIONS_PER_ADDRESS_INDEX = String(process.env.APPLICATIONS_PER_ADDRESS_INDEX);
@@ -30,14 +31,22 @@ export class AragonScraper implements Scraper {
   async fromBlock(block: ExtendedBlock): Promise<OrganisationEvent[]> {
     const created = await this.createdFromTransactions(block);
     const appInstalled = await this.appInstalledEvents(block);
-    const transfers = await this.transfers(block);
+    const transfers = await this.transfers(block, appInstalled);
 
-    return created.concat(appInstalled).concat(transfers);
+    const result = [] as OrganisationEvent[];
+
+    return result
+      .concat(created)
+      .concat(appInstalled)
+      .concat(transfers);
   }
 
-  async transfers(block: ExtendedBlock): Promise<OrganisationEvent[]> {
+  async transfers(block: ExtendedBlock, appInstalled: AppInstalledEvent[]): Promise<OrganisationEvent[]> {
     // is Transfer event
-    const promises = this.logEvents(block, TRANSFER_EVENT).map<Promise<ShareTransferEvent | null>>(async e => {
+    const filter = (log: Log) => {
+      return log.topics.length === 3;
+    };
+    const promises = this.logEvents(block, TRANSFER_EVENT, filter).map<Promise<ShareTransferEvent | null>>(async e => {
       const dynamoResponse = await this.dynamo.query({
         TableName: APPLICATIONS_TABLE,
         IndexName: APPLICATIONS_PER_ADDRESS_INDEX,
@@ -48,17 +57,25 @@ export class AragonScraper implements Scraper {
         }
       });
       const items = dynamoResponse.Items;
-      if (items?.length) {
-        const found = items[0];
+      let organisationAddress = items?.length ? items[0].organisationAddress.toLowerCase() : null;
+      if (!organisationAddress) {
+        const foundEvent = appInstalled.find(a => a.proxyAddress === e.address);
+        if (foundEvent) {
+          organisationAddress = foundEvent.organisationAddress;
+        }
+      }
+
+      if (organisationAddress) {
         return {
           kind: ORGANISATION_EVENT.TRANSFER_SHARE,
           platform: ORGANISATION_PLATFORM.ARAGON,
-          organisationAddress: found.organisationAddress,
+          organisationAddress: organisationAddress.toLowerCase(),
           logIndex: e.logIndex,
           txid: e.txid,
-          shareAddress: e.address,
-          from: e._from,
-          to: e._to,
+          blockNumber: e.blockNumber,
+          shareAddress: e.address.toLowerCase(),
+          from: e._from.toLowerCase(),
+          to: e._to.toLowerCase(),
           amount: e._amount
         };
       } else {
@@ -85,7 +102,7 @@ export class AragonScraper implements Scraper {
     return this.web3.eth.abi.decodeParameter("address", result) as any;
   }
 
-  async createdFromTransactions(block: ExtendedBlock): Promise<OrganisationEvent[]> {
+  async createdFromTransactions(block: ExtendedBlock): Promise<OrganisationCreatedEvent[]> {
     const whitelist = KIT_ADDRESSES;
     const abiMap = KIT_SIGNATURES;
     return Promise.all(
@@ -113,7 +130,7 @@ export class AragonScraper implements Scraper {
     );
   }
 
-  async appInstalledEvents(block: ExtendedBlock): Promise<OrganisationEvent[]> {
+  async appInstalledEvents(block: ExtendedBlock): Promise<AppInstalledEvent[]> {
     const appInstalledPromised = this.logEvents(block, NEW_APP_PROXY_EVENT).map<Promise<AppInstalledEvent>>(async e => {
       const organisationAddress = await this.kernelAddress(e.proxy);
       return {
@@ -152,10 +169,15 @@ export class AragonScraper implements Scraper {
 
   logEvents<A extends Indexed<string>>(
     block: ExtendedBlock,
-    event: BlockchainEvent<A>
+    event: BlockchainEvent<A>,
+    filter?: (log: Log) => boolean
   ): (A & { txid: string; blockNumber: number; address: string; logIndex: number })[] {
     return block.logs
-      .filter(log => log.topics[0] === event.signature && log.topics.length === 3)
+      .filter(log => {
+        const isKnown = log.topics[0] === event.signature;
+        const isFiltered = filter ? filter(log) : true;
+        return isKnown && isFiltered;
+      })
       .map(log => {
         return {
           ...(this.web3.eth.abi.decodeLog(event.abi, log.data, log.topics.slice(1)) as A),
