@@ -56,11 +56,11 @@ plugins:
   - serverless-offline
 
 functions:
-  scraping-tick-block:
+  scraping-tickBlock:
     handler: functions/scraping.tickBlock
     events:
       - schedule: rate(1 minute)
-  scraping-parse-block:
+  scraping-parseBlock:
     handler: functions/scraping.parseBlock
     events:
       - http:
@@ -72,15 +72,8 @@ functions:
             Fn::GetAtt:
               - BlocksQueue
               - Arn
-  scraping-parse-participants:
-    handler: functions/scraping.parseParticipants
-    events:
-      - http:
-          path: update-participants
-          method: post
-          cors: true
-  storage-save-ogranisation-event:
-    handler: functions/storage.saveOrganisationEvent
+  scraping-saveOgranisationEvent:
+    handler: functions/scraping.saveOrganisationEvent
     events:
       - sqs:
           arn:
