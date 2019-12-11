@@ -6,7 +6,7 @@ import {
   OrganisationEvent, ShareTransferEvent
 } from "../lib/organisation-events";
 import { UnreachableCaseError } from "../lib/unreachable-case-error";
-import { DynamoService } from "../lib/dynamo.service";
+import { DynamoService } from "../lib/storage/dynamo.service";
 import { ok } from "../lib/response";
 import {EthereumService} from "../lib/ethereum.service";
 

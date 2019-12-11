@@ -2,7 +2,7 @@ import { notFound, ok } from "../lib/response";
 import { ScrapingService } from "../lib/scraping/scraping.service";
 import { EthereumService } from "../lib/ethereum.service";
 import AWS from "aws-sdk";
-import { DynamoService } from "../lib/dynamo.service";
+import { DynamoService } from "../lib/storage/dynamo.service";
 import { TOKEN_ABI, TOKEN_CONTROLLER_ABI } from "../lib/scraping/aragon.constants";
 import { AddParticipantEvent, ORGANISATION_EVENT, ORGANISATION_PLATFORM } from "../lib/organisation-events";
 

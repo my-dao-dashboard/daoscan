@@ -2,7 +2,7 @@ import { EthereumService } from "../ethereum.service";
 import { Scraper } from "./scraper.interface";
 import { AragonScraper } from "./aragon.scraper";
 import * as _ from "lodash";
-import { DynamoService } from "../dynamo.service";
+import { DynamoService } from "../storage/dynamo.service";
 
 export class ScrapingService {
   private readonly scrapers: Scraper[];
