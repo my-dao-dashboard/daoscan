@@ -14,9 +14,9 @@ import {
 } from "../lib/organisation-events";
 import { UnreachableCaseError } from "../lib/unreachable-case-error";
 import { BlocksRepository } from "../lib/storage/blocks.repository";
-import { ScrapingQueue } from "../lib/scraping.queue";
-import { QueueService } from "../lib/queue.service";
-import { BlocksQueue } from "../lib/blocks.queue";
+import { ScrapingQueue } from "../lib/queues/scraping.queue";
+import { QueueService } from "../lib/queues/queue.service";
+import { BlocksQueue } from "../lib/queues/blocks.queue";
 import { ApplicationsRepository } from "../lib/storage/applications.repository";
 import { ParticipantsRepository } from "../lib/storage/participants.repository";
 import { OrganisationsRepository } from "../lib/storage/organisations.repository";

@@ -2,6 +2,17 @@ export enum ORGANISATION_PLATFORM {
   ARAGON = "ARAGON"
 }
 
+export namespace ORGANISATION_PLATFORM {
+  export function fromString(platform: string): ORGANISATION_PLATFORM {
+    switch (platform) {
+      case ORGANISATION_PLATFORM.ARAGON:
+        return ORGANISATION_PLATFORM.ARAGON;
+      default:
+        throw new Error(`Can not parse unknown platform ${platform}`);
+    }
+  }
+}
+
 export enum ORGANISATION_EVENT {
   CREATED = "CREATED",
   APP_INSTALLED = "APP_INSTALLED",

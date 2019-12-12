@@ -1,10 +1,11 @@
 import { DynamoService } from "../lib/storage/dynamo.service";
 import { ok } from "../lib/response";
 import { ParticipantsRepository } from "../lib/storage/participants.repository";
+import { OrganisationsRepository } from "../lib/storage/organisations.repository";
 
-const ORGANISATIONS_TABLE = String(process.env.ORGANISATIONS_TABLE);
 const dynamo = new DynamoService();
 const participantsRepository = new ParticipantsRepository(dynamo);
+const organisationsRepository = new OrganisationsRepository(dynamo);
 
 export async function readParticipants(event: any) {
   const organisationAddress = event.pathParameters.organisationAddress;
@@ -21,10 +22,8 @@ export async function readOrganisations(event: any) {
 }
 
 export async function allOrgs(event: any) {
-  const items = await dynamo.scan({
-    TableName: ORGANISATIONS_TABLE,
-    ProjectionExpression: "organisationAddress, blockNumber"
-  });
+  const items = await organisationsRepository.all();
+  const count = items.length
 
-  return ok({ items });
+  return ok({ count, items });
 }

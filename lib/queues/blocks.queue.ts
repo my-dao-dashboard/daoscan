@@ -1,5 +1,5 @@
-import {ENV, FromEnv} from "./from-env";
-import {QueueService} from "./queue.service";
+import { ENV, FromEnv } from "../from-env";
+import { QueueService } from "./queue.service";
 
 export class BlocksQueue {
   private readonly queueName: string;

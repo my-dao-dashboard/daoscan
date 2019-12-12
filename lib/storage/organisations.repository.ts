@@ -18,6 +18,31 @@ export class OrganisationsRepository {
     this.tableName = FromEnv.readString(ENV.ORGANISATIONS_TABLE);
   }
 
+  async all(): Promise<OrganisationEntity[]> {
+    const items = await this.dynamo.scan({
+      TableName: this.tableName,
+      ProjectionExpression: "address, #orgName, platform, txid, #orgTimestamp, blockNumber",
+      ExpressionAttributeNames: {
+        "#orgName": "name",
+        "#orgTimestamp": "timestamp"
+      }
+    });
+    if (items.Items && items.Items.length) {
+      return items.Items.map<OrganisationEntity>(item => {
+        return {
+          address: String(item.address),
+          name: String(item.name),
+          platform: ORGANISATION_PLATFORM.fromString(item.platform),
+          txid: String(item.txid),
+          timestamp: Number(item.timestamp),
+          blockNumber: Number(item.blockNumber)
+        };
+      });
+    } else {
+      return [];
+    }
+  }
+
   async save(entity: OrganisationEntity) {
     await this.dynamo.put({
       TableName: this.tableName,

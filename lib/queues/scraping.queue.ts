@@ -1,5 +1,5 @@
-import { ENV, FromEnv } from "./from-env";
-import { OrganisationEvent } from "./organisation-events";
+import { ENV, FromEnv } from "../from-env";
+import { OrganisationEvent } from "../organisation-events";
 import { QueueService } from "./queue.service";
 
 export class ScrapingQueue {
