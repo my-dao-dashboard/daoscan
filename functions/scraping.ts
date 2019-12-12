@@ -21,9 +21,7 @@ import { ApplicationsRepository } from "../lib/storage/applications.repository";
 import { ParticipantsRepository } from "../lib/storage/participants.repository";
 import { OrganisationsRepository } from "../lib/storage/organisations.repository";
 
-const INFURA_PROJECT_ID = String(process.env.INFURA_PROJECT_ID);
-
-const ethereum = new EthereumService(INFURA_PROJECT_ID);
+const ethereum = new EthereumService();
 const dynamo = new DynamoService();
 const scraping = new ScrapingService(ethereum, dynamo);
 const blocksRepository = new BlocksRepository(dynamo);
@@ -78,15 +76,6 @@ export async function parseBlock(event: any, context: any) {
 export async function parseParticipants(event: any, context: any) {
   const data = JSON.parse(event.body);
   const organisationAddress = data.organisationAddress;
-  // const tokenApplication = await dynamo.get({
-  //   TableName: APPLICATIONS_TABLE,
-  //   ProjectionExpression: "proxyAddress",
-  //   Key: {
-  //     organisationAddress: organisationAddress,
-  //     appId: "0x6b20a3010614eeebf2138ccec99f028a61c811b3b1a3343b6ff635985c75c91f"
-  //   }
-  // });
-  // const tokenControllerAddress: string | undefined = tokenApplication.Item?.proxyAddress
   const tokenControllerAddress = await applicationsRepository.tokenAddress(organisationAddress);
   if (tokenControllerAddress) {
     const tokenController = new ethereum.web3.eth.Contract(TOKEN_CONTROLLER_ABI, tokenControllerAddress);

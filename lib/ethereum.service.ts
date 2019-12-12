@@ -1,7 +1,8 @@
 import Web3 from "web3";
-import { BlockTransactionString, TransactionReceipt, Transaction } from "web3-eth";
+import { BlockTransactionString, Transaction, TransactionReceipt } from "web3-eth";
 import { Log } from "web3-core/types";
 import * as _ from "lodash";
+import { ENV, FromEnv } from "./from-env";
 
 const BASE = "https://mainnet.infura.io/v3";
 
@@ -17,7 +18,8 @@ export interface ExtendedBlock extends BlockTransactionString {
 export class EthereumService {
   readonly web3: Web3;
 
-  constructor(projectId: string) {
+  constructor() {
+    const projectId = FromEnv.readString(ENV.INFURA_PROJECT_ID);
     const endpoint = `${BASE}/${projectId}`;
     const provider = new Web3.providers.HttpProvider(endpoint);
     this.web3 = new Web3(provider);

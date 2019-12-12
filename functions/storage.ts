@@ -1,28 +1,16 @@
 import { DynamoService } from "../lib/storage/dynamo.service";
 import { ok } from "../lib/response";
+import { ParticipantsRepository } from "../lib/storage/participants.repository";
 
 const ORGANISATIONS_TABLE = String(process.env.ORGANISATIONS_TABLE);
 const PARTICIPANTS_TABLE = String(process.env.PARTICIPANTS_TABLE);
 const PARTICIPANTS_INDEX = String(process.env.PARTICIPANTS_INDEX);
 const dynamo = new DynamoService();
+const participantsRepository = new ParticipantsRepository(dynamo);
 
 export async function readParticipants(event: any, context: any) {
   const organisationAddress = event.pathParameters.organisationAddress;
-  const items = await dynamo.query({
-    TableName: PARTICIPANTS_TABLE,
-    ProjectionExpression: "organisationAddress, participantAddress, updatedAt",
-    KeyConditionExpression: "organisationAddress = :organisationAddress",
-    ExpressionAttributeValues: {
-      ":organisationAddress": organisationAddress
-    }
-  });
-  const participants = items.Items?.map(item => {
-    return {
-      participantAddress: item.participantAddress,
-      updatedAt: item.updatedAt
-    };
-  });
-
+  const participants = await participantsRepository.allByOrganisationAddress(organisationAddress);
   return ok({
     participants
   });
