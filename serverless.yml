@@ -80,6 +80,13 @@ functions:
             Fn::GetAtt:
               - ScrapingQueue
               - Arn
+  scraping-parseParticipants:
+    handler: functions/scraping.parseParticipants
+    events:
+      - http:
+          path: parse-participants
+          method: post
+          cors: true
   storage-read-participants-by-organisation:
     handler: functions/storage.readParticipants
     events:
