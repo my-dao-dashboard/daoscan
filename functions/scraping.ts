@@ -17,6 +17,7 @@ import { BlocksRepository } from "../lib/storage/blocks.repository";
 import { ScrapingQueue } from "../lib/scraping.queue";
 import { QueueService } from "../lib/queue.service";
 import { BlocksQueue } from "../lib/blocks.queue";
+import { ApplicationsRepository } from "../lib/storage/applications.repository";
 
 const INFURA_PROJECT_ID = String(process.env.INFURA_PROJECT_ID);
 
@@ -31,6 +32,7 @@ const blocksRepository = new BlocksRepository(dynamo);
 const queueService = new QueueService();
 const scrapingQueue = new ScrapingQueue(queueService);
 const blocksQueue = new BlocksQueue(queueService);
+const applicationsRepository = new ApplicationsRepository(dynamo);
 
 async function parseBlockImpl(body: any) {
   const data = JSON.parse(body);
@@ -49,12 +51,14 @@ export async function tickBlock(event: any, context: any) {
   const block = await ethereum.block("latest");
   const latest = block.number;
   const previous = latest - 20;
-  for (let i = previous; i <= latest; i++) {
+  let blockNumbers = [];
+  for (let i = previous; i <= latest; i++) blockNumbers.push(i);
+  await Promise.all(blockNumbers.map(async i => {
     const isPresent = await blocksRepository.isPresent(i);
     if (!isPresent) {
       await blocksQueue.send(i);
     }
-  }
+  }));
 }
 
 export async function parseBlock(event: any, context: any) {
@@ -72,16 +76,17 @@ export async function parseBlock(event: any, context: any) {
 export async function parseParticipants(event: any, context: any) {
   const data = JSON.parse(event.body);
   const organisationAddress = data.organisationAddress;
-  const tokenApplication = await dynamo.get({
-    TableName: APPLICATIONS_TABLE,
-    ProjectionExpression: "proxyAddress",
-    Key: {
-      organisationAddress: organisationAddress,
-      appId: "0x6b20a3010614eeebf2138ccec99f028a61c811b3b1a3343b6ff635985c75c91f"
-    }
-  });
-  if (tokenApplication.Item) {
-    const tokenControllerAddress = tokenApplication.Item.proxyAddress as string;
+  // const tokenApplication = await dynamo.get({
+  //   TableName: APPLICATIONS_TABLE,
+  //   ProjectionExpression: "proxyAddress",
+  //   Key: {
+  //     organisationAddress: organisationAddress,
+  //     appId: "0x6b20a3010614eeebf2138ccec99f028a61c811b3b1a3343b6ff635985c75c91f"
+  //   }
+  // });
+  // const tokenControllerAddress: string | undefined = tokenApplication.Item?.proxyAddress
+  const tokenControllerAddress = await applicationsRepository.tokenAddress(organisationAddress);
+  if (tokenControllerAddress) {
     const tokenController = new ethereum.web3.eth.Contract(TOKEN_CONTROLLER_ABI, tokenControllerAddress);
     const tokenAddress = await tokenController.methods.token().call();
     const token = new ethereum.web3.eth.Contract(TOKEN_ABI, tokenAddress);
@@ -143,18 +148,9 @@ async function handleCreateOrganisation(event: OrganisationCreatedEvent): Promis
 }
 
 async function handleInstallApplication(event: AppInstalledEvent): Promise<void> {
-  await dynamo.put({
-    TableName: APPLICATIONS_TABLE,
-    Item: {
-      organisationAddress: event.organisationAddress,
-      appId: event.appId,
-      proxyAddress: event.proxyAddress,
-      platform: event.platform,
-      txid: event.txid,
-      blockNumber: event.blockNumber,
-      timestamp: event.timestamp
-    }
-  });
+  console.log(`Saving application...`, event);
+  await applicationsRepository.save(event);
+  console.log(`Application saved`, event);
 }
 
 async function handleAddParticipant(event: AddParticipantEvent) {

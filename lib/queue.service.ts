@@ -19,7 +19,7 @@ export class QueueService {
         QueueUrl: queueUrl,
         Entries: entries
       };
-      console.log("Posting message", message);
+      console.log(`Posting message to queue ${queueUrl}`, message);
       return new Promise((resolve, reject) => {
         this.sqs.sendMessageBatch(message, error => {
           error ? reject(error) : resolve();
