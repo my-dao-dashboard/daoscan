@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "aws-sdk": "^2.580.0",
+    "injection-js": "^2.2.2",
     "lodash": "^4.17.15",
     "web3": "^1.2.4"
   },

@@ -5,12 +5,16 @@ import AWS from "aws-sdk";
 import { DynamoService } from "../lib/storage/dynamo.service";
 import { TOKEN_ABI, TOKEN_CONTROLLER_ABI } from "../lib/scraping/aragon.constants";
 import {
-  AddParticipantEvent, AppInstalledEvent,
+  AddParticipantEvent,
+  AppInstalledEvent,
   ORGANISATION_EVENT,
-  ORGANISATION_PLATFORM, OrganisationCreatedEvent,
-  OrganisationEvent, ShareTransferEvent
+  ORGANISATION_PLATFORM,
+  OrganisationCreatedEvent,
+  OrganisationEvent,
+  ShareTransferEvent
 } from "../lib/organisation-events";
-import {UnreachableCaseError} from "../lib/unreachable-case-error";
+import { UnreachableCaseError } from "../lib/unreachable-case-error";
+import { BlocksRepository } from "../lib/storage/blocks.repository";
 
 const BLOCKS_SQS_URL = String(process.env.BLOCKS_SQS_URL);
 const SCRAPING_SQS_URL = String(process.env.SCRAPING_SQS_URL);
@@ -18,7 +22,6 @@ const SCRAPING_SQS_URL = String(process.env.SCRAPING_SQS_URL);
 const INFURA_PROJECT_ID = String(process.env.INFURA_PROJECT_ID);
 
 const APPLICATIONS_TABLE = String(process.env.APPLICATIONS_TABLE);
-const BLOCKS_TABLE = String(process.env.BLOCKS_TABLE);
 const PARTICIPANTS_TABLE = String(process.env.PARTICIPANTS_TABLE);
 const ORGANISATIONS_TABLE = String(process.env.ORGANISATIONS_TABLE);
 
@@ -26,6 +29,7 @@ const ethereum = new EthereumService(INFURA_PROJECT_ID);
 const dynamo = new DynamoService();
 const scraping = new ScrapingService(ethereum, dynamo);
 const sqs = new AWS.SQS();
+const blocksRepository = new BlocksRepository(dynamo);
 
 async function parseBlockImpl(body: any) {
   const data = JSON.parse(body);
@@ -44,16 +48,8 @@ async function parseBlockImpl(body: any) {
       });
     });
   });
-
   await Promise.all(sendings);
-
-  await dynamo.put({
-    TableName: BLOCKS_TABLE,
-    Item: {
-      blockNumber: id
-    }
-  });
-
+  await blocksRepository.markParsed(id);
   console.log(`Parsed block #${id}: events=${events.length}`);
   return ok({
     events: events
@@ -65,14 +61,8 @@ export async function tickBlock(event: any, context: any) {
   const latest = block.number;
   const previous = latest - 20;
   for (let i = previous; i <= latest; i++) {
-    const items = await dynamo.get({
-      TableName: BLOCKS_TABLE,
-      ProjectionExpression: 'blockNumber',
-      Key: {
-        blockNumber: i
-      }
-    });
-    if (!items.Item) {
+    const isPresent = await blocksRepository.isPresent(i);
+    if (!isPresent) {
       const sending = new Promise((resolve, reject) => {
         const message = {
           QueueUrl: BLOCKS_SQS_URL,
@@ -158,10 +148,10 @@ export async function parseParticipants(event: any, context: any) {
 }
 
 export async function readExtendedBlock(event: any) {
-  const id = Number(event.pathParameters.id)
-  const block = await ethereum.extendedBlock(id)
+  const id = Number(event.pathParameters.id);
+  const block = await ethereum.extendedBlock(id);
   const events = await scraping.fromBlock(id);
-  return ok({block, events})
+  return ok({ block, events });
 }
 
 interface SqsEvent {
@@ -217,14 +207,14 @@ async function handleAddParticipant(event: AddParticipantEvent) {
 }
 
 async function putParticipant(event: ShareTransferEvent, account: string) {
-  if (account !== '0x0000000000000000000000000000000000000000') {
+  if (account !== "0x0000000000000000000000000000000000000000") {
     await dynamo.put({
       TableName: PARTICIPANTS_TABLE,
       Item: {
         organisationAddress: event.organisationAddress,
         participantAddress: account
       }
-    })
+    });
   }
 }
 
