@@ -1,4 +1,4 @@
-import { FromEnv } from "./from-env";
+import { ENV, FromEnv } from "./from-env";
 import { OrganisationEvent } from "./organisation-events";
 import { QueueService } from "./queue.service";
 
@@ -6,7 +6,7 @@ export class ScrapingQueue {
   private readonly queueName: string;
 
   constructor(private readonly queue: QueueService) {
-    this.queueName = FromEnv.string("SCRAPING_SQS_URL");
+    this.queueName = FromEnv.readString(ENV.SCRAPING_SQS_URL);
   }
 
   async sendBatch(events: OrganisationEvent[]): Promise<void> {

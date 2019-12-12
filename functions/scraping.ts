@@ -18,11 +18,10 @@ import { ScrapingQueue } from "../lib/scraping.queue";
 import { QueueService } from "../lib/queue.service";
 import { BlocksQueue } from "../lib/blocks.queue";
 import { ApplicationsRepository } from "../lib/storage/applications.repository";
+import { ParticipantsRepository } from "../lib/storage/participants.repository";
 
 const INFURA_PROJECT_ID = String(process.env.INFURA_PROJECT_ID);
 
-const APPLICATIONS_TABLE = String(process.env.APPLICATIONS_TABLE);
-const PARTICIPANTS_TABLE = String(process.env.PARTICIPANTS_TABLE);
 const ORGANISATIONS_TABLE = String(process.env.ORGANISATIONS_TABLE);
 
 const ethereum = new EthereumService(INFURA_PROJECT_ID);
@@ -33,6 +32,7 @@ const queueService = new QueueService();
 const scrapingQueue = new ScrapingQueue(queueService);
 const blocksQueue = new BlocksQueue(queueService);
 const applicationsRepository = new ApplicationsRepository(dynamo);
+const participantsRepository = new ParticipantsRepository(dynamo);
 
 async function parseBlockImpl(body: any) {
   const data = JSON.parse(body);
@@ -53,12 +53,14 @@ export async function tickBlock(event: any, context: any) {
   const previous = latest - 20;
   let blockNumbers = [];
   for (let i = previous; i <= latest; i++) blockNumbers.push(i);
-  await Promise.all(blockNumbers.map(async i => {
-    const isPresent = await blocksRepository.isPresent(i);
-    if (!isPresent) {
-      await blocksQueue.send(i);
-    }
-  }));
+  await Promise.all(
+    blockNumbers.map(async i => {
+      const isPresent = await blocksRepository.isPresent(i);
+      if (!isPresent) {
+        await blocksQueue.send(i);
+      }
+    })
+  );
 }
 
 export async function parseBlock(event: any, context: any) {
@@ -154,32 +156,19 @@ async function handleInstallApplication(event: AppInstalledEvent): Promise<void>
 }
 
 async function handleAddParticipant(event: AddParticipantEvent) {
-  console.log("trying to put", {
-    TableName: PARTICIPANTS_TABLE,
-    Item: {
-      organisationAddress: event.organisationAddress,
-      participantAddress: event.participant,
-      updatedAt: new Date().valueOf()
-    }
-  });
-  await dynamo.put({
-    TableName: PARTICIPANTS_TABLE,
-    Item: {
-      organisationAddress: event.organisationAddress,
-      participantAddress: event.participant,
-      updatedAt: new Date().valueOf()
-    }
+  await participantsRepository.save({
+    organisationAddress: event.organisationAddress,
+    participantAddress: event.participant,
+    updatedAt: new Date().valueOf()
   });
 }
 
 async function putParticipant(event: ShareTransferEvent, account: string) {
   if (account !== "0x0000000000000000000000000000000000000000") {
-    await dynamo.put({
-      TableName: PARTICIPANTS_TABLE,
-      Item: {
-        organisationAddress: event.organisationAddress,
-        participantAddress: account
-      }
+    await participantsRepository.save({
+      organisationAddress: event.organisationAddress,
+      participantAddress: account,
+      updatedAt: new Date().valueOf()
     });
   }
 }

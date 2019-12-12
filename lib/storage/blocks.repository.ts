@@ -1,11 +1,11 @@
 import { DynamoService } from "./dynamo.service";
-import { FromEnv } from "../from-env";
+import { ENV, FromEnv } from "../from-env";
 
 export class BlocksRepository {
   private readonly tableName: string;
 
   constructor(private readonly dynamo: DynamoService) {
-    this.tableName = FromEnv.string("BLOCKS_TABLE");
+    this.tableName = FromEnv.readString(ENV.BLOCKS_TABLE);
   }
 
   async markParsed(id: number): Promise<void> {

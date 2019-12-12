@@ -1,11 +1,11 @@
-import { FromEnv } from "./from-env";
-import { QueueService } from "./queue.service";
+import {ENV, FromEnv} from "./from-env";
+import {QueueService} from "./queue.service";
 
 export class BlocksQueue {
   private readonly queueName: string;
 
   constructor(private readonly queue: QueueService) {
-    this.queueName = FromEnv.string("BLOCKS_SQS_URL");
+    this.queueName = FromEnv.readString(ENV.BLOCKS_SQS_URL);
   }
 
   async send(id: number): Promise<void> {

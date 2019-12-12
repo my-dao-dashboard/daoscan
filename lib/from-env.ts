@@ -1,7 +1,15 @@
 export class EmptyEnvError extends Error {}
 
+export enum ENV {
+  PARTICIPANTS_TABLE = "PARTICIPANTS_TABLE",
+  BLOCKS_SQS_URL = "BLOCKS_SQS_URL",
+  SCRAPING_SQS_URL = 'SCRAPING_SQS_URL',
+  APPLICATIONS_TABLE = 'APPLICATIONS_TABLE',
+  BLOCKS_TABLE = 'BLOCKS_TABLE'
+}
+
 export class FromEnv {
-  static string(name: string): string {
+  static readString(name: ENV): string {
     const value = process.env[name];
     if (!value) {
       throw new EmptyEnvError(`Missing ${name} env`);

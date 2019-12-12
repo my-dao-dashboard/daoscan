@@ -1,6 +1,6 @@
-import { DynamoService } from "./dynamo.service";
-import { FromEnv } from "../from-env";
-import { ORGANISATION_PLATFORM } from "../organisation-events";
+import {DynamoService} from "./dynamo.service";
+import {ENV, FromEnv} from "../from-env";
+import {ORGANISATION_PLATFORM} from "../organisation-events";
 
 export interface Key {
   organisationAddress: string;
@@ -25,7 +25,7 @@ export class ApplicationsRepository {
   private readonly tableName: string;
 
   constructor(private readonly dynamo: DynamoService) {
-    this.tableName = FromEnv.string("APPLICATIONS_TABLE");
+    this.tableName = FromEnv.readString(ENV.APPLICATIONS_TABLE);
   }
 
   async save(entity: ApplicationEntity) {
