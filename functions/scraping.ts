@@ -15,9 +15,10 @@ import {
 } from "../lib/organisation-events";
 import { UnreachableCaseError } from "../lib/unreachable-case-error";
 import { BlocksRepository } from "../lib/storage/blocks.repository";
+import { ScrapingQueue } from "../lib/scraping.queue";
+import { QueueService } from "../lib/queue.service";
 
 const BLOCKS_SQS_URL = String(process.env.BLOCKS_SQS_URL);
-const SCRAPING_SQS_URL = String(process.env.SCRAPING_SQS_URL);
 
 const INFURA_PROJECT_ID = String(process.env.INFURA_PROJECT_ID);
 
@@ -30,6 +31,8 @@ const dynamo = new DynamoService();
 const scraping = new ScrapingService(ethereum, dynamo);
 const sqs = new AWS.SQS();
 const blocksRepository = new BlocksRepository(dynamo);
+const queueService = new QueueService();
+const scrapingQueue = new ScrapingQueue(queueService);
 
 async function parseBlockImpl(body: any) {
   const data = JSON.parse(body);
@@ -37,18 +40,11 @@ async function parseBlockImpl(body: any) {
   console.log(`Starting parsing block #${id}...`);
   const events = await scraping.fromBlock(id);
 
-  const sendings = events.map(e => {
-    return new Promise((resolve, reject) => {
-      const message = {
-        QueueUrl: SCRAPING_SQS_URL,
-        MessageBody: JSON.stringify(e)
-      };
-      sqs.sendMessage(message, (error, result) => {
-        error ? reject(error) : resolve(result);
-      });
-    });
-  });
-  await Promise.all(sendings);
+  await Promise.all(
+    events.map(e => {
+      return scrapingQueue.send(e);
+    })
+  );
   await blocksRepository.markParsed(id);
   console.log(`Parsed block #${id}: events=${events.length}`);
   return ok({
@@ -125,15 +121,7 @@ export async function parseParticipants(event: any, context: any) {
         organisationAddress: organisationAddress,
         participant: participant
       };
-      const message = {
-        QueueUrl: SCRAPING_SQS_URL,
-        MessageBody: JSON.stringify(e)
-      };
-      return new Promise((resolve, reject) => {
-        sqs.sendMessage(message, (error, result) => {
-          error ? reject(error) : resolve(result);
-        });
-      });
+      return scrapingQueue.send(e);
     });
 
     await Promise.all(sendings);
