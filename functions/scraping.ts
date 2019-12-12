@@ -19,10 +19,9 @@ import { QueueService } from "../lib/queue.service";
 import { BlocksQueue } from "../lib/blocks.queue";
 import { ApplicationsRepository } from "../lib/storage/applications.repository";
 import { ParticipantsRepository } from "../lib/storage/participants.repository";
+import { OrganisationsRepository } from "../lib/storage/organisations.repository";
 
 const INFURA_PROJECT_ID = String(process.env.INFURA_PROJECT_ID);
-
-const ORGANISATIONS_TABLE = String(process.env.ORGANISATIONS_TABLE);
 
 const ethereum = new EthereumService(INFURA_PROJECT_ID);
 const dynamo = new DynamoService();
@@ -33,6 +32,7 @@ const scrapingQueue = new ScrapingQueue(queueService);
 const blocksQueue = new BlocksQueue(queueService);
 const applicationsRepository = new ApplicationsRepository(dynamo);
 const participantsRepository = new ParticipantsRepository(dynamo);
+const organisationsRepository = new OrganisationsRepository(dynamo);
 
 async function parseBlockImpl(body: any) {
   const data = JSON.parse(body);
@@ -136,17 +136,7 @@ interface SqsEvent {
 }
 
 async function handleCreateOrganisation(event: OrganisationCreatedEvent): Promise<void> {
-  await dynamo.put({
-    TableName: ORGANISATIONS_TABLE,
-    Item: {
-      address: event.address,
-      name: event.name,
-      platform: event.platform,
-      txid: event.txid,
-      timestamp: event.timestamp,
-      blockNumber: event.blockNumber
-    }
-  });
+  await organisationsRepository.save(event);
 }
 
 async function handleInstallApplication(event: AppInstalledEvent): Promise<void> {
