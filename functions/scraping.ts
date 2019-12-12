@@ -1,7 +1,6 @@
 import { notFound, ok } from "../lib/response";
 import { ScrapingService } from "../lib/scraping/scraping.service";
 import { EthereumService } from "../lib/ethereum.service";
-import AWS from "aws-sdk";
 import { DynamoService } from "../lib/storage/dynamo.service";
 import { TOKEN_ABI, TOKEN_CONTROLLER_ABI } from "../lib/scraping/aragon.constants";
 import {
@@ -17,8 +16,7 @@ import { UnreachableCaseError } from "../lib/unreachable-case-error";
 import { BlocksRepository } from "../lib/storage/blocks.repository";
 import { ScrapingQueue } from "../lib/scraping.queue";
 import { QueueService } from "../lib/queue.service";
-
-const BLOCKS_SQS_URL = String(process.env.BLOCKS_SQS_URL);
+import { BlocksQueue } from "../lib/blocks.queue";
 
 const INFURA_PROJECT_ID = String(process.env.INFURA_PROJECT_ID);
 
@@ -29,22 +27,17 @@ const ORGANISATIONS_TABLE = String(process.env.ORGANISATIONS_TABLE);
 const ethereum = new EthereumService(INFURA_PROJECT_ID);
 const dynamo = new DynamoService();
 const scraping = new ScrapingService(ethereum, dynamo);
-const sqs = new AWS.SQS();
 const blocksRepository = new BlocksRepository(dynamo);
 const queueService = new QueueService();
 const scrapingQueue = new ScrapingQueue(queueService);
+const blocksQueue = new BlocksQueue(queueService);
 
 async function parseBlockImpl(body: any) {
   const data = JSON.parse(body);
   const id = Number(data.id);
   console.log(`Starting parsing block #${id}...`);
   const events = await scraping.fromBlock(id);
-
-  await Promise.all(
-    events.map(e => {
-      return scrapingQueue.send(e);
-    })
-  );
+  await scrapingQueue.sendBatch(events);
   await blocksRepository.markParsed(id);
   console.log(`Parsed block #${id}: events=${events.length}`);
   return ok({
@@ -59,16 +52,7 @@ export async function tickBlock(event: any, context: any) {
   for (let i = previous; i <= latest; i++) {
     const isPresent = await blocksRepository.isPresent(i);
     if (!isPresent) {
-      const sending = new Promise((resolve, reject) => {
-        const message = {
-          QueueUrl: BLOCKS_SQS_URL,
-          MessageBody: JSON.stringify({ id: i })
-        };
-        sqs.sendMessage(message, (err, data) => {
-          err ? reject(err) : resolve(data);
-        });
-      });
-      await sending;
+      await blocksQueue.send(i);
     }
   }
 }
@@ -114,17 +98,15 @@ export async function parseParticipants(event: any, context: any) {
       return acc;
     }, new Set<string>());
 
-    const sendings = Array.from(participants).map(async participant => {
-      const e: AddParticipantEvent = {
+    const events = Array.from(participants).map<AddParticipantEvent>(participant => {
+      return {
         kind: ORGANISATION_EVENT.ADD_PARTICIPANT,
         platform: ORGANISATION_PLATFORM.ARAGON,
         organisationAddress: organisationAddress,
         participant: participant
       };
-      return scrapingQueue.send(e);
     });
-
-    await Promise.all(sendings);
+    await scrapingQueue.sendBatch(events);
 
     return ok({
       addr: organisationAddress,
