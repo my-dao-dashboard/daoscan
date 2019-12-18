@@ -20,6 +20,7 @@ import { BlocksQueue } from "../lib/queues/blocks.queue";
 import { ApplicationsRepository } from "../lib/storage/applications.repository";
 import { ParticipantsRepository } from "../lib/storage/participants.repository";
 import { OrganisationsRepository } from "../lib/storage/organisations.repository";
+import { APIGatewayEvent, SQSEvent } from "aws-lambda";
 
 const ethereum = new EthereumService();
 const dynamo = new DynamoService();
@@ -45,7 +46,7 @@ async function parseBlockImpl(body: any) {
   });
 }
 
-export async function tickBlock(event: any, context: any) {
+export async function tickBlock() {
   const block = await ethereum.block("latest");
   const latest = block.number;
   const previous = latest - 20;
@@ -61,8 +62,12 @@ export async function tickBlock(event: any, context: any) {
   );
 }
 
-export async function parseBlock(event: any, context: any) {
-  if (event.body) {
+function isAPIGatewayEvent(event: any): event is APIGatewayEvent {
+  return !!event.httpMethod && !!event.path;
+}
+
+export async function parseBlock(event: APIGatewayEvent | SQSEvent) {
+  if (isAPIGatewayEvent(event)) {
     return parseBlockImpl(event.body);
   } else {
     await Promise.all(
@@ -73,8 +78,8 @@ export async function parseBlock(event: any, context: any) {
   }
 }
 
-export async function parseParticipants(event: any, context: any) {
-  const data = JSON.parse(event.body);
+export async function parseParticipants(event: APIGatewayEvent) {
+  const data = JSON.parse(String(event.body));
   const organisationAddress = data.organisationAddress;
   const tokenControllerAddress = await applicationsRepository.tokenAddress(organisationAddress);
   if (tokenControllerAddress) {
@@ -113,15 +118,13 @@ export async function parseParticipants(event: any, context: any) {
   }
 }
 
-export async function readExtendedBlock(event: any) {
-  const id = Number(event.pathParameters.id);
+export async function readExtendedBlock(event: APIGatewayEvent) {
+  const idParameter = event.pathParameters?.id;
+  if (!idParameter) return notFound({ error: "ID Required" });
+  const id = Number(idParameter);
   const block = await ethereum.extendedBlock(id);
   const events = await scraping.fromBlock(id);
   return ok({ block, events });
-}
-
-interface SqsEvent {
-  Records: { body: string }[];
 }
 
 async function handleCreateOrganisation(event: OrganisationCreatedEvent): Promise<void> {
@@ -157,7 +160,7 @@ async function handleTransferShare(event: ShareTransferEvent) {
   await putParticipant(event, event.to);
 }
 
-export async function saveOrganisationEvent(event: SqsEvent, context: any): Promise<void> {
+export async function saveOrganisationEvent(event: SQSEvent): Promise<void> {
   const loop = event.Records.map(async r => {
     const event = JSON.parse(r.body) as OrganisationEvent;
     switch (event.kind) {
