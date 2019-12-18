@@ -1,5 +1,5 @@
 import { DynamoService } from "./dynamo.service";
-import { ENV, FromEnv } from "../from-env";
+import { ENV, FromEnv } from "../shared/from-env";
 
 export interface ParticipantEntity {
   organisationAddress: string;

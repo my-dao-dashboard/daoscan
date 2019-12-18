@@ -2,7 +2,7 @@ import Web3 from "web3";
 import { BlockTransactionString, Transaction, TransactionReceipt } from "web3-eth";
 import { Log } from "web3-core/types";
 import * as _ from "lodash";
-import { ENV, FromEnv } from "./from-env";
+import { ENV, FromEnv } from "./shared/from-env";
 
 const BASE = "https://mainnet.infura.io/v3";
 

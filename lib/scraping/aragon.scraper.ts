@@ -16,7 +16,7 @@ import {
 } from "../organisation-events";
 import Web3 from "web3";
 import { Scraper } from "./scraper.interface";
-import { Indexed } from "../indexed.interface";
+import { Indexed } from "./indexed.interface";
 import { BlockchainEvent } from "./blockchain-event.interface";
 import { DynamoService } from "../storage/dynamo.service";
 import * as _ from "lodash";

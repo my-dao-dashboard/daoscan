@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "aws-sdk": "^2.580.0",
+    "decko": "^1.2.0",
     "lodash": "^4.17.15",
     "memoizee": "^0.4.14",
     "web3": "^1.2.4"

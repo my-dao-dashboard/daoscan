@@ -1,4 +1,4 @@
-import { notFound, ok } from "../lib/util/response";
+import { notFound, ok } from "../lib/shared/response";
 import { TOKEN_ABI, TOKEN_CONTROLLER_ABI } from "../lib/scraping/aragon.constants";
 import {
   AddParticipantEvent,
@@ -9,9 +9,9 @@ import {
   OrganisationEvent,
   ShareTransferEvent
 } from "../lib/organisation-events";
-import { UnreachableCaseError } from "../lib/unreachable-case-error";
+import { UnreachableCaseError } from "../lib/shared/unreachable-case-error";
 import { APIGatewayEvent, SQSEvent } from "aws-lambda";
-import { ScrapingContainer } from "../lib/scraping.container";
+import { ScrapingContainer } from "../lib/scraping/scraping.container";
 
 const scrapingContainer = new ScrapingContainer();
 

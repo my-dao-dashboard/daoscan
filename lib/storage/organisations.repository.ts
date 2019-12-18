@@ -1,5 +1,5 @@
 import { DynamoService } from "./dynamo.service";
-import { ENV, FromEnv } from "../from-env";
+import { ENV, FromEnv } from "../shared/from-env";
 import { ORGANISATION_PLATFORM } from "../organisation-events";
 
 export interface OrganisationEntity {

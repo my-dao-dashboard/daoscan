@@ -1,4 +1,4 @@
-import { ENV, FromEnv } from "../from-env";
+import { ENV, FromEnv } from "../shared/from-env";
 import { OrganisationEvent } from "../organisation-events";
 import { QueueService } from "./queue.service";
 
