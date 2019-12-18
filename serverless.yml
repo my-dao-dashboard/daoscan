@@ -87,20 +87,20 @@ functions:
           path: parse-participants
           method: post
           cors: true
-  storage-read-participants-by-organisation:
-    handler: functions/storage.readParticipants
+  api-read-participants-by-organisation:
+    handler: functions/api.readParticipants
     events:
       - http:
           path: get-participants/{organisationAddress}
           method: get
-  storage-read-organisations-by-participant:
-    handler: functions/storage.readOrganisations
+  api-read-organisations-by-participant:
+    handler: functions/api.readOrganisations
     events:
       - http:
           path: get-organisations/{participantAddress}
           method: get
   tmp-all-orgs:
-    handler: functions/storage.allOrgs
+    handler: functions/api.allOrgs
     events:
       - http:
           path: all-orgs

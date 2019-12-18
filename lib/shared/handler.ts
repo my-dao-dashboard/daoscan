@@ -3,7 +3,7 @@ import { KnownError } from "./errors";
 import { HTTP_STATUS_CODE } from "./http-status-code";
 import { APIGatewayProxyHandler } from "aws-lambda";
 
-function ok(data?: any, statusCode?: number) {
+export function ok(data?: any, statusCode?: number) {
   const realStatusCode = statusCode || 200;
   const body = data ? JSON.stringify(data) : "";
   return {
@@ -12,7 +12,7 @@ function ok(data?: any, statusCode?: number) {
   };
 }
 
-function error(e: Error) {
+export function error(e: Error) {
   if (e instanceof KnownError) {
     return {
       statusCode: e.code,

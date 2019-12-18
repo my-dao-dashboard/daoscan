@@ -8,16 +8,27 @@ import { BlocksQueue } from "../queues/blocks.queue";
 import { ApplicationsRepository } from "../storage/applications.repository";
 import { ParticipantsRepository } from "../storage/participants.repository";
 import { OrganisationsRepository } from "../storage/organisations.repository";
+import { ScrapingController } from "./scraping.controller";
 
 export class ScrapingContainer {
   public readonly ethereum = new EthereumService();
   public readonly dynamo = new DynamoService();
-  public readonly scrapingService = new ScrapingService(this.ethereum, this.dynamo);
-  public readonly blocksRepository = new BlocksRepository(this.dynamo);
   public readonly queueService = new QueueService();
+  public readonly blocksRepository = new BlocksRepository(this.dynamo);
   public readonly scrapingQueue = new ScrapingQueue(this.queueService);
   public readonly blocksQueue = new BlocksQueue(this.queueService);
   public readonly applicationsRepository = new ApplicationsRepository(this.dynamo);
   public readonly participantsRepository = new ParticipantsRepository(this.dynamo);
   public readonly organisationsRepository = new OrganisationsRepository(this.dynamo);
+  public readonly scrapingService = new ScrapingService(
+    this.ethereum,
+    this.dynamo,
+    this.blocksRepository,
+    this.blocksQueue,
+    this.scrapingQueue,
+    this.applicationsRepository,
+    this.organisationsRepository,
+    this.participantsRepository
+  );
+  public readonly scrapingController = new ScrapingController(this.scrapingService);
 }
