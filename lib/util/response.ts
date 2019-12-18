@@ -1,4 +1,4 @@
-export function ok(data?: object) {
+export function ok(data?: any) {
   if (data) {
     return {
       statusCode: 200,

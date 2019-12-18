@@ -1,7 +1,4 @@
-import { notFound, ok } from "../lib/response";
-import { ScrapingService } from "../lib/scraping/scraping.service";
-import { EthereumService } from "../lib/ethereum.service";
-import { DynamoService } from "../lib/storage/dynamo.service";
+import { notFound, ok } from "../lib/util/response";
 import { TOKEN_ABI, TOKEN_CONTROLLER_ABI } from "../lib/scraping/aragon.constants";
 import {
   AddParticipantEvent,
@@ -13,33 +10,18 @@ import {
   ShareTransferEvent
 } from "../lib/organisation-events";
 import { UnreachableCaseError } from "../lib/unreachable-case-error";
-import { BlocksRepository } from "../lib/storage/blocks.repository";
-import { ScrapingQueue } from "../lib/queues/scraping.queue";
-import { QueueService } from "../lib/queues/queue.service";
-import { BlocksQueue } from "../lib/queues/blocks.queue";
-import { ApplicationsRepository } from "../lib/storage/applications.repository";
-import { ParticipantsRepository } from "../lib/storage/participants.repository";
-import { OrganisationsRepository } from "../lib/storage/organisations.repository";
 import { APIGatewayEvent, SQSEvent } from "aws-lambda";
+import { ScrapingContainer } from "../lib/scraping.container";
 
-const ethereum = new EthereumService();
-const dynamo = new DynamoService();
-const scraping = new ScrapingService(ethereum, dynamo);
-const blocksRepository = new BlocksRepository(dynamo);
-const queueService = new QueueService();
-const scrapingQueue = new ScrapingQueue(queueService);
-const blocksQueue = new BlocksQueue(queueService);
-const applicationsRepository = new ApplicationsRepository(dynamo);
-const participantsRepository = new ParticipantsRepository(dynamo);
-const organisationsRepository = new OrganisationsRepository(dynamo);
+const scrapingContainer = new ScrapingContainer();
 
 async function parseBlockImpl(body: any) {
   const data = JSON.parse(body);
   const id = Number(data.id);
   console.log(`Starting parsing block #${id}...`);
-  const events = await scraping.fromBlock(id);
-  await scrapingQueue.sendBatch(events);
-  await blocksRepository.markParsed(id);
+  const events = await scrapingContainer.scrapingService.fromBlock(id);
+  await scrapingContainer.scrapingQueue.sendBatch(events);
+  await scrapingContainer.blocksRepository.markParsed(id);
   console.log(`Parsed block #${id}: events=${events.length}`);
   return ok({
     events: events
@@ -47,16 +29,16 @@ async function parseBlockImpl(body: any) {
 }
 
 export async function tickBlock() {
-  const block = await ethereum.block("latest");
+  const block = await scrapingContainer.ethereum.block("latest");
   const latest = block.number;
   const previous = latest - 20;
   let blockNumbers = [];
   for (let i = previous; i <= latest; i++) blockNumbers.push(i);
   await Promise.all(
     blockNumbers.map(async i => {
-      const isPresent = await blocksRepository.isPresent(i);
+      const isPresent = await scrapingContainer.blocksRepository.isPresent(i);
       if (!isPresent) {
-        await blocksQueue.send(i);
+        await scrapingContainer.blocksQueue.send(i);
       }
     })
   );
@@ -81,11 +63,11 @@ export async function parseBlock(event: APIGatewayEvent | SQSEvent) {
 export async function parseParticipants(event: APIGatewayEvent) {
   const data = JSON.parse(String(event.body));
   const organisationAddress = data.organisationAddress;
-  const tokenControllerAddress = await applicationsRepository.tokenAddress(organisationAddress);
+  const tokenControllerAddress = await scrapingContainer.applicationsRepository.tokenAddress(organisationAddress);
   if (tokenControllerAddress) {
-    const tokenController = new ethereum.web3.eth.Contract(TOKEN_CONTROLLER_ABI, tokenControllerAddress);
+    const tokenController = new scrapingContainer.ethereum.web3.eth.Contract(TOKEN_CONTROLLER_ABI, tokenControllerAddress);
     const tokenAddress = await tokenController.methods.token().call();
-    const token = new ethereum.web3.eth.Contract(TOKEN_ABI, tokenAddress);
+    const token = new scrapingContainer.ethereum.web3.eth.Contract(TOKEN_ABI, tokenAddress);
     const transferEvents = await token.getPastEvents("Transfer", { fromBlock: 0, toBlock: "latest" });
     const participants = transferEvents.reduce((acc, event) => {
       const from = (event.returnValues._from as string).toLowerCase();
@@ -107,7 +89,7 @@ export async function parseParticipants(event: APIGatewayEvent) {
         participant: participant
       };
     });
-    await scrapingQueue.sendBatch(events);
+    await scrapingContainer.scrapingQueue.sendBatch(events);
 
     return ok({
       addr: organisationAddress,
@@ -122,23 +104,23 @@ export async function readExtendedBlock(event: APIGatewayEvent) {
   const idParameter = event.pathParameters?.id;
   if (!idParameter) return notFound({ error: "ID Required" });
   const id = Number(idParameter);
-  const block = await ethereum.extendedBlock(id);
-  const events = await scraping.fromBlock(id);
+  const block = await scrapingContainer.ethereum.extendedBlock(id);
+  const events = await scrapingContainer.scrapingService.fromBlock(id);
   return ok({ block, events });
 }
 
 async function handleCreateOrganisation(event: OrganisationCreatedEvent): Promise<void> {
-  await organisationsRepository.save(event);
+  await scrapingContainer.organisationsRepository.save(event);
 }
 
 async function handleInstallApplication(event: AppInstalledEvent): Promise<void> {
   console.log(`Saving application...`, event);
-  await applicationsRepository.save(event);
+  await scrapingContainer.applicationsRepository.save(event);
   console.log(`Application saved`, event);
 }
 
 async function handleAddParticipant(event: AddParticipantEvent) {
-  await participantsRepository.save({
+  await scrapingContainer.participantsRepository.save({
     organisationAddress: event.organisationAddress,
     participantAddress: event.participant,
     updatedAt: new Date().valueOf()
@@ -147,7 +129,7 @@ async function handleAddParticipant(event: AddParticipantEvent) {
 
 async function putParticipant(event: ShareTransferEvent, account: string) {
   if (account !== "0x0000000000000000000000000000000000000000") {
-    await participantsRepository.save({
+    await scrapingContainer.participantsRepository.save({
       organisationAddress: event.organisationAddress,
       participantAddress: account,
       updatedAt: new Date().valueOf()
