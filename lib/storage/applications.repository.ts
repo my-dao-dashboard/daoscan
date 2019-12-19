@@ -2,7 +2,7 @@ import { DynamoService } from "./dynamo.service";
 import { ENV, FromEnv } from "../shared/from-env";
 import { ORGANISATION_PLATFORM } from "../organisation-events";
 import { Service, Inject } from "typedi";
-import {APP_ID} from "../app-id";
+import { APP_ID } from "../app-id";
 
 export interface Key {
   organisationAddress: string;
@@ -22,6 +22,8 @@ export interface ApplicationEntity {
 export enum FIELD {
   PROXY_ADDRESS = "proxyAddress"
 }
+
+type ProxyAddressResult = { proxyAddress: string };
 
 @Service()
 export class ApplicationsRepository {
@@ -46,9 +48,21 @@ export class ApplicationsRepository {
     });
   }
 
+  async bankAddress(organisationAddress: string): Promise<string | undefined> {
+    const result = await this.get<ProxyAddressResult>(
+      {
+        organisationAddress: organisationAddress.toLowerCase(),
+        appId: APP_ID.ARAGON_VAULT
+      },
+      [FIELD.PROXY_ADDRESS]
+    );
+    if (result) {
+      return result.proxyAddress;
+    }
+  }
+
   async tokenAddress(organisationAddress: string): Promise<string | undefined> {
-    type Result = { proxyAddress: string };
-    const result = await this.get<Result>(
+    const result = await this.get<ProxyAddressResult>(
       {
         organisationAddress: organisationAddress.toLowerCase(),
         appId: APP_ID.SHARE

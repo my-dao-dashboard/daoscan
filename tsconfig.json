@@ -10,6 +10,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "lib": ["es2015"],
     "rootDir": "./"
   }

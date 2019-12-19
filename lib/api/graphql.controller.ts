@@ -5,7 +5,6 @@ import fs from "fs";
 import path from "path";
 import { makeExecutableSchema } from "graphql-tools";
 import { OrganisationsResolver } from "./organisation.resolver";
-import { OrganisationGraphql } from "./organisation.graphql";
 
 @Service()
 export class GraphqlController {
@@ -51,14 +50,9 @@ export class GraphqlController {
         }
       },
       Organisation: {
-        participants: (root: OrganisationGraphql) => {
-          const address = root.address;
-          return this.organisationsResolver.participants(address);
-        },
-        shares: (root: OrganisationGraphql) => {
-          const address = root.address;
-          return this.organisationsResolver.shares(address);
-        }
+        participants: this.organisationsResolver.participants,
+        shares: this.organisationsResolver.shares,
+        bank: this.organisationsResolver.bank
       }
     };
   }

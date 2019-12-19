@@ -14,13 +14,13 @@ type Organisation {
   address: String! # yes
   platform: String! # yes
   name: String! # yes
-  shares: Token! # yes
-  bank: [Token]
-  participant(address: String!): Participant
-  participants: [Participant] # partial
   txid: String! #yes
   timestamp: Int #yes
   blockNumber: Int #yes
+  shares: Token! # yes
+  bank: [Token] # yes
+  participants: [Participant] # partial
+  participant(address: String!): Participant
 }
 
 type OrganisationsPaged {

@@ -5,6 +5,7 @@ import { ParticipantsRepository } from "../storage/participants.repository";
 import { ParticipantGraphql } from "./participant.graphql";
 import { TokenGraphql } from "./token.graphql";
 import { OrganisationsService } from "../services/organisations.service";
+import { bind } from "decko";
 
 @Service()
 export class OrganisationsResolver {
@@ -18,8 +19,9 @@ export class OrganisationsResolver {
     return this.organisationsRepository.byAddress(address);
   }
 
-  async participants(address: string): Promise<ParticipantGraphql[]> {
-    const participants = await this.participantsRepository.allByOrganisationAddress(address);
+  @bind()
+  async participants(root: OrganisationGraphql): Promise<ParticipantGraphql[]> {
+    const participants = await this.participantsRepository.allByOrganisationAddress(root.address);
     return participants.map(p => {
       return {
         address: p.participantAddress
@@ -27,12 +29,18 @@ export class OrganisationsResolver {
     });
   }
 
-  async shares(address: string): Promise<TokenGraphql> {
-    const shares = await this.organisationsService.shares(address);
+  @bind()
+  async shares(root: OrganisationGraphql): Promise<TokenGraphql> {
+    const shares = await this.organisationsService.shares(root.address);
     return {
       name: shares.name,
       amount: shares.totalSupply,
       decimals: shares.decimals
     };
+  }
+
+  @bind()
+  async bank(root: OrganisationGraphql) {
+    return this.organisationsService.bank(root.address);
   }
 }
