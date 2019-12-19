@@ -10,6 +10,11 @@ type Token {
   decimals: Int
 }
 
+type Shares {
+  totalSupply: Token!
+  shareValue: [Token!]
+}
+
 # progress
 type Organisation {
   address: String! # yes
@@ -18,7 +23,7 @@ type Organisation {
   txid: String! #yes
   timestamp: Int #yes
   blockNumber: Int #yes
-  shares: Token! # yes
+  shares: Shares! # no
   bank: [Token] # yes
   participants: [Participant] # partial
   participant(address: String!): Participant
