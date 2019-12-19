@@ -6,32 +6,35 @@ import { Service } from "typedi";
 export class DynamoService {
   private readonly client = new AWS.DynamoDB.DocumentClient();
 
-  createSet(list: number[] | string[] | DocumentClient.binaryType[], options?: DocumentClient.CreateSetOptions): DocumentClient.StringSet | DocumentClient.NumberSet | DocumentClient.BinarySet {
+  createSet(
+    list: number[] | string[] | DocumentClient.binaryType[],
+    options?: DocumentClient.CreateSetOptions
+  ): DocumentClient.StringSet | DocumentClient.NumberSet | DocumentClient.BinarySet {
     return this.client.createSet(list, options);
   }
 
-  scan (payload: DocumentClient.ScanInput): Promise<DocumentClient.ScanOutput> {
+  scan(payload: DocumentClient.ScanInput): Promise<DocumentClient.ScanOutput> {
     return new Promise<DocumentClient.ScanOutput>((resolve, reject) => {
       this.client.scan(payload, (err, data) => {
-        err ? reject(err) : resolve(data)
-      })
-    })
+        err ? reject(err) : resolve(data);
+      });
+    });
   }
 
-  query (payload: DocumentClient.QueryInput): Promise<DocumentClient.QueryOutput> {
+  query(payload: DocumentClient.QueryInput): Promise<DocumentClient.QueryOutput> {
     return new Promise<DocumentClient.QueryOutput>((resolve, reject) => {
       this.client.query(payload, (err, data) => {
-        err ? reject(err) : resolve(data)
-      })
-    })
+        err ? reject(err) : resolve(data);
+      });
+    });
   }
 
-  get (payload: DocumentClient.GetItemInput): Promise<DocumentClient.GetItemOutput> {
+  get(payload: DocumentClient.GetItemInput): Promise<DocumentClient.GetItemOutput> {
     return new Promise<DocumentClient.GetItemOutput>((resolve, reject) => {
       this.client.get(payload, (error, result) => {
-        error ? reject(error) : resolve(result)
-      })
-    })
+        error ? reject(error) : resolve(result);
+      });
+    });
   }
 
   put(payload: DocumentClient.PutItemInput): Promise<DocumentClient.PutItemOutput> {

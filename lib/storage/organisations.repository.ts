@@ -30,17 +30,18 @@ export class OrganisationsRepository {
         "#orgName": "name",
         "#orgTimestamp": "timestamp"
       },
-      KeyConditionExpression: "organisationAddress = :organisationAddress",
+      KeyConditionExpression: "address = :address",
       ExpressionAttributeValues: {
-        ":organisationAddress": address.toLowerCase()
+        ":address": address.toLowerCase()
       },
       Limit: 1
     });
-    if (items.Items) {
+    if (items.Items && items.Items[0]) {
       const item = items.Items[0];
-      console.log(item);
       return {
-        address: "foo"
+        address: item.address,
+        name: item.name,
+        platform: item.platform
       };
     } else {
       throw new NotFoundError(`Can not find organisation ${address}`);
