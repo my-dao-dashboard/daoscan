@@ -51,7 +51,8 @@ export class GraphqlController {
       },
       Organisation: {
         participants: this.organisationsResolver.participants,
-        shares: this.organisationsResolver.shares,
+        totalSupply: this.organisationsResolver.totalSupply,
+        shareValue: this.organisationsResolver.shareValue,
         bank: this.organisationsResolver.bank
       }
     };

@@ -6,7 +6,6 @@ import { ParticipantGraphql } from "./participant.graphql";
 import { TokenGraphql } from "./token.graphql";
 import { OrganisationsService } from "../services/organisations.service";
 import { bind } from "decko";
-import {SharesGraphql} from "./shares.graphql";
 
 @Service()
 export class OrganisationsResolver {
@@ -31,13 +30,23 @@ export class OrganisationsResolver {
   }
 
   @bind()
-  async shares(root: OrganisationGraphql): Promise<SharesGraphql> {
-    const shares = await this.organisationsService.shares(root.address);
-    return {
-      totalSupply: shares.totalSupply,
-      shareValue: shares.shareValue
-    }
+  async totalSupply(root: OrganisationGraphql): Promise<TokenGraphql> {
+    return this.organisationsService.totalSupply(root.address);
   }
+
+  @bind()
+  async shareValue(root: OrganisationGraphql, args: {symbol: string}): Promise<TokenGraphql> {
+    return this.organisationsService.shareValue(root.address, args.symbol);
+  }
+
+  // @bind()
+  // async shares(root: OrganisationGraphql): Promise<SharesGraphql> {
+  //   const shares = await this.organisationsService.shares(root.address);
+  //   return {
+  //     totalSupply: shares.totalSupply,
+  //     shareValue: shares.shareValue
+  //   }
+  // }
 
   @bind()
   async bank(root: OrganisationGraphql) {
