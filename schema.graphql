@@ -1,0 +1,35 @@
+type Participant {
+  address: String!
+  shares: Token
+}
+
+type Token {
+  name: String!
+  amount: String!
+  decimals: Int
+}
+
+type Organisation {
+  address: String!
+  platform: String!
+  name: String!
+  shares: Token
+  bank: [Token]
+  participant(address: String!): Participant
+  participants: [Participant]
+}
+
+type OrganisationsPaged {
+  items: [Organisation]
+  cursor: String
+}
+
+type Account {
+  address: String!
+  organisations: [Organisation]
+}
+
+type Query {
+  account(address: String!): Account
+  organisation(address: String): Organisation
+}

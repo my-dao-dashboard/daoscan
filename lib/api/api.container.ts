@@ -2,6 +2,7 @@ import { DynamoService } from "../storage/dynamo.service";
 import { ParticipantsRepository } from "../storage/participants.repository";
 import { OrganisationsRepository } from "../storage/organisations.repository";
 import { OrganisationsController } from "./organisations.controller";
+import { GraphqlController } from "./graphql.controller";
 
 export class ApiContainer {
   public readonly dynamo = new DynamoService();
@@ -11,4 +12,5 @@ export class ApiContainer {
     this.organisationsRepository,
     this.participantsRepository
   );
+  public readonly graphql = new GraphqlController();
 }

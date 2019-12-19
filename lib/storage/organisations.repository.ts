@@ -1,6 +1,8 @@
 import { DynamoService } from "./dynamo.service";
 import { ENV, FromEnv } from "../shared/from-env";
 import { ORGANISATION_PLATFORM } from "../organisation-events";
+import { NotFoundError } from "../shared/errors";
+import { Organisation } from "../api/organisation.graphql";
 
 export interface OrganisationEntity {
   address: string;
@@ -16,6 +18,31 @@ export class OrganisationsRepository {
 
   constructor(private readonly dynamo: DynamoService) {
     this.tableName = FromEnv.readString(ENV.ORGANISATIONS_TABLE);
+  }
+
+  async byAddress(address: string): Promise<Organisation> {
+    const items = await this.dynamo.query({
+      TableName: this.tableName,
+      ProjectionExpression: "address, #orgName, platform, txid, #orgTimestamp, blockNumber",
+      ExpressionAttributeNames: {
+        "#orgName": "name",
+        "#orgTimestamp": "timestamp"
+      },
+      KeyConditionExpression: "organisationAddress = :organisationAddress",
+      ExpressionAttributeValues: {
+        ":organisationAddress": address.toLowerCase()
+      },
+      Limit: 1
+    });
+    if (items.Items) {
+      const item = items.Items[0];
+      console.log(item);
+      return {
+        address: "foo"
+      };
+    } else {
+      throw new NotFoundError(`Can not find organisation ${address}`);
+    }
   }
 
   async all(): Promise<OrganisationEntity[]> {

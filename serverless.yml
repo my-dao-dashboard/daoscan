@@ -8,9 +8,9 @@ custom:
 provider:
   name: aws
   runtime: nodejs12.x
-  region: 'us-east-1'
+  region: "us-east-1"
   environment:
-    INFURA_PROJECT_ID: '7e19ece913ca433cadb164942a0b3e2e'
+    INFURA_PROJECT_ID: "7e19ece913ca433cadb164942a0b3e2e"
     SCRAPING_SQS_URL:
       Ref: ScrapingQueue
     BLOCKS_SQS_URL:
@@ -33,12 +33,12 @@ provider:
         - dynamodb:DeleteItem
         - dynamodb:BatchWriteItem
       Resource:
-        - "Fn::GetAtt": [ OrganisationsTable, Arn ]
-        - "Fn::GetAtt": [ ApplicationsTable, Arn ]
-        - "Fn::GetAtt": [ ParticipantsTable, Arn ]
-        - "Fn::GetAtt": [ BlocksTable, Arn ]
-        - "Fn::Join": [ "/", [{ "Fn::GetAtt": ["ParticipantsTable", "Arn" ] }, "index", "by-participant"]]
-        - "Fn::Join": [ "/", [{ "Fn::GetAtt": ["ApplicationsTable", "Arn" ] }, "index", "byProxyAddress"]]
+        - "Fn::GetAtt": [OrganisationsTable, Arn]
+        - "Fn::GetAtt": [ApplicationsTable, Arn]
+        - "Fn::GetAtt": [ParticipantsTable, Arn]
+        - "Fn::GetAtt": [BlocksTable, Arn]
+        - "Fn::Join": ["/", [{ "Fn::GetAtt": ["ParticipantsTable", "Arn"] }, "index", "by-participant"]]
+        - "Fn::Join": ["/", [{ "Fn::GetAtt": ["ApplicationsTable", "Arn"] }, "index", "byProxyAddress"]]
     - Effect: Allow
       Action:
         - sqs:SendMessageBatch
@@ -110,6 +110,16 @@ functions:
     events:
       - http:
           path: extended-block/{id}
+          method: get
+  api-graphql:
+    handler: functions/api.graphql
+    events:
+      - http:
+          path: graphql
+          method: post
+          cors: true
+      - http:
+          path: graphql
           method: get
 
 resources:
