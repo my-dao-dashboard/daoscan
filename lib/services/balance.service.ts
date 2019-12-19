@@ -4,8 +4,8 @@ import Web3 from "web3";
 import { TokenGraphql } from "../api/token.graphql";
 import { TOKEN_ABI } from "../scraping/aragon.constants";
 import { Contract } from "web3-eth-contract";
-import SAI_ABI from './sai.abi.json'
-import { AbiItem } from 'web3-utils'
+import SAI_ABI from "./sai.abi.json";
+import { AbiItem } from "web3-utils";
 
 const DAI_ADDRESS = "0x6b175474e89094c44da98b954eedeac495271d0f";
 const SAI_ADDRESS = "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359";
@@ -13,6 +13,16 @@ const ANT_ADDRESS = "0x960b236A07cf122663c4303350609A66A7B288C0";
 const GEN_ADDRESS = "0x543ff227f64aa17ea132bf9886cab5db55dcaddf";
 const TACO_ADDRESS = "0x36efe52b14e4d0ca4e3bd492488272e1fb2d7e1b";
 const WETH_ADDRESS = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
+
+function decodeString(s: string): string {
+  if (s.startsWith("0x")) {
+    return Buffer.from(s.slice(2), "hex")
+      .toString()
+      .replace(/\0/g, "");
+  } else {
+    return s
+  }
+}
 
 @Service()
 export class BalanceService {
@@ -35,6 +45,7 @@ export class BalanceService {
     const ethBalance = await this.web3.eth.getBalance(address);
     return {
       name: "ETH",
+      symbol: "ETH",
       amount: ethBalance,
       decimals: 18
     };
@@ -42,11 +53,13 @@ export class BalanceService {
 
   async tokenBalances(address: string): Promise<TokenGraphql[]> {
     const promisedBalance = this.tokenContracts.map<Promise<TokenGraphql>>(async contract => {
-      const name = await contract.methods.name().call();
+      const name = decodeString(await contract.methods.name().call());
+      const symbol = decodeString(await contract.methods.symbol().call());
       const amount = await contract.methods.balanceOf(address).call();
       const decimals = await contract.methods.decimals().call();
       return {
         amount,
+        symbol,
         name,
         decimals: decimals
       };

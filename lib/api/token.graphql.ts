@@ -1,5 +1,6 @@
 export interface TokenGraphql {
-  name: string
+  name?: string
+  symbol: string
   amount: string
   decimals: number
 }

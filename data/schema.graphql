@@ -4,7 +4,8 @@ type Participant {
 }
 
 type Token {
-  name: String!
+  name: String
+  symbol: String!
   amount: String!
   decimals: Int
 }

@@ -34,6 +34,7 @@ export class OrganisationsResolver {
     const shares = await this.organisationsService.shares(root.address);
     return {
       name: shares.name,
+      symbol: shares.symbol,
       amount: shares.totalSupply,
       decimals: shares.decimals
     };
