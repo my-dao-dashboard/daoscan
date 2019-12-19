@@ -4,16 +4,18 @@ import { Inject, Service } from "typedi";
 import fs from "fs";
 import path from "path";
 import { makeExecutableSchema } from "graphql-tools";
-import { OrganisationsResolver } from "./organisation.resolver";
+import { OrganisationResolver } from "./organisation.resolver";
 import { ParticipantResolver } from "./participant.resolver";
+import { AccountResolver } from "./account.resolver";
 
 @Service()
 export class GraphqlController {
   public readonly handler: APIGatewayProxyHandler;
 
   constructor(
-    @Inject(type => OrganisationsResolver) private readonly organisationsResolver: OrganisationsResolver,
-    @Inject(type => ParticipantResolver) private readonly participantResolver: ParticipantResolver
+    @Inject(type => OrganisationResolver) private readonly organisationResolver: OrganisationResolver,
+    @Inject(type => ParticipantResolver) private readonly participantResolver: ParticipantResolver,
+    @Inject(type => AccountResolver) private readonly accountResolver: AccountResolver
   ) {
     const server = new ApolloServer({
       schema: this.schema(),
@@ -27,8 +29,7 @@ export class GraphqlController {
         event,
         context
       }),
-      playground: true,
-      tracing: true
+      playground: true
     });
     this.handler = server.createHandler();
   }
@@ -44,21 +45,24 @@ export class GraphqlController {
   private resolvers() {
     return {
       Query: {
-        account: (address: string) => {
+        account: (root: undefined, args: { address: string }) => {
           return {
-            address: address
+            address: args.address
           };
         },
-        organisation: (root: any, args: { address: string }) => {
-          return this.organisationsResolver.organisation(args.address);
+        organisation: (root: undefined, args: { address: string }) => {
+          return this.organisationResolver.organisation(args.address);
         }
       },
       Organisation: {
-        participants: this.organisationsResolver.participants,
-        participant: this.organisationsResolver.participant,
-        totalSupply: this.organisationsResolver.totalSupply,
-        shareValue: this.organisationsResolver.shareValue,
-        bank: this.organisationsResolver.bank
+        participants: this.organisationResolver.participants,
+        participant: this.organisationResolver.participant,
+        totalSupply: this.organisationResolver.totalSupply,
+        shareValue: this.organisationResolver.shareValue,
+        bank: this.organisationResolver.bank
+      },
+      Account: {
+        organisations: this.accountResolver.organisations
       }
     };
   }

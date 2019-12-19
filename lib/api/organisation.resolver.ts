@@ -9,7 +9,7 @@ import { bind } from "decko";
 import { BalanceService } from "../services/balance.service";
 
 @Service()
-export class OrganisationsResolver {
+export class OrganisationResolver {
   constructor(
     @Inject(type => OrganisationsRepository) private readonly organisationsRepository: OrganisationsRepository,
     @Inject(type => ParticipantsRepository) private readonly participantsRepository: ParticipantsRepository,
@@ -49,9 +49,9 @@ export class OrganisationsResolver {
       return {
         address: participantAddress,
         shares
-      }
+      };
     } else {
-      return null
+      return null;
     }
   }
 

@@ -6,7 +6,7 @@ import { TOKEN_ABI } from "../scraping/aragon.constants";
 import { Contract } from "web3-eth-contract";
 import SAI_ABI from "./sai.abi.json";
 import { AbiItem } from "web3-utils";
-import {decodeString} from "../shared/decode-string";
+import { decodeString } from "../shared/decode-string";
 
 const DAI_ADDRESS = "0x6b175474e89094c44da98b954eedeac495271d0f";
 const SAI_ADDRESS = "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359";
@@ -42,7 +42,10 @@ export class BalanceService {
     };
   }
 
-  async balanceOf(address: string, tokenContract: Contract): Promise<{ symbol: string; amount: string; decimals: number; name: string }> {
+  async balanceOf(
+    address: string,
+    tokenContract: Contract
+  ): Promise<{ symbol: string; amount: string; decimals: number; name: string }> {
     const name = decodeString(await tokenContract.methods.name().call());
     const symbol = decodeString(await tokenContract.methods.symbol().call());
     const amount = await tokenContract.methods.balanceOf(address).call();
@@ -57,7 +60,7 @@ export class BalanceService {
 
   async tokenBalances(address: string): Promise<TokenGraphql[]> {
     const promisedBalance = this.tokenContracts.map<Promise<TokenGraphql>>(async contract => {
-      return this.balanceOf(address, contract)
+      return this.balanceOf(address, contract);
     });
     return Promise.all(promisedBalance);
   }

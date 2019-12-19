@@ -10,19 +10,18 @@ type Token {
   decimals: Int
 }
 
-# progress
 type Organisation {
-  address: String! # yes
-  platform: String! # yes
-  name: String! # yes
-  txid: String! #yes
-  timestamp: Int #yes
-  blockNumber: Int #yes
-  totalSupply: Token! #yes
-  shareValue(symbol: String!): Token! #yes
-  bank: [Token] # yes
-  participants: [Participant] # yes
-  participant(address: String!): Participant # yes
+  address: String!
+  platform: String!
+  name: String!
+  txid: String!
+  timestamp: Int
+  blockNumber: Int
+  totalSupply: Token!
+  shareValue(symbol: String!): Token!
+  bank: [Token]
+  participants: [Participant]
+  participant(address: String!): Participant
 }
 
 type Account {
@@ -31,6 +30,6 @@ type Account {
 }
 
 type Query {
-  account(address: String!): Account # nope
-  organisation(address: String): Organisation # progress
+  account(address: String!): Account
+  organisation(address: String): Organisation
 }

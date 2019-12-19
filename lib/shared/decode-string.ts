@@ -4,6 +4,6 @@ export function decodeString(s: string): string {
       .toString()
       .replace(/\0/g, "");
   } else {
-    return s
+    return s;
   }
 }

@@ -21,7 +21,7 @@ import { BlockchainEvent } from "./blockchain-event.interface";
 import { DynamoService } from "../storage/dynamo.service";
 import * as _ from "lodash";
 import { Log } from "web3-core";
-import {APP_ID} from "../app-id";
+import { APP_ID } from "../app-id";
 
 const APPLICATIONS_TABLE = String(process.env.APPLICATIONS_TABLE);
 const APPLICATIONS_PER_ADDRESS_INDEX = String(process.env.APPLICATIONS_PER_ADDRESS_INDEX);
