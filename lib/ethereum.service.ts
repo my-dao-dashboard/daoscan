@@ -3,6 +3,7 @@ import { BlockTransactionString, Transaction, TransactionReceipt } from "web3-et
 import { Log } from "web3-core/types";
 import * as _ from "lodash";
 import { ENV, FromEnv } from "./shared/from-env";
+import { Service } from "typedi";
 
 const BASE = "https://mainnet.infura.io/v3";
 
@@ -15,6 +16,7 @@ export interface ExtendedBlock extends BlockTransactionString {
   logs: Log[];
 }
 
+@Service()
 export class EthereumService {
   readonly web3: Web3;
 

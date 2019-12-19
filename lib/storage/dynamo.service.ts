@@ -1,6 +1,8 @@
 import AWS from "aws-sdk";
 import { DocumentClient } from "aws-sdk/lib/dynamodb/document_client";
+import { Service } from "typedi";
 
+@Service()
 export class DynamoService {
   private readonly client = new AWS.DynamoDB.DocumentClient();
 

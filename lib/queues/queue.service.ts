@@ -1,6 +1,8 @@
 import { SQS } from "aws-sdk";
 import * as _ from "lodash";
+import { Service } from "typedi";
 
+@Service()
 export class QueueService {
   private readonly sqs: SQS;
 

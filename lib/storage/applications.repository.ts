@@ -1,6 +1,7 @@
-import {DynamoService} from "./dynamo.service";
-import {ENV, FromEnv} from "../shared/from-env";
-import {ORGANISATION_PLATFORM} from "../organisation-events";
+import { DynamoService } from "./dynamo.service";
+import { ENV, FromEnv } from "../shared/from-env";
+import { ORGANISATION_PLATFORM } from "../organisation-events";
+import { Service, Inject } from "typedi";
 
 export interface Key {
   organisationAddress: string;
@@ -21,10 +22,11 @@ export enum FIELD {
   PROXY_ADDRESS = "proxyAddress"
 }
 
+@Service()
 export class ApplicationsRepository {
   private readonly tableName: string;
 
-  constructor(private readonly dynamo: DynamoService) {
+  constructor(@Inject(type => DynamoService) private readonly dynamo: DynamoService) {
     this.tableName = FromEnv.readString(ENV.APPLICATIONS_TABLE);
   }
 

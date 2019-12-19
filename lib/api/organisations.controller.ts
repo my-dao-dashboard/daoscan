@@ -1,24 +1,25 @@
 import { OrganisationEntity, OrganisationsRepository } from "../storage/organisations.repository";
 import { bind } from "decko";
 import { ApiEvent } from "../shared/api.types";
-import { BadRequestError } from "../shared/errors";
+import { BadRequestError, NotFoundError } from "../shared/errors";
 import { ParticipantEntity, ParticipantsRepository } from "../storage/participants.repository";
-import {notFound, ok} from "../shared/response";
+import { Service, Inject } from "typedi";
 
+@Service()
 export class OrganisationsController {
   constructor(
-    private readonly organisationsRepository: OrganisationsRepository,
-    private readonly participantsRepository: ParticipantsRepository
+    @Inject(type => OrganisationsRepository) private readonly organisationsRepository: OrganisationsRepository,
+    @Inject(type => ParticipantsRepository) private readonly participantsRepository: ParticipantsRepository
   ) {}
 
   @bind()
-  async participants (event: ApiEvent) {
+  async participants(event: ApiEvent) {
     const organisationAddress = event.pathParameters?.organisationAddress;
-    if (!organisationAddress) return notFound();
+    if (!organisationAddress) throw new NotFoundError(`Expected organisationAddress`);
     const participants = await this.participantsRepository.allByOrganisationAddress(organisationAddress);
-    return{
+    return {
       participants
-    }
+    };
   }
 
   @bind()

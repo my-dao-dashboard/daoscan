@@ -1,24 +1,19 @@
 import { APIGatewayEvent, SQSEvent } from "aws-lambda";
 import { ScrapingService } from "./scraping.service";
 import { BadRequestError } from "../shared/errors";
-import {
-  AddParticipantEvent,
-  ORGANISATION_EVENT,
-  ORGANISATION_PLATFORM,
-  OrganisationEvent
-} from "../organisation-events";
+import { OrganisationEvent } from "../organisation-events";
 import { bind } from "decko";
-import { TOKEN_ABI, TOKEN_CONTROLLER_ABI } from "./aragon.constants";
 import { ExtendedBlock } from "../ethereum.service";
-import { UnreachableCaseError } from "../shared/unreachable-case-error";
-import { handler, ok } from "../shared/handler";
+import { ok } from "../shared/handler";
+import { Service, Inject } from "typedi";
 
 function isAPIGatewayEvent(event: any): event is APIGatewayEvent {
   return !!event.httpMethod && !!event.path;
 }
 
+@Service()
 export class ScrapingController {
-  constructor(private readonly scrapingService: ScrapingService) {}
+  constructor(@Inject(type => ScrapingService) private readonly scrapingService: ScrapingService) {}
 
   parseBlock(event: APIGatewayEvent): Promise<{ body: string; statusCode: number }>;
   parseBlock(event: SQSEvent): Promise<void>;

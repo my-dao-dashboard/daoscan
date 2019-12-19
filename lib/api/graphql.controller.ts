@@ -2,7 +2,9 @@ import { buildSchemaSync } from "type-graphql";
 import { OrganisationsResolver } from "./organisation.resolver";
 import { ApolloServer } from "apollo-server-lambda";
 import { APIGatewayProxyHandler } from "aws-lambda";
+import { Service } from "typedi";
 
+@Service()
 export class GraphqlController {
   public readonly handler: APIGatewayProxyHandler;
 

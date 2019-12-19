@@ -3,6 +3,7 @@ import { ENV, FromEnv } from "../shared/from-env";
 import { ORGANISATION_PLATFORM } from "../organisation-events";
 import { NotFoundError } from "../shared/errors";
 import { Organisation } from "../api/organisation.graphql";
+import { Service, Inject } from "typedi";
 
 export interface OrganisationEntity {
   address: string;
@@ -13,10 +14,11 @@ export interface OrganisationEntity {
   blockNumber: number;
 }
 
+@Service()
 export class OrganisationsRepository {
   private readonly tableName: string;
 
-  constructor(private readonly dynamo: DynamoService) {
+  constructor(@Inject(type => DynamoService) private readonly dynamo: DynamoService) {
     this.tableName = FromEnv.readString(ENV.ORGANISATIONS_TABLE);
   }
 

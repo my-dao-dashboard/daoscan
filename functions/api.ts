@@ -1,12 +1,13 @@
 import "reflect-metadata";
 
-import { ApiContainer } from "../lib/api/api.container";
+import { Container } from "typedi";
 import { handler } from "../lib/shared/handler";
+import { OrganisationsController } from "../lib/api/organisations.controller";
+import { GraphqlController } from "../lib/api/graphql.controller";
 
-const container = new ApiContainer();
+const controller = Container.get(OrganisationsController);
+export const readParticipants = handler(controller.participants);
+export const readOrganisations = handler(controller.byParticipant);
+export const allOrgs = handler(controller.index);
 
-export const readParticipants = handler(container.organisationsController.participants);
-export const readOrganisations = handler(container.organisationsController.byParticipant);
-export const allOrgs = handler(container.organisationsController.index);
-
-export const graphql = container.graphql.handler;
+export const graphql = Container.get(GraphqlController).handler;

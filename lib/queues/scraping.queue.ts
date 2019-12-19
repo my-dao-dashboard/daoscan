@@ -1,11 +1,13 @@
 import { ENV, FromEnv } from "../shared/from-env";
 import { OrganisationEvent } from "../organisation-events";
 import { QueueService } from "./queue.service";
+import { Service, Inject } from "typedi";
 
+@Service()
 export class ScrapingQueue {
   private readonly queueName: string;
 
-  constructor(private readonly queue: QueueService) {
+  constructor(@Inject(type => QueueService) private readonly queue: QueueService) {
     this.queueName = FromEnv.readString(ENV.SCRAPING_SQS_URL);
   }
 

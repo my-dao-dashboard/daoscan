@@ -1,5 +1,6 @@
 import { DynamoService } from "./dynamo.service";
 import { ENV, FromEnv } from "../shared/from-env";
+import { Service, Inject } from "typedi";
 
 export interface ParticipantEntity {
   organisationAddress: string;
@@ -7,11 +8,12 @@ export interface ParticipantEntity {
   updatedAt: number;
 }
 
+@Service()
 export class ParticipantsRepository {
   private readonly tableName: string;
   private readonly participantsIndexName: string;
 
-  constructor(private readonly dynamo: DynamoService) {
+  constructor(@Inject(type => DynamoService) private readonly dynamo: DynamoService) {
     this.tableName = FromEnv.readString(ENV.PARTICIPANTS_TABLE);
     this.participantsIndexName = FromEnv.readString(ENV.PARTICIPANTS_INDEX);
   }
