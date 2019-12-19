@@ -1,9 +1,10 @@
-import { OrganisationEntity, OrganisationsRepository } from "../storage/organisations.repository";
+import { OrganisationsRepository } from "../storage/organisations.repository";
 import { bind } from "decko";
 import { ApiEvent } from "../shared/api.types";
 import { BadRequestError, NotFoundError } from "../shared/errors";
 import { ParticipantEntity, ParticipantsRepository } from "../storage/participants.repository";
 import { Service, Inject } from "typedi";
+import { OrganisationEntity } from "../storage/organisation.entity";
 
 @Service()
 export class OrganisationsController {

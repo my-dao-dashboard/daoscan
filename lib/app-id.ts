@@ -1,0 +1,4 @@
+export enum APP_ID {
+  SHARE = "ds:share",
+  ARAGON_TOKEN_CONTROLLER = "0x6b20a3010614eeebf2138ccec99f028a61c811b3b1a3343b6ff635985c75c91f"
+}

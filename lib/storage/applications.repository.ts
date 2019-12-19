@@ -2,6 +2,7 @@ import { DynamoService } from "./dynamo.service";
 import { ENV, FromEnv } from "../shared/from-env";
 import { ORGANISATION_PLATFORM } from "../organisation-events";
 import { Service, Inject } from "typedi";
+import {APP_ID} from "../app-id";
 
 export interface Key {
   organisationAddress: string;
@@ -50,7 +51,21 @@ export class ApplicationsRepository {
     const result = await this.get<Result>(
       {
         organisationAddress: organisationAddress.toLowerCase(),
-        appId: "0x6b20a3010614eeebf2138ccec99f028a61c811b3b1a3343b6ff635985c75c91f"
+        appId: APP_ID.SHARE
+      },
+      [FIELD.PROXY_ADDRESS]
+    );
+    if (result) {
+      return result.proxyAddress;
+    }
+  }
+
+  async tokenControllerAddress(organisationAddress: string): Promise<string | undefined> {
+    type Result = { proxyAddress: string };
+    const result = await this.get<Result>(
+      {
+        organisationAddress: organisationAddress.toLowerCase(),
+        appId: APP_ID.ARAGON_TOKEN_CONTROLLER
       },
       [FIELD.PROXY_ADDRESS]
     );

@@ -21,6 +21,7 @@ import { BlockchainEvent } from "./blockchain-event.interface";
 import { DynamoService } from "../storage/dynamo.service";
 import * as _ from "lodash";
 import { Log } from "web3-core";
+import {APP_ID} from "../app-id";
 
 const APPLICATIONS_TABLE = String(process.env.APPLICATIONS_TABLE);
 const APPLICATIONS_PER_ADDRESS_INDEX = String(process.env.APPLICATIONS_PER_ADDRESS_INDEX);
@@ -146,7 +147,7 @@ export class AragonScraper implements Scraper {
     });
     const appsInstalled = await Promise.all(appInstalledPromised);
     const tokenControllerEvents = appsInstalled.filter(e => {
-      return e.appId === "0x6b20a3010614eeebf2138ccec99f028a61c811b3b1a3343b6ff635985c75c91f";
+      return e.appId === APP_ID.ARAGON_TOKEN_CONTROLLER;
     });
     for (let e of tokenControllerEvents) {
       const tokenControllerAddress = e.proxyAddress;
@@ -156,7 +157,7 @@ export class AragonScraper implements Scraper {
         kind: ORGANISATION_EVENT.APP_INSTALLED,
         platform: ORGANISATION_PLATFORM.ARAGON,
         organisationAddress: e.organisationAddress,
-        appId: "ds:share",
+        appId: APP_ID.SHARE,
         proxyAddress: tokenAddress,
         txid: e.txid,
         blockNumber: e.blockNumber,

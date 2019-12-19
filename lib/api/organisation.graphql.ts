@@ -1,13 +1,12 @@
-import { Field, ObjectType } from "type-graphql";
-
-@ObjectType()
-export class Organisation {
-  @Field(type => String)
-  address!: string;
-
-  @Field(type => String)
-  platform!: string;
-
-  @Field(type => String)
-  name!: string;
+export interface OrganisationGraphql {
+  address: string;
+  platform: string;
+  name: string;
+  // shares: Token
+  // bank: [Token]
+  // participant(address: String!): Participant
+  // participants: [Participant]
+  txid: string;
+  timestamp: number;
+  blockNumber: number;
 }

@@ -5,6 +5,10 @@ org: ukstv
 custom:
   stage: ${opt:stage, self:provider.stage}
 
+package:
+  include:
+    - data/*
+
 provider:
   name: aws
   runtime: nodejs12.x

@@ -13,10 +13,10 @@
     "aws-sdk": "^2.580.0",
     "decko": "^1.2.0",
     "graphql": "^14.5.8",
+    "graphql-tools": "^4.0.6",
     "lodash": "^4.17.15",
     "memoizee": "^0.4.14",
     "reflect-metadata": "^0.1.13",
-    "type-graphql": "^0.17.5",
     "typedi": "^0.8.0",
     "web3": "^1.2.4"
   },

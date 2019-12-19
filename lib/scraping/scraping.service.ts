@@ -77,7 +77,7 @@ export class ScrapingService {
   }
 
   async parseParticipants(organisationAddress: string): Promise<{ addr: string; participants: string[] }> {
-    const tokenControllerAddress = await this.applicationsRepository.tokenAddress(organisationAddress);
+    const tokenControllerAddress = await this.applicationsRepository.tokenControllerAddress(organisationAddress);
     const web3 = this.ethereum.web3;
     if (tokenControllerAddress) {
       const tokenController = new web3.eth.Contract(TOKEN_CONTROLLER_ABI, tokenControllerAddress);
