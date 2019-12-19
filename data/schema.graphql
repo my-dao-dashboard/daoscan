@@ -18,16 +18,11 @@ type Organisation {
   txid: String! #yes
   timestamp: Int #yes
   blockNumber: Int #yes
-  totalSupply: Token!
-  shareValue(symbol: String!): Token!
+  totalSupply: Token! #yes
+  shareValue(symbol: String!): Token! #yes
   bank: [Token] # yes
-  participants: [Participant] # partial
-  participant(address: String!): Participant
-}
-
-type OrganisationsPaged {
-  items: [Organisation]
-  cursor: String
+  participants: [Participant] # yes
+  participant(address: String!): Participant # yes
 }
 
 type Account {

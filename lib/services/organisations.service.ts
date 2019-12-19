@@ -39,20 +39,24 @@ export class OrganisationsService {
     const bank = await this.bank(organisationAddress);
     const usdAmount = await this.priceOfShareUsd(totalSupply, bank);
     const assetPrice = await this.messariService.usdPrice(symbol);
-    const assetAmount = usdAmount / assetPrice
+    const assetAmount = usdAmount / assetPrice;
     return {
       name: symbol,
       symbol: symbol,
       amount: (assetAmount * 10 ** 4).toFixed(0),
       decimals: 4
-    }
+    };
+  }
+
+  async tokenContract(organisationAddress: string) {
+    const tokenAddress = await this.applicationsRepository.tokenAddress(organisationAddress);
+    return new this.web3.eth.Contract(TOKEN_ABI, tokenAddress);
   }
 
   async totalSupply(
     organisationAddress: string
   ): Promise<{ amount: string; decimals: number; name: string; symbol: string }> {
-    const tokenAddress = await this.applicationsRepository.tokenAddress(organisationAddress);
-    const token = new this.web3.eth.Contract(TOKEN_ABI, tokenAddress);
+    const token = await this.tokenContract(organisationAddress);
     const name = await token.methods.name().call();
     const symbol = await token.methods.symbol().call();
     const decimals = await token.methods.decimals().call();

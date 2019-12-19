@@ -53,6 +53,32 @@ export class ParticipantsRepository {
     }
   }
 
+  async byAddressInOrganisation(
+    organisationAddress: string,
+    participantAddress: string
+  ): Promise<ParticipantEntity | null> {
+    const items = await this.dynamo.query({
+      TableName: this.tableName,
+      ProjectionExpression: "organisationAddress, participantAddress, updatedAt",
+      KeyConditionExpression: "organisationAddress = :organisationAddress AND participantAddress = :participantAddress",
+      ExpressionAttributeValues: {
+        ":organisationAddress": organisationAddress.toLowerCase(),
+        ":participantAddress": participantAddress.toLowerCase()
+      },
+      Limit: 1
+    });
+    if (items.Items && items.Items[0]) {
+      const item = items.Items[0];
+      return {
+        organisationAddress: String(item.organisationAddress),
+        participantAddress: String(item.participantAddress),
+        updatedAt: Number(item.updatedAt)
+      };
+    } else {
+      return null;
+    }
+  }
+
   async allByOrganisationAddress(organisationAddress: string): Promise<ParticipantEntity[]> {
     const items = await this.dynamo.query({
       TableName: this.tableName,

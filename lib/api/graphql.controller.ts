@@ -5,12 +5,16 @@ import fs from "fs";
 import path from "path";
 import { makeExecutableSchema } from "graphql-tools";
 import { OrganisationsResolver } from "./organisation.resolver";
+import { ParticipantResolver } from "./participant.resolver";
 
 @Service()
 export class GraphqlController {
   public readonly handler: APIGatewayProxyHandler;
 
-  constructor(@Inject(type => OrganisationsResolver) private readonly organisationsResolver: OrganisationsResolver) {
+  constructor(
+    @Inject(type => OrganisationsResolver) private readonly organisationsResolver: OrganisationsResolver,
+    @Inject(type => ParticipantResolver) private readonly participantResolver: ParticipantResolver
+  ) {
     const server = new ApolloServer({
       schema: this.schema(),
       formatError: error => {
@@ -51,6 +55,7 @@ export class GraphqlController {
       },
       Organisation: {
         participants: this.organisationsResolver.participants,
+        participant: this.organisationsResolver.participant,
         totalSupply: this.organisationsResolver.totalSupply,
         shareValue: this.organisationsResolver.shareValue,
         bank: this.organisationsResolver.bank
