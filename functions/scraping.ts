@@ -1,4 +1,4 @@
-// import "reflect-metadata";
+import "reflect-metadata";
 
 import { Container } from "typedi";
 import { handler } from "../lib/shared/handler";
