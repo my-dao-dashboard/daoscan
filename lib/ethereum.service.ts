@@ -4,6 +4,7 @@ import { Log } from "web3-core/types";
 import * as _ from "lodash";
 import { ENV, FromEnv } from "./shared/from-env";
 import { Service } from "typedi";
+import { memoize } from "decko";
 
 const BASE = "https://mainnet.infura.io/v3";
 
@@ -27,10 +28,12 @@ export class EthereumService {
     this.web3 = new Web3(provider);
   }
 
+  @memoize
   block(number: string | number): Promise<BlockTransactionString> {
     return this.web3.eth.getBlock(number);
   }
 
+  @memoize
   async extendedBlock(number: string | number): Promise<ExtendedBlock> {
     const block = await this.block(number);
     const receipts = await Promise.all(
@@ -51,14 +54,17 @@ export class EthereumService {
     };
   }
 
+  @memoize
   transaction(txid: string): Promise<Transaction> {
     return this.web3.eth.getTransaction(txid);
   }
 
+  @memoize
   transactionReceipt(txid: string): Promise<TransactionReceipt> {
     return this.web3.eth.getTransactionReceipt(txid);
   }
 
+  @memoize
   async canonicalAddress(addressOrName: string): Promise<string> {
     if (this.web3.utils.isAddress(addressOrName)) {
       return addressOrName.toLowerCase();

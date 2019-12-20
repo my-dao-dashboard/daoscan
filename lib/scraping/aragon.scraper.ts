@@ -1,5 +1,6 @@
 import { ExtendedBlock } from "../ethereum.service";
 import {
+  DEPLOY_INSTANCE_EVENT,
   KIT_ADDRESSES,
   KIT_SIGNATURES,
   NEW_APP_PROXY_EVENT,
@@ -30,14 +31,16 @@ export class AragonScraper implements Scraper {
   constructor(private readonly web3: Web3, private readonly dynamo: DynamoService) {}
 
   async fromBlock(block: ExtendedBlock): Promise<OrganisationEvent[]> {
-    const created = await this.createdFromTransactions(block);
+    const createdFromTransaction = await this.createdFromTransactions(block);
+    const createdFromEvents = await this.createdFromEvents(block);
     const appInstalled = await this.appInstalledEvents(block);
     const transfers = await this.transfers(block, appInstalled);
 
     const result = [] as OrganisationEvent[];
 
     return result
-      .concat(created)
+      .concat(createdFromEvents)
+      .concat(createdFromTransaction)
       .concat(appInstalled)
       .concat(transfers);
   }
@@ -129,6 +132,21 @@ export class AragonScraper implements Scraper {
           return event;
         })
     );
+  }
+
+  async createdFromEvents(block: ExtendedBlock): Promise<OrganisationCreatedEvent[]> {
+    return this.logEvents(block, DEPLOY_INSTANCE_EVENT).map(e => {
+      const organisationAddress = e.dao;
+      return {
+        kind: ORGANISATION_EVENT.CREATED,
+        platform: ORGANISATION_PLATFORM.ARAGON,
+        name: organisationAddress.toLowerCase(),
+        address: organisationAddress,
+        txid: e.txid,
+        blockNumber: e.blockNumber,
+        timestamp: Number(block.timestamp)
+      };
+    });
   }
 
   async appInstalledEvents(block: ExtendedBlock): Promise<AppInstalledEvent[]> {
