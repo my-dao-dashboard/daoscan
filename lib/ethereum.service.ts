@@ -58,4 +58,13 @@ export class EthereumService {
   transactionReceipt(txid: string): Promise<TransactionReceipt> {
     return this.web3.eth.getTransactionReceipt(txid);
   }
+
+  async canonicalAddress(addressOrName: string): Promise<string> {
+    if (this.web3.utils.isAddress(addressOrName)) {
+      return addressOrName.toLowerCase();
+    } else {
+      const fromEns = await this.web3.eth.ens.getAddress(addressOrName);
+      return fromEns.toLowerCase();
+    }
+  }
 }

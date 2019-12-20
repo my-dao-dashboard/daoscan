@@ -7,6 +7,7 @@ import { TokenGraphql } from "./token.graphql";
 import { OrganisationsService } from "../services/organisations.service";
 import { bind } from "decko";
 import { BalanceService } from "../services/balance.service";
+import { EthereumService } from "../ethereum.service";
 
 @Service()
 export class OrganisationResolver {
@@ -14,17 +15,20 @@ export class OrganisationResolver {
     @Inject(type => OrganisationsRepository) private readonly organisationsRepository: OrganisationsRepository,
     @Inject(type => ParticipantsRepository) private readonly participantsRepository: ParticipantsRepository,
     @Inject(type => OrganisationsService) private readonly organisationsService: OrganisationsService,
-    @Inject(type => BalanceService) private readonly balanceService: BalanceService
+    @Inject(type => BalanceService) private readonly balanceService: BalanceService,
+    @Inject(type => EthereumService) private readonly ethereum: EthereumService
   ) {}
 
   async organisation(address: string): Promise<Partial<OrganisationGraphql>> {
-    return this.organisationsRepository.byAddress(address);
+    const organisationAddress = await this.ethereum.canonicalAddress(address);
+    return this.organisationsRepository.byAddress(organisationAddress);
   }
 
   @bind()
   async participants(root: OrganisationGraphql): Promise<ParticipantGraphql[]> {
-    const token = await this.organisationsService.tokenContract(root.address);
-    const participants = await this.participantsRepository.allByOrganisationAddress(root.address);
+    const organisationAddress = await this.ethereum.canonicalAddress(root.address);
+    const token = await this.organisationsService.tokenContract(organisationAddress);
+    const participants = await this.participantsRepository.allByOrganisationAddress(organisationAddress);
     const promised = participants.map(async p => {
       const shares = await this.balanceService.balanceOf(p.participantAddress, token);
       return {
@@ -37,8 +41,8 @@ export class OrganisationResolver {
 
   @bind()
   async participant(root: OrganisationGraphql, args: { address: string }): Promise<ParticipantGraphql | null> {
-    const organisationAddress = root.address;
-    const participantAddress = args.address;
+    const organisationAddress = await this.ethereum.canonicalAddress(root.address);
+    const participantAddress = await this.ethereum.canonicalAddress(args.address);
     const token = await this.organisationsService.tokenContract(organisationAddress);
     const participant = await this.participantsRepository.byAddressInOrganisation(
       organisationAddress,
@@ -57,16 +61,19 @@ export class OrganisationResolver {
 
   @bind()
   async totalSupply(root: OrganisationGraphql): Promise<TokenGraphql> {
-    return this.organisationsService.totalSupply(root.address);
+    const organisationAddress = await this.ethereum.canonicalAddress(root.address);
+    return this.organisationsService.totalSupply(organisationAddress);
   }
 
   @bind()
   async shareValue(root: OrganisationGraphql, args: { symbol: string }): Promise<TokenGraphql> {
-    return this.organisationsService.shareValue(root.address, args.symbol);
+    const organisationAddress = await this.ethereum.canonicalAddress(root.address);
+    return this.organisationsService.shareValue(organisationAddress, args.symbol);
   }
 
   @bind()
   async bank(root: OrganisationGraphql) {
-    return this.organisationsService.bank(root.address);
+    const organisationAddress = await this.ethereum.canonicalAddress(root.address);
+    return this.organisationsService.bank(organisationAddress);
   }
 }
