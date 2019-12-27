@@ -1,4 +1,4 @@
-# daoscan
+# DAOScan
 
 DAOScan is a system which analyses Ethereum's blockchain to easily access information about Aragon DAOs operating on Ethereum.
 
