@@ -32,7 +32,7 @@ export class ScrapingService {
     @Inject(type => EthereumService) private readonly ethereum: EthereumService,
     @Inject(type => DynamoService) private readonly dynamo: DynamoService,
     @Inject(type => BlocksRepository) private readonly blocksRepository: BlocksRepository,
-    @Inject(type => BlocksQueue) private readonly blocksQueue: BlocksQueue,
+    @Inject(BlocksQueue.name) private readonly blocksQueue: BlocksQueue,
     @Inject(type => ScrapingQueue) private readonly scrapingQueue: ScrapingQueue,
     @Inject(type => ApplicationsRepository) private readonly applicationsRepository: ApplicationsRepository,
     @Inject(type => OrganisationsRepository) private readonly organisationsRepository: OrganisationsRepository,

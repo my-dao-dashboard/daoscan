@@ -1,15 +1,6 @@
-export class EmptyEnvError extends Error {}
+import { ENV } from "./env";
 
-export enum ENV {
-  PARTICIPANTS_TABLE = "PARTICIPANTS_TABLE",
-  BLOCKS_SQS_URL = "BLOCKS_SQS_URL",
-  SCRAPING_SQS_URL = "SCRAPING_SQS_URL",
-  APPLICATIONS_TABLE = "APPLICATIONS_TABLE",
-  BLOCKS_TABLE = "BLOCKS_TABLE",
-  ORGANISATIONS_TABLE = "ORGANISATIONS_TABLE",
-  ETHEREUM_RPC = "ETHEREUM_RPC",
-  PARTICIPANTS_INDEX = "PARTICIPANTS_INDEX"
-}
+export class EmptyEnvError extends Error {}
 
 export class FromEnv {
   static readString(name: ENV): string {

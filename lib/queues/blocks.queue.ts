@@ -1,15 +1,15 @@
 import { IQueueService, QueueService } from "./queue.service";
 import { Service, Inject } from "typedi";
-import { EnvService } from "../services/env.service";
+import { EnvService, IEnvService } from "../services/env.service";
 import { ENV } from "../shared/env";
 
-@Service()
+@Service(BlocksQueue.name)
 export class BlocksQueue {
   private readonly queueName: string;
 
   constructor(
-    @Inject(type => QueueService) private readonly queue: IQueueService,
-    @Inject(type => EnvService) env: EnvService
+    @Inject(QueueService.name) private readonly queue: IQueueService,
+    @Inject(EnvService.name) env: IEnvService
   ) {
     this.queueName = env.readString(ENV.BLOCKS_SQS_URL);
   }

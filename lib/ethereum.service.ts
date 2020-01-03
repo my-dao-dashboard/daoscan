@@ -2,8 +2,9 @@ import Web3 from "web3";
 import { BlockTransactionString, Transaction, TransactionReceipt } from "web3-eth";
 import { Log } from "web3-core/types";
 import * as _ from "lodash";
-import { ENV, FromEnv } from "./shared/from-env";
+import { FromEnv } from "./shared/from-env";
 import { Service } from "typedi";
+import {ENV} from "./shared/env";
 
 export interface ExtendedTransactionReceipt extends TransactionReceipt {
   input: string;

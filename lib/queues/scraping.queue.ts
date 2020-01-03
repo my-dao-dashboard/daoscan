@@ -1,7 +1,8 @@
-import { ENV, FromEnv } from "../shared/from-env";
+import { FromEnv } from "../shared/from-env";
 import { OrganisationEvent } from "../organisation-events";
 import { QueueService } from "./queue.service";
 import { Service, Inject } from "typedi";
+import { ENV } from "../shared/env";
 
 @Service()
 export class ScrapingQueue {

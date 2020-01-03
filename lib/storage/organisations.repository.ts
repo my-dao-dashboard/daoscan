@@ -1,9 +1,10 @@
 import { DynamoService } from "./dynamo.service";
-import { ENV, FromEnv } from "../shared/from-env";
+import { FromEnv } from "../shared/from-env";
 import { ORGANISATION_PLATFORM } from "../organisation-events";
 import { NotFoundError } from "../shared/errors";
 import { Service, Inject } from "typedi";
 import { OrganisationEntity } from "./organisation.entity";
+import { ENV } from "../shared/env";
 
 @Service()
 export class OrganisationsRepository {
