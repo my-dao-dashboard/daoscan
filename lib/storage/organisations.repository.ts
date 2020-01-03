@@ -4,20 +4,20 @@ import { NotFoundError } from "../shared/errors";
 import { Service, Inject } from "typedi";
 import { OrganisationEntity } from "./organisation.entity";
 import { ENV } from "../shared/env";
-import { EnvService, IEnvService } from "../services/env.service";
+import { EnvService } from "../services/env.service";
 
-@Service()
+@Service(OrganisationsRepository.name)
 export class OrganisationsRepository {
   private readonly tableName: string;
 
   constructor(
-    @Inject(type => DynamoService) private readonly dynamo: DynamoService,
-    @Inject(EnvService.name) env: IEnvService
+    @Inject(DynamoService.name) private readonly dynamo: DynamoService,
+    @Inject(EnvService.name) env: EnvService
   ) {
     this.tableName = env.readString(ENV.ORGANISATIONS_TABLE);
   }
 
-  async byAddress(address: string) {
+  async byAddress(address: string): Promise<OrganisationEntity> {
     const items = await this.dynamo.query({
       TableName: this.tableName,
       ProjectionExpression: "address, #orgName, platform, txid, #orgTimestamp, blockNumber",
