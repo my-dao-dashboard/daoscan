@@ -2,8 +2,8 @@ import { ApplicationsRepository, FIELD } from "./applications.repository";
 import { IEnvService } from "../services/env.service";
 import faker from "faker";
 import { DynamoService } from "./dynamo.service";
-import { ORGANISATION_PLATFORM } from "../organisation-events";
-import { APP_ID } from "../app-id";
+import { APP_ID } from "../shared/app-id";
+import {PLATFORM} from "../shared/platform";
 
 const APPLICATIONS_TABLE = faker.random.alphaNumeric();
 
@@ -17,7 +17,7 @@ test("save", async () => {
   } as unknown) as DynamoService;
   const repository = new ApplicationsRepository(dynamo, env);
   const item = {
-    platform: ORGANISATION_PLATFORM.ARAGON,
+    platform: PLATFORM.ARAGON,
     organisationAddress: faker.random.alphaNumeric(10).toUpperCase(),
     appId: faker.random.alphaNumeric(10).toUpperCase(),
     proxyAddress: faker.random.alphaNumeric(),

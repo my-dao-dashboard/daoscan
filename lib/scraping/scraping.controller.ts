@@ -1,7 +1,7 @@
 import { APIGatewayEvent, SQSEvent } from "aws-lambda";
 import { ScrapingService } from "./scraping.service";
 import { BadRequestError } from "../shared/errors";
-import { OrganisationEvent } from "../organisation-events";
+import { OrganisationEvent } from "../shared/organisation-events";
 import { bind } from "decko";
 import { ExtendedBlock } from "../ethereum.service";
 import { ok } from "../shared/handler";

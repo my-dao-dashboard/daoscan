@@ -2,8 +2,8 @@ import { OrganisationsRepository } from "./organisations.repository";
 import { DynamoService } from "./dynamo.service";
 import { EnvService } from "../services/env.service";
 import faker from "faker";
-import { ORGANISATION_PLATFORM } from "../organisation-events";
 import { NotFoundError } from "../shared/errors";
+import {PLATFORM} from "../shared/platform";
 
 const ORGANISATIONS_TABLE = faker.random.alphaNumeric(10);
 
@@ -15,7 +15,7 @@ test("byAddress found", async () => {
   const item = {
     address: faker.random.alphaNumeric(10),
     name: faker.random.alphaNumeric(10),
-    platform: ORGANISATION_PLATFORM.ARAGON,
+    platform: PLATFORM.ARAGON,
     txid: faker.random.alphaNumeric(10),
     blockNumber: faker.random.number(),
     timestamp: faker.random.number()

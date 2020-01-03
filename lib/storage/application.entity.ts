@@ -1,7 +1,7 @@
-import {ORGANISATION_PLATFORM} from "../organisation-events";
+import { PLATFORM } from "../shared/platform";
 
 export interface ApplicationEntity {
-  platform: ORGANISATION_PLATFORM;
+  platform: PLATFORM;
   organisationAddress: string;
   appId: string;
   proxyAddress: string;

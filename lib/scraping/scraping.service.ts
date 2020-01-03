@@ -7,11 +7,10 @@ import {
   AddParticipantEvent,
   AppInstalledEvent,
   ORGANISATION_EVENT,
-  ORGANISATION_PLATFORM,
   OrganisationCreatedEvent,
   OrganisationEvent,
   ShareTransferEvent
-} from "../organisation-events";
+} from "../shared/organisation-events";
 import { BlocksRepository } from "../storage/blocks.repository";
 import { BlocksQueue } from "../queues/blocks.queue";
 import { bind } from "decko";
@@ -23,6 +22,7 @@ import { UnreachableCaseError } from "../shared/unreachable-case-error";
 import { OrganisationsRepository } from "../storage/organisations.repository";
 import { ParticipantsRepository } from "../storage/participants.repository";
 import { Service, Inject } from "typedi";
+import {PLATFORM} from "../shared/platform";
 
 @Service()
 export class ScrapingService {
@@ -99,7 +99,7 @@ export class ScrapingService {
       const events = Array.from(participants).map<AddParticipantEvent>(participant => {
         return {
           kind: ORGANISATION_EVENT.ADD_PARTICIPANT,
-          platform: ORGANISATION_PLATFORM.ARAGON,
+          platform: PLATFORM.ARAGON,
           organisationAddress: organisationAddress,
           participant: participant
         };

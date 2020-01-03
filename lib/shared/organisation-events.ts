@@ -1,17 +1,4 @@
-export enum ORGANISATION_PLATFORM {
-  ARAGON = "ARAGON"
-}
-
-export namespace ORGANISATION_PLATFORM {
-  export function fromString(platform: string): ORGANISATION_PLATFORM {
-    switch (platform) {
-      case ORGANISATION_PLATFORM.ARAGON:
-        return ORGANISATION_PLATFORM.ARAGON;
-      default:
-        throw new Error(`Can not parse unknown platform ${platform}`);
-    }
-  }
-}
+import { PLATFORM } from "./platform";
 
 export enum ORGANISATION_EVENT {
   CREATED = "CREATED",
@@ -22,7 +9,7 @@ export enum ORGANISATION_EVENT {
 
 export interface OrganisationCreatedEvent {
   kind: ORGANISATION_EVENT.CREATED;
-  platform: ORGANISATION_PLATFORM;
+  platform: PLATFORM;
   name: string;
   address: string;
   txid: string;
@@ -32,7 +19,7 @@ export interface OrganisationCreatedEvent {
 
 export interface AppInstalledEvent {
   kind: ORGANISATION_EVENT.APP_INSTALLED;
-  platform: ORGANISATION_PLATFORM.ARAGON;
+  platform: PLATFORM.ARAGON;
   organisationAddress: string;
   appId: string;
   proxyAddress: string;
@@ -43,14 +30,14 @@ export interface AppInstalledEvent {
 
 export interface AddParticipantEvent {
   kind: ORGANISATION_EVENT.ADD_PARTICIPANT;
-  platform: ORGANISATION_PLATFORM.ARAGON;
+  platform: PLATFORM.ARAGON;
   organisationAddress: string;
   participant: string;
 }
 
 export interface ShareTransferEvent {
   kind: ORGANISATION_EVENT.TRANSFER_SHARE;
-  platform: ORGANISATION_PLATFORM.ARAGON;
+  platform: PLATFORM.ARAGON;
   organisationAddress: string;
   blockNumber: number;
   txid: string;

@@ -1,8 +1,9 @@
 import { IQueueService } from "./queue.service";
 import { ScrapingQueue } from "./scraping.queue";
 import { IEnvService } from "../services/env.service";
-import { ORGANISATION_EVENT, ORGANISATION_PLATFORM, OrganisationCreatedEvent } from "../organisation-events";
+import { ORGANISATION_EVENT, OrganisationCreatedEvent } from "../shared/organisation-events";
 import faker from "faker";
+import {PLATFORM} from "../shared/platform";
 
 const QUEUE_NAME = faker.random.alphaNumeric();
 
@@ -20,7 +21,7 @@ const env: IEnvService = {
 
 const event: OrganisationCreatedEvent = {
   kind: ORGANISATION_EVENT.CREATED,
-  platform: ORGANISATION_PLATFORM.ARAGON,
+  platform: PLATFORM.ARAGON,
   name: faker.random.alphaNumeric(),
   address: faker.random.alphaNumeric(),
   txid: faker.random.alphaNumeric(),

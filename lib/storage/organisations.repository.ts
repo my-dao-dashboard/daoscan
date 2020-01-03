@@ -1,10 +1,10 @@
 import { DynamoService } from "./dynamo.service";
-import { ORGANISATION_PLATFORM } from "../organisation-events";
 import { NotFoundError } from "../shared/errors";
 import { Service, Inject } from "typedi";
 import { OrganisationEntity } from "./organisation.entity";
 import { ENV } from "../shared/env";
 import { EnvService } from "../services/env.service";
+import {PLATFORM} from "../shared/platform";
 
 @Service(OrganisationsRepository.name)
 export class OrganisationsRepository {
@@ -60,7 +60,7 @@ export class OrganisationsRepository {
         return {
           address: String(item.address),
           name: String(item.name),
-          platform: ORGANISATION_PLATFORM.fromString(item.platform),
+          platform: PLATFORM.fromString(item.platform),
           txid: String(item.txid),
           timestamp: Number(item.timestamp),
           blockNumber: Number(item.blockNumber)

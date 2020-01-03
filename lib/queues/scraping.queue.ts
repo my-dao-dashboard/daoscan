@@ -1,4 +1,4 @@
-import { OrganisationEvent } from "../organisation-events";
+import { OrganisationEvent } from "../shared/organisation-events";
 import { IQueueService, QueueService } from "./queue.service";
 import { Service, Inject } from "typedi";
 import { ENV } from "../shared/env";

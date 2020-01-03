@@ -10,11 +10,10 @@ import {
 import {
   AppInstalledEvent,
   ORGANISATION_EVENT,
-  ORGANISATION_PLATFORM,
   OrganisationCreatedEvent,
   OrganisationEvent,
   ShareTransferEvent
-} from "../organisation-events";
+} from "../shared/organisation-events";
 import Web3 from "web3";
 import { Scraper } from "./scraper.interface";
 import { Indexed } from "./indexed.interface";
@@ -22,7 +21,8 @@ import { BlockchainEvent } from "./blockchain-event.interface";
 import { DynamoService } from "../storage/dynamo.service";
 import * as _ from "lodash";
 import { Log } from "web3-core";
-import { APP_ID } from "../app-id";
+import { APP_ID } from "../shared/app-id";
+import {PLATFORM} from "../shared/platform";
 
 const APPLICATIONS_TABLE = String(process.env.APPLICATIONS_TABLE);
 const APPLICATIONS_PER_ADDRESS_INDEX = String(process.env.APPLICATIONS_PER_ADDRESS_INDEX);
@@ -72,7 +72,7 @@ export class AragonScraper implements Scraper {
       if (organisationAddress) {
         return {
           kind: ORGANISATION_EVENT.TRANSFER_SHARE,
-          platform: ORGANISATION_PLATFORM.ARAGON,
+          platform: PLATFORM.ARAGON,
           organisationAddress: organisationAddress.toLowerCase(),
           logIndex: e.logIndex,
           txid: e.txid,
@@ -122,7 +122,7 @@ export class AragonScraper implements Scraper {
 
           const event: OrganisationCreatedEvent = {
             kind: ORGANISATION_EVENT.CREATED,
-            platform: ORGANISATION_PLATFORM.ARAGON,
+            platform: PLATFORM.ARAGON,
             name: ensName,
             address: address.toLowerCase(),
             txid: t.transactionHash,
@@ -139,7 +139,7 @@ export class AragonScraper implements Scraper {
       const organisationAddress = e.dao;
       return {
         kind: ORGANISATION_EVENT.CREATED,
-        platform: ORGANISATION_PLATFORM.ARAGON,
+        platform: PLATFORM.ARAGON,
         name: organisationAddress.toLowerCase(),
         address: organisationAddress,
         txid: e.txid,
@@ -154,7 +154,7 @@ export class AragonScraper implements Scraper {
       const organisationAddress = await this.kernelAddress(e.proxy);
       return {
         kind: ORGANISATION_EVENT.APP_INSTALLED,
-        platform: ORGANISATION_PLATFORM.ARAGON,
+        platform: PLATFORM.ARAGON,
         organisationAddress: organisationAddress.toLowerCase(),
         appId: e.appId,
         proxyAddress: e.proxy,
@@ -173,7 +173,7 @@ export class AragonScraper implements Scraper {
       const tokenAddress = await tokenController.methods.token().call();
       const tokenEvent: AppInstalledEvent = {
         kind: ORGANISATION_EVENT.APP_INSTALLED,
-        platform: ORGANISATION_PLATFORM.ARAGON,
+        platform: PLATFORM.ARAGON,
         organisationAddress: e.organisationAddress,
         appId: APP_ID.SHARE,
         proxyAddress: tokenAddress,
