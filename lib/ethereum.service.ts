@@ -4,7 +4,6 @@ import { Log } from "web3-core/types";
 import * as _ from "lodash";
 import { ENV, FromEnv } from "./shared/from-env";
 import { Service } from "typedi";
-import { memoize } from "decko";
 
 const BASE = "https://mainnet.infura.io/v3";
 
