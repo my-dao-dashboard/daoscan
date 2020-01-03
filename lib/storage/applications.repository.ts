@@ -1,23 +1,13 @@
 import { DynamoService } from "./dynamo.service";
-import { ORGANISATION_PLATFORM } from "../organisation-events";
 import { Service, Inject } from "typedi";
 import { APP_ID } from "../app-id";
 import { ENV } from "../shared/env";
 import { EnvService, IEnvService } from "../services/env.service";
+import { ApplicationEntity } from "./application.entity";
 
 export interface Key {
   organisationAddress: string;
   appId: string;
-}
-
-export interface ApplicationEntity {
-  platform: ORGANISATION_PLATFORM;
-  organisationAddress: string;
-  appId: string;
-  proxyAddress: string;
-  txid: string;
-  blockNumber: number;
-  timestamp: number;
 }
 
 export enum FIELD {
@@ -26,12 +16,12 @@ export enum FIELD {
 
 type ProxyAddressResult = { proxyAddress: string };
 
-@Service()
+@Service(ApplicationsRepository.name)
 export class ApplicationsRepository {
   private readonly tableName: string;
 
   constructor(
-    @Inject(type => DynamoService) private readonly dynamo: DynamoService,
+    @Inject(DynamoService.name) private readonly dynamo: DynamoService,
     @Inject(EnvService.name) env: IEnvService
   ) {
     this.tableName = env.readString(ENV.APPLICATIONS_TABLE);
