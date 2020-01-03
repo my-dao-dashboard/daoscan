@@ -2,8 +2,20 @@ import AWS from "aws-sdk";
 import { DocumentClient } from "aws-sdk/lib/dynamodb/document_client";
 import { Service } from "typedi";
 
+export interface IDynamoService {
+  createSet(
+    list: number[] | string[] | DocumentClient.binaryType[],
+    options?: DocumentClient.CreateSetOptions
+  ): DocumentClient.StringSet | DocumentClient.NumberSet | DocumentClient.BinarySet;
+  scan(payload: DocumentClient.ScanInput): Promise<DocumentClient.ScanOutput>;
+  query(payload: DocumentClient.QueryInput): Promise<DocumentClient.QueryOutput>;
+  get(payload: DocumentClient.GetItemInput): Promise<DocumentClient.GetItemOutput>;
+  put(payload: DocumentClient.PutItemInput): Promise<DocumentClient.PutItemOutput>;
+  update(payload: DocumentClient.UpdateItemInput): Promise<DocumentClient.UpdateItemOutput>;
+}
+
 @Service(DynamoService.name)
-export class DynamoService {
+export class DynamoService implements IDynamoService {
   constructor(private readonly client: AWS.DynamoDB.DocumentClient = new AWS.DynamoDB.DocumentClient()) {}
 
   createSet(
