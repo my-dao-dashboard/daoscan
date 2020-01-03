@@ -48,11 +48,8 @@ export interface DeployInstanceParams {
 
 export const DEPLOY_INSTANCE_EVENT: BlockchainEvent<DeployInstanceParams> = {
   signature: "0x8f42a14c9fe9e09f4fe8eeee69ae878731c838b6497425d4c30e1d09336cf34b",
-  abi: [
-    { indexed: false, name: "dao", type: "address" }
-  ]
+  abi: [{ indexed: false, name: "dao", type: "address" }]
 };
-
 
 export const KIT_ADDRESSES = new Set(
   [

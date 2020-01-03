@@ -3,7 +3,7 @@ import { FromEnv } from "../shared/from-env";
 import { ORGANISATION_PLATFORM } from "../organisation-events";
 import { Service, Inject } from "typedi";
 import { APP_ID } from "../app-id";
-import {ENV} from "../shared/env";
+import { ENV } from "../shared/env";
 
 export interface Key {
   organisationAddress: string;

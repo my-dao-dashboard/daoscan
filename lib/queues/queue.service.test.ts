@@ -39,7 +39,6 @@ test("constructor", async () => {
 });
 
 describe("send", () => {
-
   test("send object", async () => {
     const queueService = new QueueService();
     const message = { foo: "hello" };

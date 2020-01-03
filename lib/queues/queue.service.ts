@@ -7,7 +7,7 @@ export interface IQueueService {
   send(queueUrl: string, payload: any): Promise<void>;
 }
 
-@Service()
+@Service(QueueService.name)
 export class QueueService implements IQueueService {
   constructor(private readonly sqs: SQS = new SQS()) {}
 
