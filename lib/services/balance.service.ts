@@ -4,9 +4,8 @@ import Web3 from "web3";
 import { TokenGraphql } from "../api/token.graphql";
 import { TOKEN_ABI } from "../scraping/aragon.constants";
 import { Contract } from "web3-eth-contract";
-import SAI_ABI from "./sai.abi.json";
-import { AbiItem } from "web3-utils";
 import { decodeString } from "../shared/decode-string";
+import { SAI_ABI } from "./sai.abi";
 
 const DAI_ADDRESS = "0x6b175474e89094c44da98b954eedeac495271d0f";
 const SAI_ADDRESS = "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359";
@@ -25,7 +24,7 @@ export class BalanceService {
     this.tokenContracts = [
       new this.web3.eth.Contract(TOKEN_ABI, ANT_ADDRESS),
       new this.web3.eth.Contract(TOKEN_ABI, DAI_ADDRESS),
-      new this.web3.eth.Contract(SAI_ABI as AbiItem[], SAI_ADDRESS),
+      new this.web3.eth.Contract(SAI_ABI, SAI_ADDRESS),
       new this.web3.eth.Contract(TOKEN_ABI, GEN_ADDRESS),
       new this.web3.eth.Contract(TOKEN_ABI, TACO_ADDRESS),
       new this.web3.eth.Contract(TOKEN_ABI, WETH_ADDRESS)
