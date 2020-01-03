@@ -5,8 +5,6 @@ import * as _ from "lodash";
 import { ENV, FromEnv } from "./shared/from-env";
 import { Service } from "typedi";
 
-const BASE = "https://mainnet.infura.io/v3";
-
 export interface ExtendedTransactionReceipt extends TransactionReceipt {
   input: string;
 }
@@ -21,8 +19,7 @@ export class EthereumService {
   readonly web3: Web3;
 
   constructor() {
-    const projectId = FromEnv.readString(ENV.INFURA_PROJECT_ID);
-    const endpoint = `${BASE}/${projectId}`;
+    const endpoint = FromEnv.readString(ENV.ETHEREUM_RPC);
     const provider = new Web3.providers.HttpProvider(endpoint);
     this.web3 = new Web3(provider);
   }
