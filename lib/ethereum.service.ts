@@ -2,9 +2,9 @@ import Web3 from "web3";
 import { BlockTransactionString, Transaction, TransactionReceipt } from "web3-eth";
 import { Log } from "web3-core/types";
 import * as _ from "lodash";
-import { FromEnv } from "./shared/from-env";
-import { Service } from "typedi";
+import { Inject, Service } from "typedi";
 import { ENV } from "./shared/env";
+import { EnvService, IEnvService } from "./services/env.service";
 
 export interface ExtendedTransactionReceipt extends TransactionReceipt {
   input: string;
@@ -19,8 +19,8 @@ export interface ExtendedBlock extends BlockTransactionString {
 export class EthereumService {
   readonly web3: Web3;
 
-  constructor() {
-    const endpoint = FromEnv.readString(ENV.ETHEREUM_RPC);
+  constructor(@Inject(EnvService.name) env: IEnvService) {
+    const endpoint = env.readString(ENV.ETHEREUM_RPC);
     const provider = new Web3.providers.HttpProvider(endpoint);
     this.web3 = new Web3(provider);
   }

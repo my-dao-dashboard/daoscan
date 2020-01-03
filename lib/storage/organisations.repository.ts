@@ -1,17 +1,20 @@
 import { DynamoService } from "./dynamo.service";
-import { FromEnv } from "../shared/from-env";
 import { ORGANISATION_PLATFORM } from "../organisation-events";
 import { NotFoundError } from "../shared/errors";
 import { Service, Inject } from "typedi";
 import { OrganisationEntity } from "./organisation.entity";
 import { ENV } from "../shared/env";
+import { EnvService, IEnvService } from "../services/env.service";
 
 @Service()
 export class OrganisationsRepository {
   private readonly tableName: string;
 
-  constructor(@Inject(type => DynamoService) private readonly dynamo: DynamoService) {
-    this.tableName = FromEnv.readString(ENV.ORGANISATIONS_TABLE);
+  constructor(
+    @Inject(type => DynamoService) private readonly dynamo: DynamoService,
+    @Inject(EnvService.name) env: IEnvService
+  ) {
+    this.tableName = env.readString(ENV.ORGANISATIONS_TABLE);
   }
 
   async byAddress(address: string) {

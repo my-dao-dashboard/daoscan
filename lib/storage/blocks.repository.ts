@@ -1,14 +1,17 @@
 import { DynamoService } from "./dynamo.service";
-import { FromEnv } from "../shared/from-env";
 import { Service, Inject } from "typedi";
 import { ENV } from "../shared/env";
+import { EnvService, IEnvService } from "../services/env.service";
 
 @Service()
 export class BlocksRepository {
   private readonly tableName: string;
 
-  constructor(@Inject(type => DynamoService) private readonly dynamo: DynamoService) {
-    this.tableName = FromEnv.readString(ENV.BLOCKS_TABLE);
+  constructor(
+    @Inject(type => DynamoService) private readonly dynamo: DynamoService,
+    @Inject(EnvService.name) env: IEnvService
+  ) {
+    this.tableName = env.readString(ENV.BLOCKS_TABLE);
   }
 
   async markParsed(id: number): Promise<void> {

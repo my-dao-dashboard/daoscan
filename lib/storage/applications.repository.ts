@@ -1,9 +1,9 @@
 import { DynamoService } from "./dynamo.service";
-import { FromEnv } from "../shared/from-env";
 import { ORGANISATION_PLATFORM } from "../organisation-events";
 import { Service, Inject } from "typedi";
 import { APP_ID } from "../app-id";
 import { ENV } from "../shared/env";
+import { EnvService, IEnvService } from "../services/env.service";
 
 export interface Key {
   organisationAddress: string;
@@ -30,8 +30,11 @@ type ProxyAddressResult = { proxyAddress: string };
 export class ApplicationsRepository {
   private readonly tableName: string;
 
-  constructor(@Inject(type => DynamoService) private readonly dynamo: DynamoService) {
-    this.tableName = FromEnv.readString(ENV.APPLICATIONS_TABLE);
+  constructor(
+    @Inject(type => DynamoService) private readonly dynamo: DynamoService,
+    @Inject(EnvService.name) env: IEnvService
+  ) {
+    this.tableName = env.readString(ENV.APPLICATIONS_TABLE);
   }
 
   async save(entity: ApplicationEntity) {

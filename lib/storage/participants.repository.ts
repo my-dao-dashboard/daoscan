@@ -1,7 +1,7 @@
 import { DynamoService } from "./dynamo.service";
-import { FromEnv } from "../shared/from-env";
 import { Service, Inject } from "typedi";
 import { ENV } from "../shared/env";
+import { EnvService, IEnvService } from "../services/env.service";
 
 export interface ParticipantEntity {
   organisationAddress: string;
@@ -14,9 +14,12 @@ export class ParticipantsRepository {
   private readonly tableName: string;
   private readonly participantsIndexName: string;
 
-  constructor(@Inject(type => DynamoService) private readonly dynamo: DynamoService) {
-    this.tableName = FromEnv.readString(ENV.PARTICIPANTS_TABLE);
-    this.participantsIndexName = FromEnv.readString(ENV.PARTICIPANTS_INDEX);
+  constructor(
+    @Inject(type => DynamoService) private readonly dynamo: DynamoService,
+    @Inject(EnvService.name) env: IEnvService
+  ) {
+    this.tableName = env.readString(ENV.PARTICIPANTS_TABLE);
+    this.participantsIndexName = env.readString(ENV.PARTICIPANTS_INDEX);
   }
 
   async save(participant: ParticipantEntity): Promise<void> {
