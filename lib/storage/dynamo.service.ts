@@ -2,9 +2,9 @@ import AWS from "aws-sdk";
 import { DocumentClient } from "aws-sdk/lib/dynamodb/document_client";
 import { Service } from "typedi";
 
-@Service()
+@Service(DynamoService.name)
 export class DynamoService {
-  private readonly client = new AWS.DynamoDB.DocumentClient();
+  constructor(private readonly client: AWS.DynamoDB.DocumentClient = new AWS.DynamoDB.DocumentClient()) {}
 
   createSet(
     list: number[] | string[] | DocumentClient.binaryType[],
