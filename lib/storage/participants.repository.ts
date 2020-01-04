@@ -1,7 +1,7 @@
 import { DynamoService } from "./dynamo.service";
 import { Service, Inject } from "typedi";
 import { ENV } from "../shared/env";
-import { EnvService, IEnvService } from "../services/env.service";
+import { EnvService } from "../services/env.service";
 
 export interface ParticipantEntity {
   organisationAddress: string;
@@ -9,14 +9,14 @@ export interface ParticipantEntity {
   updatedAt: number;
 }
 
-@Service()
+@Service(ParticipantsRepository.name)
 export class ParticipantsRepository {
   private readonly tableName: string;
   private readonly participantsIndexName: string;
 
   constructor(
-    @Inject(type => DynamoService) private readonly dynamo: DynamoService,
-    @Inject(EnvService.name) env: IEnvService
+    @Inject(DynamoService.name) private readonly dynamo: DynamoService,
+    @Inject(EnvService.name) env: EnvService
   ) {
     this.tableName = env.readString(ENV.PARTICIPANTS_TABLE);
     this.participantsIndexName = env.readString(ENV.PARTICIPANTS_INDEX);
@@ -60,7 +60,7 @@ export class ParticipantsRepository {
   async byAddressInOrganisation(
     organisationAddress: string,
     participantAddress: string
-  ): Promise<ParticipantEntity | null> {
+  ): Promise<ParticipantEntity | undefined> {
     const items = await this.dynamo.query({
       TableName: this.tableName,
       ProjectionExpression: "organisationAddress, participantAddress, updatedAt",
@@ -79,7 +79,7 @@ export class ParticipantsRepository {
         updatedAt: Number(item.updatedAt)
       };
     } else {
-      return null;
+      return undefined;
     }
   }
 

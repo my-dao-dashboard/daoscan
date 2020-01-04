@@ -22,7 +22,7 @@ import { DynamoService } from "../storage/dynamo.service";
 import * as _ from "lodash";
 import { Log } from "web3-core";
 import { APP_ID } from "../shared/app-id";
-import {PLATFORM} from "../shared/platform";
+import { PLATFORM } from "../shared/platform";
 
 const APPLICATIONS_TABLE = String(process.env.APPLICATIONS_TABLE);
 const APPLICATIONS_PER_ADDRESS_INDEX = String(process.env.APPLICATIONS_PER_ADDRESS_INDEX);

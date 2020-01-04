@@ -3,7 +3,7 @@ import { IEnvService } from "../services/env.service";
 import faker from "faker";
 import { DynamoService } from "./dynamo.service";
 import { APP_ID } from "../shared/app-id";
-import {PLATFORM} from "../shared/platform";
+import { PLATFORM } from "../shared/platform";
 
 const APPLICATIONS_TABLE = faker.random.alphaNumeric();
 

@@ -4,7 +4,7 @@ import { Service, Inject } from "typedi";
 import { OrganisationEntity } from "./organisation.entity";
 import { ENV } from "../shared/env";
 import { EnvService } from "../services/env.service";
-import {PLATFORM} from "../shared/platform";
+import { PLATFORM } from "../shared/platform";
 
 @Service(OrganisationsRepository.name)
 export class OrganisationsRepository {

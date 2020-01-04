@@ -3,7 +3,7 @@ import { ScrapingQueue } from "./scraping.queue";
 import { IEnvService } from "../services/env.service";
 import { ORGANISATION_EVENT, OrganisationCreatedEvent } from "../shared/organisation-events";
 import faker from "faker";
-import {PLATFORM} from "../shared/platform";
+import { PLATFORM } from "../shared/platform";
 
 const QUEUE_NAME = faker.random.alphaNumeric();
 

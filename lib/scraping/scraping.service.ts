@@ -22,7 +22,7 @@ import { UnreachableCaseError } from "../shared/unreachable-case-error";
 import { OrganisationsRepository } from "../storage/organisations.repository";
 import { ParticipantsRepository } from "../storage/participants.repository";
 import { Service, Inject } from "typedi";
-import {PLATFORM} from "../shared/platform";
+import { PLATFORM } from "../shared/platform";
 
 @Service()
 export class ScrapingService {
