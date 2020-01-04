@@ -162,7 +162,7 @@ test("allByOrganisationAddress found", async () => {
       ":organisationAddress": organisationAddress.toLowerCase()
     }
   });
-  expect(result).toEqual([entity])
+  expect(result).toEqual([entity]);
 });
 
 test("allByOrganisationAddress not found", async () => {
@@ -174,7 +174,7 @@ test("allByOrganisationAddress not found", async () => {
     })
   } as unknown) as DynamoService;
   const repository = new ParticipantsRepository(dynamo, env);
-  const organisationAddress = faker.random.alphaNumeric(10)
+  const organisationAddress = faker.random.alphaNumeric(10);
   const result = await repository.allByOrganisationAddress(organisationAddress);
   expect(dynamo.query).toBeCalledWith({
     TableName: PARTICIPANTS_TABLE,
@@ -184,5 +184,5 @@ test("allByOrganisationAddress not found", async () => {
       ":organisationAddress": organisationAddress.toLowerCase()
     }
   });
-  expect(result).toEqual([])
+  expect(result).toEqual([]);
 });

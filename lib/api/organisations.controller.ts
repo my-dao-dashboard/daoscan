@@ -24,7 +24,9 @@ export class OrganisationsController {
   }
 
   @bind()
-  async byParticipant(event: APIGatewayEvent): Promise<{ participantAddress: string; organisations: ParticipantEntity[] }> {
+  async byParticipant(
+    event: APIGatewayEvent
+  ): Promise<{ participantAddress: string; organisations: ParticipantEntity[] }> {
     const participantAddress = event.pathParameters?.participantAddress?.toLowerCase();
     if (!participantAddress) throw new BadRequestError(`No participant address specified`);
     const organisations = await this.participantsRepository.allOrganisations(participantAddress);
