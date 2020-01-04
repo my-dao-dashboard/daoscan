@@ -12,6 +12,9 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "alwaysStrict": false,
+    "noImplicitUseStrict": true,
     "lib": ["es6"],
     "rootDir": "./"
   }
