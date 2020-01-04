@@ -2,7 +2,7 @@ import { ApplicationsRepository, FIELD } from "./applications.repository";
 import { IEnvService } from "../services/env.service";
 import faker from "faker";
 import { DynamoService } from "./dynamo.service";
-import { APP_ID } from "../shared/app-id";
+import { APP_ID } from "../shared/app-id.const";
 import { PLATFORM } from "../shared/platform";
 
 const APPLICATIONS_TABLE = faker.random.alphaNumeric();

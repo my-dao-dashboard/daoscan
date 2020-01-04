@@ -1,6 +1,6 @@
 import { DynamoService } from "./dynamo.service";
 import { Service, Inject } from "typedi";
-import { APP_ID } from "../shared/app-id";
+import { APP_ID } from "../shared/app-id.const";
 import { ENV } from "../shared/env";
 import { EnvService, IEnvService } from "../services/env.service";
 import { ApplicationEntity } from "./application.entity";
