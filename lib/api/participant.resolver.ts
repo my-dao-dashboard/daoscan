@@ -1,7 +1,7 @@
 import { Service } from "typedi";
 import { bind } from "decko";
 
-@Service()
+@Service(ParticipantResolver.name)
 export class ParticipantResolver {
   constructor() {}
 

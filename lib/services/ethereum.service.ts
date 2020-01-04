@@ -3,8 +3,8 @@ import { BlockTransactionString, Transaction, TransactionReceipt } from "web3-et
 import { Log } from "web3-core/types";
 import * as _ from "lodash";
 import { Inject, Service } from "typedi";
-import { ENV } from "./shared/env";
-import { EnvService, IEnvService } from "./services/env.service";
+import { ENV } from "../shared/env";
+import { EnvService, IEnvService } from "./env.service";
 
 export interface ExtendedTransactionReceipt extends TransactionReceipt {
   input: string;
@@ -15,7 +15,7 @@ export interface ExtendedBlock extends BlockTransactionString {
   logs: Log[];
 }
 
-@Service()
+@Service(EthereumService.name)
 export class EthereumService {
   readonly web3: Web3;
 

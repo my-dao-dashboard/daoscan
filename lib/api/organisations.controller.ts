@@ -6,11 +6,11 @@ import { ParticipantEntity, ParticipantsRepository } from "../storage/participan
 import { Service, Inject } from "typedi";
 import { OrganisationEntity } from "../storage/organisation.entity";
 
-@Service()
+@Service(OrganisationsController.name)
 export class OrganisationsController {
   constructor(
-    @Inject(type => OrganisationsRepository) private readonly organisationsRepository: OrganisationsRepository,
-    @Inject(type => ParticipantsRepository) private readonly participantsRepository: ParticipantsRepository
+    @Inject(OrganisationsRepository.name) private readonly organisationsRepository: OrganisationsRepository,
+    @Inject(ParticipantsRepository.name) private readonly participantsRepository: ParticipantsRepository
   ) {}
 
   @bind()

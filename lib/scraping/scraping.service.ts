@@ -1,4 +1,4 @@
-import { EthereumService, ExtendedBlock } from "../ethereum.service";
+import { EthereumService, ExtendedBlock } from "../services/ethereum.service";
 import { Scraper } from "./scraper.interface";
 import { AragonScraper } from "./aragon.scraper";
 import * as _ from "lodash";
@@ -24,19 +24,19 @@ import { ParticipantsRepository } from "../storage/participants.repository";
 import { Service, Inject } from "typedi";
 import { PLATFORM } from "../shared/platform";
 
-@Service()
+@Service(ScrapingService.name)
 export class ScrapingService {
   private readonly scrapers: Scraper[];
 
   constructor(
-    @Inject(type => EthereumService) private readonly ethereum: EthereumService,
-    @Inject(type => DynamoService) private readonly dynamo: DynamoService,
-    @Inject(type => BlocksRepository) private readonly blocksRepository: BlocksRepository,
+    @Inject(EthereumService.name) private readonly ethereum: EthereumService,
+    @Inject(DynamoService.name) private readonly dynamo: DynamoService,
+    @Inject(BlocksRepository.name) private readonly blocksRepository: BlocksRepository,
     @Inject(BlocksQueue.name) private readonly blocksQueue: BlocksQueue,
-    @Inject(type => ScrapingQueue) private readonly scrapingQueue: ScrapingQueue,
-    @Inject(type => ApplicationsRepository) private readonly applicationsRepository: ApplicationsRepository,
-    @Inject(type => OrganisationsRepository) private readonly organisationsRepository: OrganisationsRepository,
-    @Inject(type => ParticipantsRepository) private readonly participantsRepository: ParticipantsRepository
+    @Inject(ScrapingQueue.name) private readonly scrapingQueue: ScrapingQueue,
+    @Inject(ApplicationsRepository.name) private readonly applicationsRepository: ApplicationsRepository,
+    @Inject(OrganisationsRepository.name) private readonly organisationsRepository: OrganisationsRepository,
+    @Inject(ParticipantsRepository.name) private readonly participantsRepository: ParticipantsRepository
   ) {
     this.scrapers = [new AragonScraper(this.ethereum.web3, dynamo)];
   }

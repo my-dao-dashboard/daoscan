@@ -1,5 +1,5 @@
 import { Inject, Service } from "typedi";
-import { EthereumService } from "../ethereum.service";
+import { EthereumService } from "./ethereum.service";
 import Web3 from "web3";
 import { TokenGraphql } from "../api/token.graphql";
 import { TOKEN_ABI } from "../scraping/aragon.constants";
@@ -14,12 +14,12 @@ const GEN_ADDRESS = "0x543ff227f64aa17ea132bf9886cab5db55dcaddf";
 const TACO_ADDRESS = "0x36efe52b14e4d0ca4e3bd492488272e1fb2d7e1b";
 const WETH_ADDRESS = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 
-@Service()
+@Service(BalanceService.name)
 export class BalanceService {
   private readonly web3: Web3;
   private readonly tokenContracts: Contract[];
 
-  constructor(@Inject(type => EthereumService) private readonly ethereum: EthereumService) {
+  constructor(@Inject(EthereumService.name) private readonly ethereum: EthereumService) {
     this.web3 = ethereum.web3;
     this.tokenContracts = [
       new this.web3.eth.Contract(TOKEN_ABI, ANT_ADDRESS),

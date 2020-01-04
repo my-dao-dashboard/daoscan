@@ -1,4 +1,4 @@
-import { ExtendedBlock } from "../ethereum.service";
+import { ExtendedBlock } from "../services/ethereum.service";
 import { OrganisationEvent } from "../shared/organisation-events";
 
 export interface Scraper {

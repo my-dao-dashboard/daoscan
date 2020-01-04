@@ -1,4 +1,4 @@
-import { ExtendedBlock } from "../ethereum.service";
+import { ExtendedBlock } from "../services/ethereum.service";
 import {
   DEPLOY_INSTANCE_EVENT,
   KIT_ADDRESSES,

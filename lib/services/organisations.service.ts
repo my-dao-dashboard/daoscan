@@ -2,21 +2,21 @@ import { Inject, Service } from "typedi";
 import { OrganisationsRepository } from "../storage/organisations.repository";
 import { ApplicationsRepository } from "../storage/applications.repository";
 import { TOKEN_ABI } from "../scraping/aragon.constants";
-import { EthereumService } from "../ethereum.service";
+import { EthereumService } from "./ethereum.service";
 import Web3 from "web3";
 import { BalanceService } from "./balance.service";
 import { TokenGraphql } from "../api/token.graphql";
 import { MessariService } from "./messari.service";
 import BigNumber from "bignumber.js";
 
-@Service()
+@Service(OrganisationsService.name)
 export class OrganisationsService {
   private readonly web3: Web3;
   constructor(
-    @Inject(type => OrganisationsRepository) private readonly organisationsRepository: OrganisationsRepository,
-    @Inject(type => ApplicationsRepository) private readonly applicationsRepository: ApplicationsRepository,
-    @Inject(type => EthereumService) private readonly ethereumService: EthereumService,
-    @Inject(type => BalanceService) private readonly balanceService: BalanceService,
+    @Inject(OrganisationsRepository.name) private readonly organisationsRepository: OrganisationsRepository,
+    @Inject(ApplicationsRepository.name) private readonly applicationsRepository: ApplicationsRepository,
+    @Inject(EthereumService.name) private readonly ethereumService: EthereumService,
+    @Inject(BalanceService.name) private readonly balanceService: BalanceService,
     @Inject(MessariService.name) private readonly messariService: MessariService
   ) {
     this.web3 = ethereumService.web3;
