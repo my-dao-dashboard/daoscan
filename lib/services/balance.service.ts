@@ -17,11 +17,13 @@ const WETH_ADDRESS = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 @Service(BalanceService.name)
 export class BalanceService {
   private readonly web3: Web3;
-  private readonly tokenContracts: Contract[];
 
   constructor(@Inject(EthereumService.name) private readonly ethereum: EthereumService) {
     this.web3 = ethereum.web3;
-    this.tokenContracts = [
+  }
+
+  get tokenContracts(): Contract[] {
+    return [
       new this.web3.eth.Contract(TOKEN_ABI, ANT_ADDRESS),
       new this.web3.eth.Contract(TOKEN_ABI, DAI_ADDRESS),
       new this.web3.eth.Contract(SAI_ABI, SAI_ADDRESS),

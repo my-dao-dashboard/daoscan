@@ -11,7 +11,6 @@ test("ethBalance", async () => {
   const ethereumService = ({
     web3: {
       eth: {
-        Contract: FakeContract,
         getBalance: getBalance
       }
     }
@@ -31,13 +30,7 @@ test("balanceOf", async () => {
   const name = faker.random.words(1);
   const symbol = faker.random.words(1);
   const decimals = faker.random.number();
-  const ethereumService = ({
-    web3: {
-      eth: {
-        Contract: FakeContract
-      }
-    }
-  } as unknown) as EthereumService;
+  const ethereumService = ({} as unknown) as EthereumService;
   const service = new BalanceService(ethereumService);
   const address = faker.random.alphaNumeric(10);
   const nameCall = jest.fn(() => name);
