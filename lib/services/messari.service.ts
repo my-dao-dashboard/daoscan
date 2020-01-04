@@ -2,7 +2,11 @@ import { Service } from "typedi";
 import { CacheMap } from "../shared/cache-map";
 import axios from "axios";
 
-@Service()
+export function messariEndpoint(symbol: string) {
+  return `https://data.messari.io/api/v1/assets/${symbol}/metrics`;
+}
+
+@Service(MessariService.name)
 export class MessariService {
   private readonly cache = new CacheMap<string, number>(120 * 1000);
 
@@ -12,11 +16,16 @@ export class MessariService {
       return cached;
     } else {
       try {
-        const endpoint = `https://data.messari.io/api/v1/assets/${symbol}/metrics`;
+        const endpoint = messariEndpoint(symbol);
         const response = await axios.get(endpoint);
-        const price = response.data.data.market_data.price_usd as number;
-        this.cache.set(symbol, price);
-        return price;
+        const rawPrice = response.data?.data?.market_data?.price_usd;
+        if (rawPrice) {
+          const price = Number(rawPrice);
+          this.cache.set(symbol, price);
+          return price;
+        } else {
+          return 0;
+        }
       } catch (e) {
         console.error(e);
         return 0;

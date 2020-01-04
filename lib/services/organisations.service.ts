@@ -17,7 +17,7 @@ export class OrganisationsService {
     @Inject(type => ApplicationsRepository) private readonly applicationsRepository: ApplicationsRepository,
     @Inject(type => EthereumService) private readonly ethereumService: EthereumService,
     @Inject(type => BalanceService) private readonly balanceService: BalanceService,
-    @Inject(type => MessariService) private readonly messariService: MessariService
+    @Inject(MessariService.name) private readonly messariService: MessariService
   ) {
     this.web3 = ethereumService.web3;
   }
