@@ -40,7 +40,7 @@ test("createdFromTransactions", async () => {
   });
   const ethereum = ({
     canonicalAddress: canonicalAddressFunc,
-    decodeParameters: decodeParametersFunc
+    codec: { decodeParameters: decodeParametersFunc }
   } as unknown) as EthereumService;
   const aragonScraper = new AragonScraper(web3, dynamo, ethereum);
   const createdFrom = await aragonScraper.createdFromTransactions(BLOCK_8403326);
@@ -75,7 +75,7 @@ test("createdFromEvents", async () => {
       dao: "0x3c307fefd3d71c3ca8a3c26539ef4d47c61b6565"
     };
   });
-  const ethereum = ({ decodeLog: decodeLogFunc } as unknown) as EthereumService;
+  const ethereum = ({ codec: { decodeLog: decodeLogFunc } } as unknown) as EthereumService;
   const aragonScraper = new AragonScraper(web3, dynamo, ethereum);
   const createdFrom = await aragonScraper.createdFromEvents(BLOCK_8000373);
   expect(createdFrom.length).toEqual(1);

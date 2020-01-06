@@ -6,6 +6,7 @@ import { Inject, Service } from "typedi";
 import { ENV } from "../shared/env";
 import { EnvService, IEnvService } from "./env.service";
 import { AbiInput } from "web3-utils";
+import { AbiCodec } from "./abi-codec";
 
 export interface ExtendedTransactionReceipt extends TransactionReceipt {
   input: string;
@@ -19,11 +20,13 @@ export interface ExtendedBlock extends BlockTransactionString {
 @Service(EthereumService.name)
 export class EthereumService {
   readonly web3: Web3;
+  readonly codec: AbiCodec;
 
   constructor(@Inject(EnvService.name) env: IEnvService) {
     const endpoint = env.readString(ENV.ETHEREUM_RPC);
     const provider = new Web3.providers.HttpProvider(endpoint);
     this.web3 = new Web3(provider);
+    this.codec = new AbiCodec(this.web3);
   }
 
   block(number: string | number): Promise<BlockTransactionString> {
@@ -56,14 +59,6 @@ export class EthereumService {
 
   transactionReceipt(txid: string): Promise<TransactionReceipt> {
     return this.web3.eth.getTransactionReceipt(txid);
-  }
-
-  decodeParameters(types: any[], hex: string): { [key: string]: any } {
-    return this.web3.eth.abi.decodeParameters(types, hex);
-  }
-
-  decodeLog(inputs: AbiInput[], hex: string, topics: string[]): { [key: string]: string } {
-    return this.web3.eth.abi.decodeLog(inputs, hex, topics);
   }
 
   async canonicalAddress(addressOrName: string): Promise<string> {

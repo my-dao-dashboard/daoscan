@@ -116,7 +116,7 @@ export class AragonScraper implements Scraper {
         .map(async t => {
           const signature = t.input.slice(0, 10);
           const abi = abiMap.get(signature)!;
-          const parameters = this.ethereum.decodeParameters(abi, "0x" + t.input.slice(10));
+          const parameters = this.ethereum.codec.decodeParameters(abi, "0x" + t.input.slice(10));
           const ensName = `${parameters.name}.aragonid.eth`;
           const address = await this.ethereum.canonicalAddress(ensName);
 
@@ -199,7 +199,7 @@ export class AragonScraper implements Scraper {
       })
       .map(log => {
         return {
-          ...(this.ethereum.decodeLog(event.abi, log.data, log.topics.slice(1)) as A),
+          ...(this.ethereum.codec.decodeLog(event.abi, log.data, log.topics.slice(1)) as A),
           address: log.address,
           txid: log.transactionHash,
           logIndex: log.logIndex,
