@@ -5,6 +5,7 @@ import * as _ from "lodash";
 import { Inject, Service } from "typedi";
 import { ENV } from "../shared/env";
 import { EnvService, IEnvService } from "./env.service";
+import { AbiInput } from "web3-utils";
 
 export interface ExtendedTransactionReceipt extends TransactionReceipt {
   input: string;
@@ -55,6 +56,14 @@ export class EthereumService {
 
   transactionReceipt(txid: string): Promise<TransactionReceipt> {
     return this.web3.eth.getTransactionReceipt(txid);
+  }
+
+  decodeParameters(types: any[], hex: string): { [key: string]: any } {
+    return this.web3.eth.abi.decodeParameters(types, hex);
+  }
+
+  decodeLog(inputs: AbiInput[], hex: string, topics: string[]): { [key: string]: string } {
+    return this.web3.eth.abi.decodeLog(inputs, hex, topics);
   }
 
   async canonicalAddress(addressOrName: string): Promise<string> {

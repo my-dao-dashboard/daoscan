@@ -1,4 +1,4 @@
-import { ExtendedBlock } from "../services/ethereum.service";
+import {EthereumService, ExtendedBlock} from "../services/ethereum.service";
 import {
   DEPLOY_INSTANCE_EVENT,
   KIT_ADDRESSES,
@@ -28,7 +28,7 @@ const APPLICATIONS_TABLE = String(process.env.APPLICATIONS_TABLE);
 const APPLICATIONS_PER_ADDRESS_INDEX = String(process.env.APPLICATIONS_PER_ADDRESS_INDEX);
 
 export class AragonScraper implements Scraper {
-  constructor(private readonly web3: Web3, private readonly dynamo: DynamoService) {}
+  constructor(private readonly web3: Web3, private readonly dynamo: DynamoService, private readonly ethereum: EthereumService) {}
 
   async fromBlock(block: ExtendedBlock): Promise<OrganisationEvent[]> {
     const createdFromTransaction = await this.createdFromTransactions(block);
@@ -116,9 +116,9 @@ export class AragonScraper implements Scraper {
         .map(async t => {
           const signature = t.input.slice(0, 10);
           const abi = abiMap.get(signature)!;
-          const parameters = this.web3.eth.abi.decodeParameters(abi, "0x" + t.input.slice(10));
+          const parameters = this.ethereum.decodeParameters(abi, "0x" + t.input.slice(10));
           const ensName = `${parameters.name}.aragonid.eth`;
-          const address = await this.web3.eth.ens.getAddress(ensName);
+          const address = await this.ethereum.canonicalAddress(ensName);
 
           const event: OrganisationCreatedEvent = {
             kind: ORGANISATION_EVENT.CREATED,
@@ -199,7 +199,7 @@ export class AragonScraper implements Scraper {
       })
       .map(log => {
         return {
-          ...(this.web3.eth.abi.decodeLog(event.abi, log.data, log.topics.slice(1)) as A),
+          ...(this.ethereum.decodeLog(event.abi, log.data, log.topics.slice(1)) as A),
           address: log.address,
           txid: log.transactionHash,
           logIndex: log.logIndex,
