@@ -1,4 +1,4 @@
-import {AbiCodec} from "./abi-codec";
+import { AbiCodec } from "./abi-codec";
 import Web3 from "web3";
 
 let abiCodec: AbiCodec;
@@ -31,5 +31,17 @@ test("decodeLog", async () => {
   const input = [{ indexed: false, name: "dao", type: "address" }];
   const hex = "0x0000000000000000000000003c307fefd3d71c3ca8a3c26539ef4d47c61b6565";
   const result = abiCodec.decodeLog(input, hex, []);
-  expect(result.dao.toLowerCase()).toEqual('0x3c307fefd3d71c3ca8a3c26539ef4d47c61b6565')
+  expect(result.dao.toLowerCase()).toEqual("0x3c307fefd3d71c3ca8a3c26539ef4d47c61b6565");
+});
+
+test("encodeFunctionCall", () => {
+  const result = abiCodec.encodeFunctionCall(
+    {
+      name: "kernel",
+      type: "function",
+      inputs: []
+    },
+    []
+  );
+  expect(result).toEqual("0xd4aae0c4");
 });

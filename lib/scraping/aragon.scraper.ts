@@ -1,4 +1,4 @@
-import {EthereumService, ExtendedBlock} from "../services/ethereum.service";
+import { EthereumService, ExtendedBlock } from "../services/ethereum.service";
 import {
   DEPLOY_INSTANCE_EVENT,
   KIT_ADDRESSES,
@@ -28,7 +28,11 @@ const APPLICATIONS_TABLE = String(process.env.APPLICATIONS_TABLE);
 const APPLICATIONS_PER_ADDRESS_INDEX = String(process.env.APPLICATIONS_PER_ADDRESS_INDEX);
 
 export class AragonScraper implements Scraper {
-  constructor(private readonly web3: Web3, private readonly dynamo: DynamoService, private readonly ethereum: EthereumService) {}
+  constructor(
+    private readonly web3: Web3,
+    private readonly dynamo: DynamoService,
+    private readonly ethereum: EthereumService
+  ) {}
 
   async fromBlock(block: ExtendedBlock): Promise<OrganisationEvent[]> {
     const createdFromTransaction = await this.createdFromTransactions(block);
@@ -91,7 +95,7 @@ export class AragonScraper implements Scraper {
   }
 
   async kernelAddress(proxy: string): Promise<string> {
-    const data = this.web3.eth.abi.encodeFunctionCall(
+    const data = this.ethereum.codec.encodeFunctionCall(
       {
         name: "kernel",
         type: "function",
@@ -99,11 +103,11 @@ export class AragonScraper implements Scraper {
       },
       []
     );
-    const result = await this.web3.eth.call({
+    const result = await this.ethereum.call({
       to: proxy,
       data
     });
-    return this.web3.eth.abi.decodeParameter("address", result) as any;
+    return this.ethereum.codec.decodeParameter("address", result);
   }
 
   async createdFromTransactions(block: ExtendedBlock): Promise<OrganisationCreatedEvent[]> {
@@ -169,7 +173,7 @@ export class AragonScraper implements Scraper {
     });
     for (let e of tokenControllerEvents) {
       const tokenControllerAddress = e.proxyAddress;
-      const tokenController = new this.web3.eth.Contract(TOKEN_CONTROLLER_ABI, tokenControllerAddress);
+      const tokenController = this.ethereum.contract(TOKEN_CONTROLLER_ABI, tokenControllerAddress);
       const tokenAddress = await tokenController.methods.token().call();
       const tokenEvent: AppInstalledEvent = {
         kind: ORGANISATION_EVENT.APP_INSTALLED,
