@@ -1,5 +1,5 @@
 import { DynamoService } from "./dynamo.service";
-import { Service, Inject } from "typedi";
+import { Inject, Service } from "typedi";
 import { APP_ID } from "../shared/app-id.const";
 import { ENV } from "../shared/env";
 import { EnvService, IEnvService } from "../services/env.service";
@@ -19,12 +19,28 @@ type ProxyAddressResult = { proxyAddress: string };
 @Service(ApplicationsRepository.name)
 export class ApplicationsRepository {
   private readonly tableName: string;
+  private readonly applicationsPerAddressIndex: string;
 
   constructor(
     @Inject(DynamoService.name) private readonly dynamo: DynamoService,
     @Inject(EnvService.name) env: IEnvService
   ) {
     this.tableName = env.readString(ENV.APPLICATIONS_TABLE);
+    this.applicationsPerAddressIndex = env.readString(ENV.APPLICATIONS_PER_ADDRESS_INDEX);
+  }
+
+  async organisationAddressByApplicationAddress(proxyAddress: string): Promise<string> {
+    const dynamoResponse = await this.dynamo.query({
+      TableName: this.tableName,
+      IndexName: this.applicationsPerAddressIndex,
+      ProjectionExpression: "proxyAddress, appId, organisationAddress",
+      KeyConditionExpression: "proxyAddress = :proxyAddress",
+      ExpressionAttributeValues: {
+        ":proxyAddress": proxyAddress
+      }
+    });
+    const items = dynamoResponse.Items;
+    return items?.length ? items[0].organisationAddress.toLowerCase() : undefined;
   }
 
   async save(entity: ApplicationEntity) {

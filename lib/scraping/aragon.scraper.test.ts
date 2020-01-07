@@ -3,10 +3,10 @@ import fs from "fs";
 import path from "path";
 import { EthereumService, ExtendedBlock } from "../services/ethereum.service";
 import Web3 from "web3";
-import { DynamoService } from "../storage/dynamo.service";
-import { ORGANISATION_EVENT } from "../shared/organisation-events";
+import { ORGANISATION_EVENT, ShareTransferEvent } from "../shared/organisation-events";
 import { PLATFORM } from "../shared/platform";
 import { AbiCodec } from "../services/abi-codec";
+import { ApplicationsRepository } from "../storage/applications.repository";
 
 const BLOCK_8403326 = JSON.parse(
   fs.readFileSync(path.resolve(__dirname, "../../data/testing/block-8403326.json")).toString()
@@ -18,16 +18,16 @@ const BLOCK_8000373 = JSON.parse(
 
 test("createdFromTransactions empty", async () => {
   const web3 = ({} as unknown) as Web3;
-  const dynamo = ({} as unknown) as DynamoService;
+  const applicationsRepository = ({} as unknown) as ApplicationsRepository;
   const ethereum = ({} as unknown) as EthereumService;
-  const aragonScraper = new AragonScraper(web3, dynamo, ethereum);
+  const aragonScraper = new AragonScraper(web3, applicationsRepository, ethereum);
   const createdFrom = await aragonScraper.createdFromTransactions(BLOCK_8000373);
   expect(createdFrom.length).toEqual(0);
 });
 
 test("createdFromTransactions", async () => {
   const web3 = ({} as unknown) as Web3;
-  const dynamo = ({} as unknown) as DynamoService;
+  const applicationsRepository = ({} as unknown) as ApplicationsRepository;
   const canonicalAddressFunc = jest.fn(() => "0xb788256177f8398babddb1118bc4aa0557ed8c65");
   const decodeParametersFunc = jest.fn(() => {
     return {
@@ -43,7 +43,7 @@ test("createdFromTransactions", async () => {
     canonicalAddress: canonicalAddressFunc,
     codec: { decodeParameters: decodeParametersFunc }
   } as unknown) as EthereumService;
-  const aragonScraper = new AragonScraper(web3, dynamo, ethereum);
+  const aragonScraper = new AragonScraper(web3, applicationsRepository, ethereum);
   const createdFrom = await aragonScraper.createdFromTransactions(BLOCK_8403326);
   expect(createdFrom.length).toEqual(1);
   const createdEvent = createdFrom[0];
@@ -70,14 +70,14 @@ test("createdFromTransactions", async () => {
 
 test("createdFromEvents", async () => {
   const web3 = ({} as unknown) as Web3;
-  const dynamo = ({} as unknown) as DynamoService;
+  const applicationsRepository = ({} as unknown) as ApplicationsRepository;
   const decodeLogFunc = jest.fn(() => {
     return {
       dao: "0x3c307fefd3d71c3ca8a3c26539ef4d47c61b6565"
     };
   });
   const ethereum = ({ codec: { decodeLog: decodeLogFunc } } as unknown) as EthereumService;
-  const aragonScraper = new AragonScraper(web3, dynamo, ethereum);
+  const aragonScraper = new AragonScraper(web3, applicationsRepository, ethereum);
   const createdFrom = await aragonScraper.createdFromEvents(BLOCK_8000373);
   expect(createdFrom.length).toEqual(1);
   const createdEvent = createdFrom[0];
@@ -165,7 +165,7 @@ test("appInstalledEvents", async () => {
   ];
   const web3 = new Web3();
   const codec = new AbiCodec(web3);
-  const dynamo = ({} as unknown) as DynamoService;
+  const applicationsRepository = ({} as unknown) as ApplicationsRepository;
   const tokenCall = jest.fn(() => "0xTOKEN");
   const contractFunc = jest.fn(() => {
     return {
@@ -179,7 +179,7 @@ test("appInstalledEvents", async () => {
     };
   });
   const ethereum = ({ web3, codec, contract: contractFunc } as unknown) as EthereumService;
-  const aragonScraper = new AragonScraper(web3, dynamo, ethereum);
+  const aragonScraper = new AragonScraper(web3, applicationsRepository, ethereum);
   (aragonScraper as any).kernelAddress = jest.fn(async () => "0xb788256177F8398babdDb1118bc4aa0557Ed8c65");
   const appsInstalled = await aragonScraper.appInstalledEvents(BLOCK_8403326);
   expect(appsInstalled.length).toEqual(7);
@@ -189,11 +189,126 @@ test("appInstalledEvents", async () => {
 test("kernelAddress", async () => {
   const web3 = new Web3();
   const codec = new AbiCodec(web3);
-  const dynamo = ({} as unknown) as DynamoService;
+  const applicationsRepository = ({} as unknown) as ApplicationsRepository;
   const callFunc = jest.fn(() => "0x000000000000000000000000b788256177f8398babddb1118bc4aa0557ed8c65");
   const ethereum = ({ web3, codec, call: callFunc } as unknown) as EthereumService;
-  const aragonScraper = new AragonScraper(web3, dynamo, ethereum);
+  const aragonScraper = new AragonScraper(web3, applicationsRepository, ethereum);
   const actual = await aragonScraper.kernelAddress("0x189445c662f5c74ed8da964dc0e56a9657d8e16f");
   expect(actual).toEqual("0xb788256177F8398babdDb1118bc4aa0557Ed8c65");
-  expect(callFunc).toBeCalledWith({ to: "0x189445c662f5c74ed8da964dc0e56a9657d8e16f", data: '0xd4aae0c4' });
+  expect(callFunc).toBeCalledWith({ to: "0x189445c662f5c74ed8da964dc0e56a9657d8e16f", data: "0xd4aae0c4" });
+});
+
+test("transfers", async () => {
+  const web3 = new Web3();
+  const codec = new AbiCodec(web3);
+  const organisationAddressByApplicationAddressFunc = jest.fn((address: string) => {
+    return undefined;
+  });
+  const applicationsRepository = ({
+    organisationAddressByApplicationAddress: organisationAddressByApplicationAddressFunc
+  } as unknown) as ApplicationsRepository;
+  const tokenCall = jest.fn(() => "0xff2b202d1d7ce83e62dc19b6b7d23ed9378e8f29");
+  const contractFunc = jest.fn(() => {
+    return {
+      methods: {
+        token: jest.fn(() => {
+          return {
+            call: tokenCall
+          };
+        })
+      }
+    };
+  });
+  const ethereum = ({ web3, codec, contract: contractFunc } as unknown) as EthereumService;
+  const aragonScraper = new AragonScraper(web3, applicationsRepository, ethereum);
+  (aragonScraper as any).kernelAddress = jest.fn(async (address: string) => {
+    return "0xb788256177f8398babddb1118bc4aa0557ed8c65";
+  });
+  const appsInstalled = await aragonScraper.appInstalledEvents(BLOCK_8403326);
+  const transfers = await aragonScraper.transfers(BLOCK_8403326, appsInstalled);
+  expect(transfers.length).toEqual(1);
+  const transfer = transfers[0] as ShareTransferEvent;
+  expect(transfer.amount).toEqual("1000000000000000000");
+  expect(transfer.blockNumber).toEqual(8403326);
+  expect(transfer.from).toEqual("0x0000000000000000000000000000000000000000");
+  expect(transfer.kind).toEqual(ORGANISATION_EVENT.TRANSFER_SHARE);
+  expect(transfer.organisationAddress).toEqual("0xb788256177f8398babddb1118bc4aa0557ed8c65");
+  expect(transfer.shareAddress).toEqual("0xff2b202d1d7ce83e62dc19b6b7d23ed9378e8f29");
+  expect(transfer.platform).toEqual(PLATFORM.ARAGON);
+});
+
+test("transfers no app installed events", async () => {
+  const web3 = new Web3();
+  const codec = new AbiCodec(web3);
+  const organisationAddressByApplicationAddressFunc = jest.fn((address: string) => {
+    if (address.toLowerCase() === "0xff2b202d1d7ce83e62dc19b6b7d23ed9378e8f29") {
+      return "0xb788256177f8398babddb1118bc4aa0557ed8c65";
+    } else {
+      return undefined;
+    }
+  });
+  const applicationsRepository = ({
+    organisationAddressByApplicationAddress: organisationAddressByApplicationAddressFunc
+  } as unknown) as ApplicationsRepository;
+  const tokenCall = jest.fn(() => "0xff2b202d1d7ce83e62dc19b6b7d23ed9378e8f29");
+  const contractFunc = jest.fn(() => {
+    return {
+      methods: {
+        token: jest.fn(() => {
+          return {
+            call: tokenCall
+          };
+        })
+      }
+    };
+  });
+  const ethereum = ({ web3, codec, contract: contractFunc } as unknown) as EthereumService;
+  const aragonScraper = new AragonScraper(web3, applicationsRepository, ethereum);
+  (aragonScraper as any).kernelAddress = jest.fn(async (address: string) => {
+    return "0xb788256177f8398babddb1118bc4aa0557ed8c65";
+  });
+  const transfers = await aragonScraper.transfers(BLOCK_8403326, []);
+  expect(transfers.length).toEqual(1);
+  const transfer = transfers[0] as ShareTransferEvent;
+  expect(transfer.amount).toEqual("1000000000000000000");
+  expect(transfer.blockNumber).toEqual(8403326);
+  expect(transfer.from).toEqual("0x0000000000000000000000000000000000000000");
+  expect(transfer.kind).toEqual(ORGANISATION_EVENT.TRANSFER_SHARE);
+  expect(transfer.organisationAddress).toEqual("0xb788256177f8398babddb1118bc4aa0557ed8c65");
+  expect(transfer.shareAddress).toEqual("0xff2b202d1d7ce83e62dc19b6b7d23ed9378e8f29");
+  expect(transfer.platform).toEqual(PLATFORM.ARAGON);
+});
+
+test("fromBlock", async () => {
+  const web3 = new Web3();
+  const codec = new AbiCodec(web3);
+  const organisationAddressByApplicationAddressFunc = jest.fn((address: string) => {
+    return undefined;
+  });
+  const applicationsRepository = ({
+    organisationAddressByApplicationAddress: organisationAddressByApplicationAddressFunc
+  } as unknown) as ApplicationsRepository;
+  const tokenCall = jest.fn(() => "0xTOKEN");
+  const contractFunc = jest.fn(() => {
+    return {
+      methods: {
+        token: jest.fn(() => {
+          return {
+            call: tokenCall
+          };
+        })
+      }
+    };
+  });
+  const canonicalAddressFunc = jest.fn(() => "0xb788256177f8398babddb1118bc4aa0557ed8c65");
+  const ethereum = ({
+    web3,
+    codec,
+    contract: contractFunc,
+    canonicalAddress: canonicalAddressFunc
+  } as unknown) as EthereumService;
+  const aragonScraper = new AragonScraper(web3, applicationsRepository, ethereum);
+  (aragonScraper as any).kernelAddress = jest.fn(async () => "0xb788256177F8398babdDb1118bc4aa0557Ed8c65");
+  const events = await aragonScraper.fromBlock(BLOCK_8403326);
+  expect(events.length).toEqual(8);
 });

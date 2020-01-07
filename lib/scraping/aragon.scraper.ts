@@ -18,19 +18,16 @@ import Web3 from "web3";
 import { Scraper } from "./scraper.interface";
 import { Indexed } from "./indexed.interface";
 import { BlockchainEvent } from "./blockchain-event.interface";
-import { DynamoService } from "../storage/dynamo.service";
 import * as _ from "lodash";
 import { Log } from "web3-core";
 import { APP_ID } from "../shared/app-id.const";
 import { PLATFORM } from "../shared/platform";
-
-const APPLICATIONS_TABLE = String(process.env.APPLICATIONS_TABLE);
-const APPLICATIONS_PER_ADDRESS_INDEX = String(process.env.APPLICATIONS_PER_ADDRESS_INDEX);
+import { ApplicationsRepository } from "../storage/applications.repository";
 
 export class AragonScraper implements Scraper {
   constructor(
     private readonly web3: Web3,
-    private readonly dynamo: DynamoService,
+    private readonly applicationsRepository: ApplicationsRepository,
     private readonly ethereum: EthereumService
   ) {}
 
@@ -55,19 +52,9 @@ export class AragonScraper implements Scraper {
       return log.topics.length === 3;
     };
     const promises = this.logEvents(block, TRANSFER_EVENT, filter).map<Promise<ShareTransferEvent | null>>(async e => {
-      const dynamoResponse = await this.dynamo.query({
-        TableName: APPLICATIONS_TABLE,
-        IndexName: APPLICATIONS_PER_ADDRESS_INDEX,
-        ProjectionExpression: "proxyAddress, appId, organisationAddress",
-        KeyConditionExpression: "proxyAddress = :proxyAddress",
-        ExpressionAttributeValues: {
-          ":proxyAddress": e.address
-        }
-      });
-      const items = dynamoResponse.Items;
-      let organisationAddress = items?.length ? items[0].organisationAddress.toLowerCase() : null;
+      let organisationAddress = await this.applicationsRepository.organisationAddressByApplicationAddress(e.address);
       if (!organisationAddress) {
-        const foundEvent = appInstalled.find(a => a.proxyAddress === e.address);
+        const foundEvent = appInstalled.find(a => a.proxyAddress.toLowerCase() === e.address.toLowerCase());
         if (foundEvent) {
           organisationAddress = foundEvent.organisationAddress;
         }

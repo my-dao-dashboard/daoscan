@@ -38,7 +38,7 @@ export class ScrapingService {
     @Inject(OrganisationsRepository.name) private readonly organisationsRepository: OrganisationsRepository,
     @Inject(ParticipantsRepository.name) private readonly participantsRepository: ParticipantsRepository
   ) {
-    this.scrapers = [new AragonScraper(this.ethereum.web3, dynamo, this.ethereum)];
+    this.scrapers = [new AragonScraper(this.ethereum.web3, applicationsRepository, this.ethereum)];
   }
 
   @bind()
