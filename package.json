@@ -1,7 +1,7 @@
 {
   "name": "daoscan",
   "version": "1.0.0-alpha.0",
-  "license": "AGPL-3.0",
+  "license": "AGPL-3.0-only",
   "scripts": {
     "deploy": "rm -rf .build/ && serverless deploy",
     "start": "serverless offline --useSeparateProcesses",
