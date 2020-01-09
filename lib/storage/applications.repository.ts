@@ -1,22 +1,13 @@
 import { DynamoService } from "./dynamo.service";
-import { ENV, FromEnv } from "../shared/from-env";
-import { ORGANISATION_PLATFORM } from "../organisation-events";
-import { Service, Inject } from "typedi";
-import { APP_ID } from "../app-id";
+import { Inject, Service } from "typedi";
+import { APP_ID } from "../shared/app-id.const";
+import { ENV } from "../shared/env";
+import { EnvService, IEnvService } from "../services/env.service";
+import { ApplicationEntity } from "./application.entity";
 
 export interface Key {
   organisationAddress: string;
   appId: string;
-}
-
-export interface ApplicationEntity {
-  platform: ORGANISATION_PLATFORM;
-  organisationAddress: string;
-  appId: string;
-  proxyAddress: string;
-  txid: string;
-  blockNumber: number;
-  timestamp: number;
 }
 
 export enum FIELD {
@@ -25,12 +16,31 @@ export enum FIELD {
 
 type ProxyAddressResult = { proxyAddress: string };
 
-@Service()
+@Service(ApplicationsRepository.name)
 export class ApplicationsRepository {
   private readonly tableName: string;
+  private readonly applicationsPerAddressIndex: string;
 
-  constructor(@Inject(type => DynamoService) private readonly dynamo: DynamoService) {
-    this.tableName = FromEnv.readString(ENV.APPLICATIONS_TABLE);
+  constructor(
+    @Inject(DynamoService.name) private readonly dynamo: DynamoService,
+    @Inject(EnvService.name) env: IEnvService
+  ) {
+    this.tableName = env.readString(ENV.APPLICATIONS_TABLE);
+    this.applicationsPerAddressIndex = env.readString(ENV.APPLICATIONS_PER_ADDRESS_INDEX);
+  }
+
+  async organisationAddressByApplicationAddress(proxyAddress: string): Promise<string> {
+    const dynamoResponse = await this.dynamo.query({
+      TableName: this.tableName,
+      IndexName: this.applicationsPerAddressIndex,
+      ProjectionExpression: "proxyAddress, appId, organisationAddress",
+      KeyConditionExpression: "proxyAddress = :proxyAddress",
+      ExpressionAttributeValues: {
+        ":proxyAddress": proxyAddress
+      }
+    });
+    const items = dynamoResponse.Items;
+    return items?.length ? items[0].organisationAddress.toLowerCase() : undefined;
   }
 
   async save(entity: ApplicationEntity) {

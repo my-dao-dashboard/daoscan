@@ -1,21 +1,25 @@
-import { ENV, FromEnv } from "../shared/from-env";
-import { OrganisationEvent } from "../organisation-events";
-import { QueueService } from "./queue.service";
+import { OrganisationEvent } from "../shared/organisation-events";
+import { IQueueService, QueueService } from "./queue.service";
 import { Service, Inject } from "typedi";
+import { ENV } from "../shared/env";
+import { EnvService, IEnvService } from "../services/env.service";
 
-@Service()
+@Service(ScrapingQueue.name)
 export class ScrapingQueue {
   private readonly queueName: string;
 
-  constructor(@Inject(type => QueueService) private readonly queue: QueueService) {
-    this.queueName = FromEnv.readString(ENV.SCRAPING_SQS_URL);
+  constructor(
+    @Inject(QueueService.name) private readonly queue: IQueueService,
+    @Inject(EnvService.name) private readonly env: IEnvService
+  ) {
+    this.queueName = env.readString(ENV.SCRAPING_SQS_URL);
   }
 
-  async sendBatch(events: OrganisationEvent[]): Promise<void> {
-    await this.queue.sendBatch(this.queueName, events);
+  sendBatch(events: OrganisationEvent[]): Promise<void> {
+    return this.queue.sendBatch(this.queueName, events);
   }
 
-  async send(event: OrganisationEvent): Promise<void> {
-    await this.queue.send(this.queueName, event);
+  send(event: OrganisationEvent): Promise<void> {
+    return this.queue.send(this.queueName, event);
   }
 }

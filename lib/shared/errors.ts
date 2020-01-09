@@ -1,7 +1,7 @@
 import { HTTP_STATUS_CODE } from "./http-status-code";
 
 export abstract class KnownError extends Error {
-  constructor(public code: HTTP_STATUS_CODE, public description: string) {
+  protected constructor(public code: HTTP_STATUS_CODE, public description: string) {
     super(description);
   }
 }

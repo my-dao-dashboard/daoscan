@@ -1,4 +1,4 @@
-import { ExtendedBlock } from "../ethereum.service";
+import { EthereumService, ExtendedBlock } from "../services/ethereum.service";
 import {
   DEPLOY_INSTANCE_EVENT,
   KIT_ADDRESSES,
@@ -10,25 +10,26 @@ import {
 import {
   AppInstalledEvent,
   ORGANISATION_EVENT,
-  ORGANISATION_PLATFORM,
   OrganisationCreatedEvent,
   OrganisationEvent,
   ShareTransferEvent
-} from "../organisation-events";
+} from "../shared/organisation-events";
 import Web3 from "web3";
 import { Scraper } from "./scraper.interface";
 import { Indexed } from "./indexed.interface";
 import { BlockchainEvent } from "./blockchain-event.interface";
-import { DynamoService } from "../storage/dynamo.service";
 import * as _ from "lodash";
 import { Log } from "web3-core";
-import { APP_ID } from "../app-id";
-
-const APPLICATIONS_TABLE = String(process.env.APPLICATIONS_TABLE);
-const APPLICATIONS_PER_ADDRESS_INDEX = String(process.env.APPLICATIONS_PER_ADDRESS_INDEX);
+import { APP_ID } from "../shared/app-id.const";
+import { PLATFORM } from "../shared/platform";
+import { ApplicationsRepository } from "../storage/applications.repository";
 
 export class AragonScraper implements Scraper {
-  constructor(private readonly web3: Web3, private readonly dynamo: DynamoService) {}
+  constructor(
+    private readonly web3: Web3,
+    private readonly applicationsRepository: ApplicationsRepository,
+    private readonly ethereum: EthereumService
+  ) {}
 
   async fromBlock(block: ExtendedBlock): Promise<OrganisationEvent[]> {
     const createdFromTransaction = await this.createdFromTransactions(block);
@@ -51,19 +52,9 @@ export class AragonScraper implements Scraper {
       return log.topics.length === 3;
     };
     const promises = this.logEvents(block, TRANSFER_EVENT, filter).map<Promise<ShareTransferEvent | null>>(async e => {
-      const dynamoResponse = await this.dynamo.query({
-        TableName: APPLICATIONS_TABLE,
-        IndexName: APPLICATIONS_PER_ADDRESS_INDEX,
-        ProjectionExpression: "proxyAddress, appId, organisationAddress",
-        KeyConditionExpression: "proxyAddress = :proxyAddress",
-        ExpressionAttributeValues: {
-          ":proxyAddress": e.address
-        }
-      });
-      const items = dynamoResponse.Items;
-      let organisationAddress = items?.length ? items[0].organisationAddress.toLowerCase() : null;
+      let organisationAddress = await this.applicationsRepository.organisationAddressByApplicationAddress(e.address);
       if (!organisationAddress) {
-        const foundEvent = appInstalled.find(a => a.proxyAddress === e.address);
+        const foundEvent = appInstalled.find(a => a.proxyAddress.toLowerCase() === e.address.toLowerCase());
         if (foundEvent) {
           organisationAddress = foundEvent.organisationAddress;
         }
@@ -72,7 +63,7 @@ export class AragonScraper implements Scraper {
       if (organisationAddress) {
         return {
           kind: ORGANISATION_EVENT.TRANSFER_SHARE,
-          platform: ORGANISATION_PLATFORM.ARAGON,
+          platform: PLATFORM.ARAGON,
           organisationAddress: organisationAddress.toLowerCase(),
           logIndex: e.logIndex,
           txid: e.txid,
@@ -91,7 +82,7 @@ export class AragonScraper implements Scraper {
   }
 
   async kernelAddress(proxy: string): Promise<string> {
-    const data = this.web3.eth.abi.encodeFunctionCall(
+    const data = this.ethereum.codec.encodeFunctionCall(
       {
         name: "kernel",
         type: "function",
@@ -99,11 +90,11 @@ export class AragonScraper implements Scraper {
       },
       []
     );
-    const result = await this.web3.eth.call({
+    const result = await this.ethereum.call({
       to: proxy,
       data
     });
-    return this.web3.eth.abi.decodeParameter("address", result) as any;
+    return this.ethereum.codec.decodeParameter("address", result);
   }
 
   async createdFromTransactions(block: ExtendedBlock): Promise<OrganisationCreatedEvent[]> {
@@ -116,13 +107,13 @@ export class AragonScraper implements Scraper {
         .map(async t => {
           const signature = t.input.slice(0, 10);
           const abi = abiMap.get(signature)!;
-          const parameters = this.web3.eth.abi.decodeParameters(abi, "0x" + t.input.slice(10));
+          const parameters = this.ethereum.codec.decodeParameters(abi, "0x" + t.input.slice(10));
           const ensName = `${parameters.name}.aragonid.eth`;
-          const address = await this.web3.eth.ens.getAddress(ensName);
+          const address = await this.ethereum.canonicalAddress(ensName);
 
           const event: OrganisationCreatedEvent = {
             kind: ORGANISATION_EVENT.CREATED,
-            platform: ORGANISATION_PLATFORM.ARAGON,
+            platform: PLATFORM.ARAGON,
             name: ensName,
             address: address.toLowerCase(),
             txid: t.transactionHash,
@@ -139,7 +130,7 @@ export class AragonScraper implements Scraper {
       const organisationAddress = e.dao;
       return {
         kind: ORGANISATION_EVENT.CREATED,
-        platform: ORGANISATION_PLATFORM.ARAGON,
+        platform: PLATFORM.ARAGON,
         name: organisationAddress.toLowerCase(),
         address: organisationAddress,
         txid: e.txid,
@@ -154,7 +145,7 @@ export class AragonScraper implements Scraper {
       const organisationAddress = await this.kernelAddress(e.proxy);
       return {
         kind: ORGANISATION_EVENT.APP_INSTALLED,
-        platform: ORGANISATION_PLATFORM.ARAGON,
+        platform: PLATFORM.ARAGON,
         organisationAddress: organisationAddress.toLowerCase(),
         appId: e.appId,
         proxyAddress: e.proxy,
@@ -169,11 +160,11 @@ export class AragonScraper implements Scraper {
     });
     for (let e of tokenControllerEvents) {
       const tokenControllerAddress = e.proxyAddress;
-      const tokenController = new this.web3.eth.Contract(TOKEN_CONTROLLER_ABI, tokenControllerAddress);
+      const tokenController = this.ethereum.contract(TOKEN_CONTROLLER_ABI, tokenControllerAddress);
       const tokenAddress = await tokenController.methods.token().call();
       const tokenEvent: AppInstalledEvent = {
         kind: ORGANISATION_EVENT.APP_INSTALLED,
-        platform: ORGANISATION_PLATFORM.ARAGON,
+        platform: PLATFORM.ARAGON,
         organisationAddress: e.organisationAddress,
         appId: APP_ID.SHARE,
         proxyAddress: tokenAddress,
@@ -199,7 +190,7 @@ export class AragonScraper implements Scraper {
       })
       .map(log => {
         return {
-          ...(this.web3.eth.abi.decodeLog(event.abi, log.data, log.topics.slice(1)) as A),
+          ...(this.ethereum.codec.decodeLog(event.abi, log.data, log.topics.slice(1)) as A),
           address: log.address,
           txid: log.transactionHash,
           logIndex: log.logIndex,

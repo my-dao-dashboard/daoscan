@@ -1,9 +1,9 @@
-import { ORGANISATION_PLATFORM } from "../organisation-events";
+import { PLATFORM } from "../shared/platform";
 
 export interface OrganisationEntity {
   address: string;
   name: string;
-  platform: ORGANISATION_PLATFORM;
+  platform: PLATFORM;
   txid: string;
   timestamp: number;
   blockNumber: number;

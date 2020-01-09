@@ -7,16 +7,16 @@ import { TokenGraphql } from "./token.graphql";
 import { OrganisationsService } from "../services/organisations.service";
 import { bind } from "decko";
 import { BalanceService } from "../services/balance.service";
-import { EthereumService } from "../ethereum.service";
+import { EthereumService } from "../services/ethereum.service";
 
-@Service()
+@Service(OrganisationResolver.name)
 export class OrganisationResolver {
   constructor(
-    @Inject(type => OrganisationsRepository) private readonly organisationsRepository: OrganisationsRepository,
-    @Inject(type => ParticipantsRepository) private readonly participantsRepository: ParticipantsRepository,
-    @Inject(type => OrganisationsService) private readonly organisationsService: OrganisationsService,
-    @Inject(type => BalanceService) private readonly balanceService: BalanceService,
-    @Inject(type => EthereumService) private readonly ethereum: EthereumService
+    @Inject(OrganisationsRepository.name) private readonly organisationsRepository: OrganisationsRepository,
+    @Inject(ParticipantsRepository.name) private readonly participantsRepository: ParticipantsRepository,
+    @Inject(OrganisationsService.name) private readonly organisationsService: OrganisationsService,
+    @Inject(BalanceService.name) private readonly balanceService: BalanceService,
+    @Inject(EthereumService.name) private readonly ethereum: EthereumService
   ) {}
 
   async organisation(address: string): Promise<Partial<OrganisationGraphql>> {

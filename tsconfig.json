@@ -4,14 +4,18 @@
     "strictNullChecks": true,
     "strict": true,
     "sourceMap": true,
-    "target": "es5",
+    "target": "es6",
+    "isolatedModules": true,
+    "module": "commonjs",
     "outDir": ".build",
     "moduleResolution": "node",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "lib": ["es2015"],
+    "alwaysStrict": false,
+    "noImplicitUseStrict": true,
+    "lib": ["es6"],
     "rootDir": "./"
   }
 }

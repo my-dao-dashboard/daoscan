@@ -1,19 +1,23 @@
 import { DynamoService } from "./dynamo.service";
-import { ENV, FromEnv } from "../shared/from-env";
-import { ORGANISATION_PLATFORM } from "../organisation-events";
 import { NotFoundError } from "../shared/errors";
 import { Service, Inject } from "typedi";
 import { OrganisationEntity } from "./organisation.entity";
+import { ENV } from "../shared/env";
+import { EnvService } from "../services/env.service";
+import { PLATFORM } from "../shared/platform";
 
-@Service()
+@Service(OrganisationsRepository.name)
 export class OrganisationsRepository {
   private readonly tableName: string;
 
-  constructor(@Inject(type => DynamoService) private readonly dynamo: DynamoService) {
-    this.tableName = FromEnv.readString(ENV.ORGANISATIONS_TABLE);
+  constructor(
+    @Inject(DynamoService.name) private readonly dynamo: DynamoService,
+    @Inject(EnvService.name) env: EnvService
+  ) {
+    this.tableName = env.readString(ENV.ORGANISATIONS_TABLE);
   }
 
-  async byAddress(address: string) {
+  async byAddress(address: string): Promise<OrganisationEntity> {
     const items = await this.dynamo.query({
       TableName: this.tableName,
       ProjectionExpression: "address, #orgName, platform, txid, #orgTimestamp, blockNumber",
@@ -56,7 +60,7 @@ export class OrganisationsRepository {
         return {
           address: String(item.address),
           name: String(item.name),
-          platform: ORGANISATION_PLATFORM.fromString(item.platform),
+          platform: PLATFORM.fromString(item.platform),
           txid: String(item.txid),
           timestamp: Number(item.timestamp),
           blockNumber: Number(item.blockNumber)

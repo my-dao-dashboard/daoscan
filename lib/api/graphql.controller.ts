@@ -8,14 +8,14 @@ import { OrganisationResolver } from "./organisation.resolver";
 import { ParticipantResolver } from "./participant.resolver";
 import { AccountResolver } from "./account.resolver";
 
-@Service()
+@Service(GraphqlController.name)
 export class GraphqlController {
   public readonly handler: APIGatewayProxyHandler;
 
   constructor(
-    @Inject(type => OrganisationResolver) private readonly organisationResolver: OrganisationResolver,
-    @Inject(type => ParticipantResolver) private readonly participantResolver: ParticipantResolver,
-    @Inject(type => AccountResolver) private readonly accountResolver: AccountResolver
+    @Inject(OrganisationResolver.name) private readonly organisationResolver: OrganisationResolver,
+    @Inject(ParticipantResolver.name) private readonly participantResolver: ParticipantResolver,
+    @Inject(AccountResolver.name) private readonly accountResolver: AccountResolver
   ) {
     const server = new ApolloServer({
       schema: this.schema(),

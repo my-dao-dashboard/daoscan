@@ -1,28 +1,29 @@
 import { Inject, Service } from "typedi";
 import { OrganisationsRepository } from "../storage/organisations.repository";
 import { ApplicationsRepository } from "../storage/applications.repository";
-import { TOKEN_ABI } from "../scraping/aragon.constants";
-import { EthereumService } from "../ethereum.service";
+import ERC20_TOKEN_ABI from "../const/erc20-token.abi.json";
+import { EthereumService } from "./ethereum.service";
 import Web3 from "web3";
 import { BalanceService } from "./balance.service";
 import { TokenGraphql } from "../api/token.graphql";
 import { MessariService } from "./messari.service";
 import BigNumber from "bignumber.js";
+import { AbiItem } from "web3-utils";
 
-@Service()
+@Service(OrganisationsService.name)
 export class OrganisationsService {
   private readonly web3: Web3;
   constructor(
-    @Inject(type => OrganisationsRepository) private readonly organisationsRepository: OrganisationsRepository,
-    @Inject(type => ApplicationsRepository) private readonly applicationsRepository: ApplicationsRepository,
-    @Inject(type => EthereumService) private readonly ethereumService: EthereumService,
-    @Inject(type => BalanceService) private readonly balanceService: BalanceService,
-    @Inject(type => MessariService) private readonly messariService: MessariService
+    @Inject(OrganisationsRepository.name) private readonly organisationsRepository: OrganisationsRepository,
+    @Inject(ApplicationsRepository.name) private readonly applicationsRepository: ApplicationsRepository,
+    @Inject(EthereumService.name) private readonly ethereumService: EthereumService,
+    @Inject(BalanceService.name) private readonly balanceService: BalanceService,
+    @Inject(MessariService.name) private readonly messariService: MessariService
   ) {
     this.web3 = ethereumService.web3;
   }
 
-  async priceOfShareUsd(totalSupply: TokenGraphql, bank: TokenGraphql[]): Promise<number> {
+  async shareValueUsd(totalSupply: TokenGraphql, bank: TokenGraphql[]): Promise<number> {
     const perTokenPromised = bank.map(async token => {
       const usdPrice = await this.messariService.usdPrice(token.symbol);
       const realAmount = new BigNumber(token.amount).div(10 ** token.decimals).toNumber();
@@ -37,7 +38,7 @@ export class OrganisationsService {
   async shareValue(organisationAddress: string, symbol: string): Promise<TokenGraphql> {
     const totalSupply = await this.totalSupply(organisationAddress);
     const bank = await this.bank(organisationAddress);
-    const usdAmount = await this.priceOfShareUsd(totalSupply, bank);
+    const usdAmount = await this.shareValueUsd(totalSupply, bank);
     const assetPrice = await this.messariService.usdPrice(symbol);
     const assetAmount = usdAmount / assetPrice;
     return {
@@ -50,12 +51,10 @@ export class OrganisationsService {
 
   async tokenContract(organisationAddress: string) {
     const tokenAddress = await this.applicationsRepository.tokenAddress(organisationAddress);
-    return new this.web3.eth.Contract(TOKEN_ABI, tokenAddress);
+    return new this.web3.eth.Contract(ERC20_TOKEN_ABI as AbiItem[], tokenAddress);
   }
 
-  async totalSupply(
-    organisationAddress: string
-  ): Promise<{ amount: string; decimals: number; name: string; symbol: string }> {
+  async totalSupply(organisationAddress: string): Promise<TokenGraphql> {
     const token = await this.tokenContract(organisationAddress);
     const name = await token.methods.name().call();
     const symbol = await token.methods.symbol().call();

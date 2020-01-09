@@ -1,4 +1,4 @@
-import { ApiContext, ApiEvent } from "./api.types";
+import { APIGatewayEvent, Context } from "aws-lambda";
 import { KnownError } from "./errors";
 import { HTTP_STATUS_CODE } from "./http-status-code";
 import { APIGatewayProxyHandler } from "aws-lambda";
@@ -26,8 +26,8 @@ export function error(e: Error) {
   }
 }
 
-export function handler<R>(f: (event: ApiEvent, context: ApiContext) => Promise<R>): APIGatewayProxyHandler {
-  return async (event: ApiEvent, context: ApiContext) => {
+export function handler<R>(f: (event: APIGatewayEvent, context: Context) => Promise<R>): APIGatewayProxyHandler {
+  return async (event: APIGatewayEvent, context: Context) => {
     try {
       const result = await f(event, context);
       return ok(result);

@@ -2,8 +2,13 @@ import Web3 from "web3";
 import { BlockTransactionString, Transaction, TransactionReceipt } from "web3-eth";
 import { Log } from "web3-core/types";
 import * as _ from "lodash";
-import { ENV, FromEnv } from "./shared/from-env";
-import { Service } from "typedi";
+import { Inject, Service } from "typedi";
+import { ENV } from "../shared/env";
+import { EnvService, IEnvService } from "./env.service";
+import { AbiItem } from "web3-utils";
+import { AbiCodec } from "./abi-codec";
+import { Contract, ContractOptions } from "web3-eth-contract";
+import {TransactionConfig} from "web3-core";
 
 export interface ExtendedTransactionReceipt extends TransactionReceipt {
   input: string;
@@ -14,14 +19,16 @@ export interface ExtendedBlock extends BlockTransactionString {
   logs: Log[];
 }
 
-@Service()
+@Service(EthereumService.name)
 export class EthereumService {
   readonly web3: Web3;
+  readonly codec: AbiCodec;
 
-  constructor() {
-    const endpoint = FromEnv.readString(ENV.ETHEREUM_RPC);
+  constructor(@Inject(EnvService.name) env: IEnvService) {
+    const endpoint = env.readString(ENV.ETHEREUM_RPC);
     const provider = new Web3.providers.HttpProvider(endpoint);
     this.web3 = new Web3(provider);
+    this.codec = new AbiCodec(this.web3);
   }
 
   block(number: string | number): Promise<BlockTransactionString> {
@@ -54,6 +61,14 @@ export class EthereumService {
 
   transactionReceipt(txid: string): Promise<TransactionReceipt> {
     return this.web3.eth.getTransactionReceipt(txid);
+  }
+
+  contract(jsonInterface: AbiItem[] | AbiItem, address?: string, options?: ContractOptions): Contract {
+    return new this.web3.eth.Contract(jsonInterface, address, options);
+  }
+
+  call(transactionConfig: TransactionConfig): Promise<string> {
+    return this.web3.eth.call(transactionConfig);
   }
 
   async canonicalAddress(addressOrName: string): Promise<string> {

@@ -4,14 +4,14 @@ import { bind } from "decko";
 import { ParticipantsRepository } from "../storage/participants.repository";
 import { OrganisationResolver } from "./organisation.resolver";
 import { OrganisationGraphql } from "./organisation.graphql";
-import { EthereumService } from "../ethereum.service";
+import { EthereumService } from "../services/ethereum.service";
 
-@Service()
+@Service(AccountResolver.name)
 export class AccountResolver {
   constructor(
-    @Inject(type => ParticipantsRepository) private readonly participantsRepository: ParticipantsRepository,
-    @Inject(type => OrganisationResolver) private readonly organisationResolver: OrganisationResolver,
-    @Inject(type => EthereumService) private readonly ethereum: EthereumService
+    @Inject(ParticipantsRepository.name) private readonly participantsRepository: ParticipantsRepository,
+    @Inject(OrganisationResolver.name) private readonly organisationResolver: OrganisationResolver,
+    @Inject(EthereumService.name) private readonly ethereum: EthereumService
   ) {}
 
   @bind()
