@@ -3,8 +3,10 @@ Resources:
   ScrapingQueue:
     Type: "AWS::SQS::Queue"
     Properties:
-      QueueName: ScrapingQueue
+      QueueName: ${self:custom.stage}-scraping-queue
+      VisibilityTimeout: 300
   BlocksQueue:
     Type: "AWS::SQS::Queue"
     Properties:
-      QueueName: BlocksQueue
+      QueueName: ${self:custom.stage}-blocks-queue
+      VisibilityTimeout: 300
