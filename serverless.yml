@@ -4,6 +4,11 @@ org: ukstv
 
 custom:
   stage: ${opt:stage, self:provider.stage}
+  customDomain:
+    domainName: 'daoscan.net'
+    basePath: ''
+    stage: ${self:provider.stage}
+    createRoute53Record: true
 
 package:
   include:
@@ -58,6 +63,7 @@ provider:
 plugins:
   - serverless-plugin-typescript
   - serverless-offline
+  - serverless-domain-manager
 
 functions:
   scraping-tickBlock:
