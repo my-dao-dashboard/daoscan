@@ -4,8 +4,11 @@ org: ukstv
 
 custom:
   stage: ${opt:stage, self:provider.stage}
+  domains:
+    prod: 'daoscan.net'
+    dev: 'dev.daoscan.net'
   customDomain:
-    domainName: 'daoscan.net'
+    domainName: ${self:custom.domains.${self:custom.stage}}
     basePath: ''
     stage: ${self:provider.stage}
     createRoute53Record: true
@@ -19,7 +22,7 @@ provider:
   runtime: nodejs12.x
   region: "us-east-1"
   environment:
-    ETHEREUM_RPC: "http://mainnet.eth.daoscan.cc:8545"
+    ETHEREUM_RPC: "http://mainnet.eth.daoscan.net:8545"
     SCRAPING_SQS_URL:
       Ref: ScrapingQueue
     BLOCKS_SQS_URL:
@@ -72,6 +75,7 @@ functions:
       - schedule: rate(1 minute)
   scraping-parseBlock:
     handler: functions/scraping.parseBlock
+    timeout: 300
     events:
       - http:
           path: block
