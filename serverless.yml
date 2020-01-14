@@ -9,7 +9,7 @@ custom:
     beta: 'beta.daoscan.net'
   customDomain:
     domainName: ${self:custom.domains.${self:custom.stage}}
-    stage: ${self:provider.stage}
+    stage: ${self:custom.stage}
     createRoute53Record: true
 
 package:
