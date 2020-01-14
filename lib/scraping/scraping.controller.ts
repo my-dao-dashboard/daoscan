@@ -4,7 +4,7 @@ import { BadRequestError } from "../shared/errors";
 import { OrganisationEvent } from "../shared/organisation-events";
 import { bind } from "decko";
 import { ExtendedBlock } from "../services/ethereum.service";
-import { ok } from "../shared/handler";
+import { ok } from "../shared/http-handler";
 import { Service, Inject } from "typedi";
 
 function isAPIGatewayEvent(event: any): event is APIGatewayEvent {

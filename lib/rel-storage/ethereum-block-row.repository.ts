@@ -24,7 +24,6 @@ export class EthereumBlockRowRepository {
   }
 
   async save(block: EthereumBlockRow) {
-    console.log('savesave')
     const repository = await this.repositoryFactory.writing(EthereumBlockRow);
     return repository.save(block);
   }

@@ -26,7 +26,7 @@ export function error(e: Error) {
   }
 }
 
-export function handler<R>(f: (event: APIGatewayEvent, context: Context) => Promise<R>): APIGatewayProxyHandler {
+export function httpHandler<R>(f: (event: APIGatewayEvent, context: Context) => Promise<R>): APIGatewayProxyHandler {
   return async (event: APIGatewayEvent, context: Context) => {
     try {
       const result = await f(event, context);
