@@ -11,7 +11,6 @@ import {
   OrganisationEvent,
   ShareTransferEvent
 } from "../shared/organisation-events";
-import { BlocksRepository } from "../storage/blocks.repository";
 import { BlocksQueue } from "../queues/blocks.queue";
 import { bind } from "decko";
 import { ScrapingQueue } from "../queues/scraping.queue";
@@ -32,7 +31,6 @@ export class ScrapingService {
   constructor(
     @Inject(EthereumService.name) private readonly ethereum: EthereumService,
     @Inject(DynamoService.name) private readonly dynamo: DynamoService,
-    @Inject(BlocksRepository.name) private readonly blocksRepository: BlocksRepository,
     @Inject(BlocksQueue.name) private readonly blocksQueue: BlocksQueue,
     @Inject(ScrapingQueue.name) private readonly scrapingQueue: ScrapingQueue,
     @Inject(ApplicationsRepository.name) private readonly applicationsRepository: ApplicationsRepository,

@@ -31,6 +31,7 @@ test("reading", async () => {
     name: "reading",
     type: "postgres",
     url: READ_URL,
+    entities: [`${path.join(__dirname, "./*.entity.{ts,js}")}`],
     migrationsRun: false
   });
 });

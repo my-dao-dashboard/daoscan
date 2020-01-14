@@ -25,7 +25,9 @@ export class ConnectionFactory {
       name: "reading",
       type: "postgres",
       url: this.readingConnectionUrl,
-      migrationsRun: false
+      migrationsRun: false,
+      entities: [`${path.join(__dirname, "./*.entity.{ts,js}")}`],
+      logging: true
     });
   }
 
