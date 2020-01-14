@@ -1,5 +1,6 @@
-import { OrganisationEntity, OrganisationsRepository } from "../storage/organisations.repository";
+import { OrganisationsRepository } from "../storage/organisations.repository";
 import { bind } from "decko";
+import { OrganisationEntity } from "../storage/organisation.entity";
 
 export class ApiController {
   constructor(private readonly organisationsRepository: OrganisationsRepository) {}

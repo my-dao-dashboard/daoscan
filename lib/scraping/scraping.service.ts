@@ -23,6 +23,7 @@ import { OrganisationsRepository } from "../storage/organisations.repository";
 import { ParticipantsRepository } from "../storage/participants.repository";
 import { Service, Inject } from "typedi";
 import { PLATFORM } from "../shared/platform";
+import { EthereumBlockRowRepository } from "../rel-storage/ethereum-block-row.repository";
 
 @Service(ScrapingService.name)
 export class ScrapingService {
@@ -36,7 +37,8 @@ export class ScrapingService {
     @Inject(ScrapingQueue.name) private readonly scrapingQueue: ScrapingQueue,
     @Inject(ApplicationsRepository.name) private readonly applicationsRepository: ApplicationsRepository,
     @Inject(OrganisationsRepository.name) private readonly organisationsRepository: OrganisationsRepository,
-    @Inject(ParticipantsRepository.name) private readonly participantsRepository: ParticipantsRepository
+    @Inject(ParticipantsRepository.name) private readonly participantsRepository: ParticipantsRepository,
+    @Inject(EthereumBlockRowRepository.name) private readonly ethereumBlockRowRepository: EthereumBlockRowRepository
   ) {
     this.scrapers = [new AragonScraper(this.ethereum.web3, applicationsRepository, this.ethereum)];
   }
@@ -50,7 +52,7 @@ export class ScrapingService {
     for (let i = previous; i <= latest; i++) blockNumbers.push(i);
     await Promise.all(
       blockNumbers.map(async i => {
-        const isPresent = await this.blocksRepository.isPresent(i);
+        const isPresent = await this.ethereumBlockRowRepository.isPresent(i);
         if (!isPresent) {
           await this.blocksQueue.send(i);
         }
@@ -63,15 +65,19 @@ export class ScrapingService {
     const data = JSON.parse(eventBody);
     const id = Number(data.id);
     console.log(`Starting parsing block #${id}...`);
-    const events = await this.fromBlock(id);
+    const block = await this.extendedBlock(id);
+    const events = await this.fromBlock(block);
     await this.scrapingQueue.sendBatch(events);
-    await this.blocksRepository.markParsed(id);
+    await this.ethereumBlockRowRepository.markParsed(id, block.hash);
     console.log(`Parsed block #${id}: events=${events.length}`);
     return { events };
   }
 
-  async fromBlock(id: number): Promise<OrganisationEvent[]> {
-    const block = await this.ethereum.extendedBlock(id);
+  extendedBlock(id: number): Promise<ExtendedBlock> {
+    return this.ethereum.extendedBlock(id);
+  }
+
+  async fromBlock(block: ExtendedBlock): Promise<OrganisationEvent[]> {
     const scraped = await Promise.all(this.scrapers.map(scraper => scraper.fromBlock(block)));
     return _.flatten(scraped);
   }
@@ -117,7 +123,7 @@ export class ScrapingService {
 
   async readExtendedBlock(id: number): Promise<{ block: ExtendedBlock; events: OrganisationEvent[] }> {
     const block = await this.ethereum.extendedBlock(id);
-    const events = await this.fromBlock(id);
+    const events = await this.fromBlock(block);
     return { block, events };
   }
 

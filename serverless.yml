@@ -33,6 +33,10 @@ provider:
     PARTICIPANTS_TABLE: ${self:custom.stage}-participants
     PARTICIPANTS_INDEX: by-participant
     BLOCKS_TABLE: ${self:custom.stage}-blocks
+
+    READ_DATABASE_URL: ${file(resources/${self:custom.stage}.env.yaml):READ_DATABASE_URL}
+    WRITE_DATABASE_URL: ${file(resources/${self:custom.stage}.env.yaml):WRITE_DATABASE_URL}
+    UTIL_SECRET: ${file(resources/${self:custom.stage}.env.yaml):UTIL_SECRET}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -125,6 +129,12 @@ functions:
       - http:
           path: extended-block/{id}
           method: get
+  util-migrateUp:
+    handler: functions/util.migrateUp
+    events:
+      - http:
+          path: util/migrate-up
+          method: post
   api-graphql:
     handler: functions/api.graphql
     events:
