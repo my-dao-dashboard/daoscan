@@ -3,9 +3,12 @@ import { ScrapingService } from "./scraping.service";
 import { BadRequestError } from "../shared/errors";
 import { OrganisationEvent } from "../shared/organisation-events";
 import { bind } from "decko";
-import { ExtendedBlock } from "../services/ethereum.service";
+import { EthereumService, ExtendedBlock } from "../services/ethereum.service";
 import { ok } from "../shared/http-handler";
 import { Service, Inject } from "typedi";
+import { EthereumBlockRowRepository } from "../rel-storage/ethereum-block-row.repository";
+import { BlocksQueue } from "../queues/blocks.queue";
+import { TickBlockScenario } from "./tick-block.scenario";
 
 function isAPIGatewayEvent(event: any): event is APIGatewayEvent {
   return !!event.httpMethod && !!event.path;
@@ -13,7 +16,13 @@ function isAPIGatewayEvent(event: any): event is APIGatewayEvent {
 
 @Service(ScrapingController.name)
 export class ScrapingController {
-  constructor(@Inject(ScrapingService.name) private readonly scrapingService: ScrapingService) {}
+  constructor(
+    @Inject(ScrapingService.name) private readonly scrapingService: ScrapingService,
+    @Inject(EthereumService.name) private readonly ethereum: EthereumService,
+    @Inject(EthereumBlockRowRepository.name) private readonly ethereumBlockRowRepository: EthereumBlockRowRepository,
+    @Inject(BlocksQueue.name) private readonly blocksQueue: BlocksQueue,
+    @Inject(TickBlockScenario.name) private readonly tickBlockScenario: TickBlockScenario
+  ) {}
 
   parseBlock(event: APIGatewayEvent): Promise<{ body: string; statusCode: number }>;
   parseBlock(event: SQSEvent): Promise<void>;
@@ -58,5 +67,10 @@ export class ScrapingController {
     });
 
     await Promise.all(loop);
+  }
+
+  @bind()
+  async tickBlock(): Promise<void> {
+    await this.tickBlockScenario.execute();
   }
 }

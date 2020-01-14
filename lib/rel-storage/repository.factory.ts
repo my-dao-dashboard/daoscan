@@ -1,5 +1,5 @@
 import { Inject, Service } from "typedi";
-import { ConnectionFactory } from "./connection-factory";
+import { ConnectionFactory } from "./connection.factory";
 import { ObjectType } from "typeorm/common/ObjectType";
 import { EntitySchema, Repository } from "typeorm";
 

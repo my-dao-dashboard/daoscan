@@ -44,23 +44,6 @@ export class ScrapingService {
   }
 
   @bind()
-  async tickBlock(): Promise<void> {
-    const block = await this.ethereum.block("latest");
-    const latest = block.number;
-    const previous = latest - 20;
-    let blockNumbers = [];
-    for (let i = previous; i <= latest; i++) blockNumbers.push(i);
-    await Promise.all(
-      blockNumbers.map(async i => {
-        const isPresent = await this.ethereumBlockRowRepository.isPresent(i);
-        if (!isPresent) {
-          await this.blocksQueue.send(i);
-        }
-      })
-    );
-  }
-
-  @bind()
   async parseBlock(eventBody: string): Promise<{ events: OrganisationEvent[] }> {
     const data = JSON.parse(eventBody);
     const id = Number(data.id);

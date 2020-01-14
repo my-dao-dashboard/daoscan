@@ -1,6 +1,6 @@
 import { EnvService } from "../services/env.service";
 import { ENV } from "../shared/env";
-import { ConnectionFactory, CreateConnectionFunction } from "./connection-factory";
+import { ConnectionFactory, CreateConnectionFunction } from "./connection.factory";
 import faker from "faker";
 import path from "path";
 import * as migrations from './migrations'

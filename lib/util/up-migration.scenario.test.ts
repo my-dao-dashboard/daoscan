@@ -1,5 +1,5 @@
 import { UpMigrationScenario } from "./up-migration.scenario";
-import { ConnectionFactory } from "../rel-storage/connection-factory";
+import { ConnectionFactory } from "../rel-storage/connection.factory";
 import faker from "faker";
 
 const runMigrations = jest.fn();

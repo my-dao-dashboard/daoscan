@@ -1,6 +1,6 @@
 import { Inject, Service } from "typedi";
 import { EthereumBlockRow } from "./ethereum-block-row.entity";
-import { RepositoryFactory } from "./repository-factory";
+import { RepositoryFactory } from "./repository.factory";
 
 @Service(EthereumBlockRowRepository.name)
 export class EthereumBlockRowRepository {

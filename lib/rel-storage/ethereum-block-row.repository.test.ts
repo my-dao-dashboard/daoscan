@@ -1,5 +1,5 @@
 import { EthereumBlockRowRepository } from "./ethereum-block-row.repository";
-import { RepositoryFactory } from "./repository-factory";
+import { RepositoryFactory } from "./repository.factory";
 import faker from "faker";
 import { EthereumBlockRow } from "./ethereum-block-row.entity";
 

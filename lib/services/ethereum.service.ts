@@ -8,7 +8,7 @@ import { EnvService, IEnvService } from "./env.service";
 import { AbiItem } from "web3-utils";
 import { AbiCodec } from "./abi-codec";
 import { Contract, ContractOptions } from "web3-eth-contract";
-import {TransactionConfig} from "web3-core";
+import { TransactionConfig } from "web3-core";
 
 export interface ExtendedTransactionReceipt extends TransactionReceipt {
   input: string;
@@ -78,5 +78,10 @@ export class EthereumService {
       const fromEns = await this.web3.eth.ens.getAddress(addressOrName);
       return fromEns.toLowerCase();
     }
+  }
+
+  async latestBlockNumber(): Promise<number> {
+    const block = await this.web3.eth.getBlock("latest");
+    return block.number;
   }
 }

@@ -1,6 +1,6 @@
 import { Scenario } from "../shared/scenario.interface";
 import { Inject, Service } from "typedi";
-import { ConnectionFactory } from "../rel-storage/connection-factory";
+import { ConnectionFactory } from "../rel-storage/connection.factory";
 
 @Service(UpMigrationScenario.name)
 export class UpMigrationScenario implements Scenario<void, string[]> {

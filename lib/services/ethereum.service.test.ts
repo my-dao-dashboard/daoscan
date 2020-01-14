@@ -120,3 +120,19 @@ test("extendedBlock", async () => {
   expect(result.receipts.length).toEqual(2);
   expect(result.logs.length).toEqual(2);
 });
+
+test("latestBlockNumber", async () => {
+  const blockNumber = faker.random.number();
+  const getBlock = jest.fn(() => {
+    return {
+      number: blockNumber
+    };
+  });
+  fakeWeb3(ethereumService, {
+    eth: {
+      getBlock: getBlock
+    }
+  });
+  const result = await ethereumService.latestBlockNumber();
+  expect(result).toEqual(blockNumber);
+});
