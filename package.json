@@ -3,7 +3,8 @@
   "version": "1.0.0-alpha.0",
   "license": "AGPL-3.0-only",
   "scripts": {
-    "deploy": "rm -rf .build/ && serverless deploy",
+    "deploy:beta": "rm -rf .build/ && serverless deploy --stage beta",
+    "deploy:prod": "rm -rf .build/ && serverless deploy --stage prod",
     "start": "serverless offline --useSeparateProcesses",
     "lint": "prettier --check \"{lib,functions}/**/*.ts\"",
     "lint:fix": "prettier --write \"{lib,functions}/**/*.ts\""
@@ -23,7 +24,8 @@
     "typedi": "^0.8.0",
     "typeorm": "^0.2.22",
     "uuid": "^3.3.3",
-    "web3": "^1.2.4"
+    "web3": "^1.2.4",
+    "axios-retry": "^3.1.2"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.39",
@@ -35,7 +37,6 @@
     "@types/node": "^12.12.24",
     "@types/node-fetch": "^2.5.4",
     "@types/uuid": "^3.4.6",
-    "axios-retry": "^3.1.2",
     "faker": "^4.1.0",
     "jest": "^24.9.0",
     "prettier": "^1.19.1",
