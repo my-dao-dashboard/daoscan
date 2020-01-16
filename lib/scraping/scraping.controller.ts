@@ -9,7 +9,8 @@ import { Service, Inject } from "typedi";
 import { EthereumBlockRowRepository } from "../rel-storage/ethereum-block-row.repository";
 import { BlocksQueue } from "../queues/blocks.queue";
 import { TickBlockScenario } from "./tick-block.scenario";
-import { ParseBlockScenario } from "./parse-block.scenario";
+import { NewBlockScenario } from "./new-block.scenario";
+import { SaveOrganisationEventScenario } from "./save-organisation-event.scenario";
 
 function isAPIGatewayEvent(event: any): event is APIGatewayEvent {
   return !!event.httpMethod && !!event.path;
@@ -23,41 +24,35 @@ export class ScrapingController {
     @Inject(EthereumBlockRowRepository.name) private readonly ethereumBlockRowRepository: EthereumBlockRowRepository,
     @Inject(BlocksQueue.name) private readonly blocksQueue: BlocksQueue,
     @Inject(TickBlockScenario.name) private readonly tickBlockScenario: TickBlockScenario,
-    @Inject(ParseBlockScenario.name) private readonly parseBlockScenario: ParseBlockScenario
+    @Inject(NewBlockScenario.name) private readonly parseBlockScenario: NewBlockScenario,
+    @Inject(SaveOrganisationEventScenario.name)
+    private readonly saveOrganisationEventScenario: SaveOrganisationEventScenario
   ) {}
-
-  async parseBlockFromPayload(payload: string): Promise<{ events: OrganisationEvent[] }> {
-    const data = JSON.parse(payload);
-    const id = Number(data.id);
-    const result = await this.parseBlockScenario.execute(id);
-    console.log("Got events:", result.events);
-    return result;
-  }
 
   @bind()
   async parseBlock(event: APIGatewayEvent | SQSEvent): Promise<{ body: string; statusCode: number } | void> {
     if (isAPIGatewayEvent(event)) {
       if (event.body) {
-        const result = await this.parseBlockFromPayload(event.body);
-        return ok(result);
+        const events = await this.parseBlockScenario.execute(event.body);
+        return ok({ events });
       } else {
         throw new BadRequestError("Expect body with block id");
       }
     } else {
       await Promise.all(
         event.Records.map(async record => {
-          await this.parseBlockFromPayload(record.body);
+          await this.parseBlockScenario.execute(record.body);
         })
       );
     }
   }
 
-  @bind()
-  parseParticipants(event: APIGatewayEvent): Promise<{ addr: string; participants: string[] }> {
-    const data = JSON.parse(String(event.body));
-    const organisationAddress = data.organisationAddress;
-    return this.scrapingService.parseParticipants(organisationAddress);
-  }
+  // @bind()
+  // parseParticipants(event: APIGatewayEvent): Promise<{ addr: string; participants: string[] }> {
+  //   const data = JSON.parse(String(event.body));
+  //   const organisationAddress = data.organisationAddress;
+  //   return this.scrapingService.parseParticipants(organisationAddress);
+  // }
 
   @bind()
   async readExtendedBlock(event: APIGatewayEvent): Promise<{ block: ExtendedBlock; events: OrganisationEvent[] }> {
@@ -71,7 +66,8 @@ export class ScrapingController {
   async saveOrganisationEvent(event: SQSEvent): Promise<void> {
     const loop = event.Records.map(async r => {
       const event = JSON.parse(r.body) as OrganisationEvent;
-      await this.scrapingService.saveOrganisationEvent(event);
+      await this.saveOrganisationEventScenario.execute(event);
+      // await this.scrapingService.saveOrganisationEvent(event);
     });
 
     await Promise.all(loop);

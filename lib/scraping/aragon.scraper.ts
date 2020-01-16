@@ -35,7 +35,7 @@ export class AragonScraper implements Scraper {
     const createdFromTransaction = await this.createdFromTransactions(block);
     const createdFromEvents = await this.createdFromEvents(block);
     const appInstalled = await this.appInstalledEvents(block);
-    const transfers = await this.transfers(block, appInstalled);
+    // const transfers = await this.transfers(block, appInstalled);
 
     const result = [] as OrganisationEvent[];
 
@@ -43,43 +43,43 @@ export class AragonScraper implements Scraper {
       .concat(createdFromEvents)
       .concat(createdFromTransaction)
       .concat(appInstalled)
-      .concat(transfers);
+      // .concat(transfers);
   }
 
-  async transfers(block: ExtendedBlock, appInstalled: AppInstalledEvent[]): Promise<OrganisationEvent[]> {
-    // is Transfer event
-    const filter = (log: Log) => {
-      return log.topics.length === 3;
-    };
-    const promises = this.logEvents(block, TRANSFER_EVENT, filter).map<Promise<ShareTransferEvent | null>>(async e => {
-      let organisationAddress = await this.applicationsRepository.organisationAddressByApplicationAddress(e.address);
-      if (!organisationAddress) {
-        const foundEvent = appInstalled.find(a => a.proxyAddress.toLowerCase() === e.address.toLowerCase());
-        if (foundEvent) {
-          organisationAddress = foundEvent.organisationAddress;
-        }
-      }
-
-      if (organisationAddress) {
-        return {
-          kind: ORGANISATION_EVENT.TRANSFER_SHARE,
-          platform: PLATFORM.ARAGON,
-          organisationAddress: organisationAddress.toLowerCase(),
-          logIndex: e.logIndex,
-          txid: e.txid,
-          blockNumber: e.blockNumber,
-          shareAddress: e.address.toLowerCase(),
-          from: e._from.toLowerCase(),
-          to: e._to.toLowerCase(),
-          amount: e._amount
-        };
-      } else {
-        return null;
-      }
-    });
-    const transfers = await Promise.all(promises);
-    return _.compact(_.flatten(transfers));
-  }
+  // async transfers(block: ExtendedBlock, appInstalled: AppInstalledEvent[]): Promise<OrganisationEvent[]> {
+  //   // is Transfer event
+  //   const filter = (log: Log) => {
+  //     return log.topics.length === 3;
+  //   };
+  //   const promises = this.logEvents(block, TRANSFER_EVENT, filter).map<Promise<ShareTransferEvent | null>>(async e => {
+  //     let organisationAddress = await this.applicationsRepository.organisationAddressByApplicationAddress(e.address);
+  //     if (!organisationAddress) {
+  //       const foundEvent = appInstalled.find(a => a.proxyAddress.toLowerCase() === e.address.toLowerCase());
+  //       if (foundEvent) {
+  //         organisationAddress = foundEvent.organisationAddress;
+  //       }
+  //     }
+  //
+  //     if (organisationAddress) {
+  //       return {
+  //         kind: ORGANISATION_EVENT.TRANSFER_SHARE,
+  //         platform: PLATFORM.ARAGON,
+  //         organisationAddress: organisationAddress.toLowerCase(),
+  //         logIndex: e.logIndex,
+  //         txid: e.txid,
+  //         blockNumber: e.blockNumber,
+  //         shareAddress: e.address.toLowerCase(),
+  //         from: e._from.toLowerCase(),
+  //         to: e._to.toLowerCase(),
+  //         amount: e._amount
+  //       };
+  //     } else {
+  //       return null;
+  //     }
+  //   });
+  //   const transfers = await Promise.all(promises);
+  //   return _.compact(_.flatten(transfers));
+  // }
 
   async kernelAddress(proxy: string): Promise<string> {
     const data = this.ethereum.codec.encodeFunctionCall(
@@ -105,17 +105,11 @@ export class AragonScraper implements Scraper {
         .filter(t => t.to && (whitelist.has(t.to.toLowerCase()) || whitelist.size === 0))
         .filter(t => abiMap.has(t.input.slice(0, 10)))
         .map(async t => {
-          console.log("a");
           const signature = t.input.slice(0, 10);
-          console.log("b");
           const abi = abiMap.get(signature)!;
-          console.log("c");
           const parameters = this.ethereum.codec.decodeParameters(abi, "0x" + t.input.slice(10));
-          console.log("d");
           const ensName = `${parameters.name}.aragonid.eth`;
-          console.log("e", ensName);
           const address = await this.ethereum.canonicalAddress(ensName);
-          console.log("f");
 
           const event: OrganisationCreatedEvent = {
             kind: ORGANISATION_EVENT.CREATED,

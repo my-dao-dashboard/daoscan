@@ -1,7 +1,7 @@
 import { EthereumBlockRowRepository } from "./ethereum-block-row.repository";
 import { RepositoryFactory } from "./repository.factory";
 import faker from "faker";
-import { EthereumBlockRow } from "./ethereum-block-row.entity";
+import { EthereumBlockRow } from "./ethereum-block.row";
 
 test("byId found", async () => {
   const expected = faker.random.word();

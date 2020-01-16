@@ -13,9 +13,9 @@ const queueService: IQueueService = {
   send: send
 };
 
-const env: IEnvService = {
+const env = ({
   readString: jest.fn(() => QUEUE_NAME)
-};
+} as unknown) as IEnvService;
 
 test("send", async () => {
   const q = new BlocksQueue(queueService, env);

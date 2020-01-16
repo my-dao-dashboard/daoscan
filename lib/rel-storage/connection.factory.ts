@@ -26,8 +26,7 @@ export class ConnectionFactory {
       type: "postgres",
       url: this.readingConnectionUrl,
       migrationsRun: false,
-      entities: [`${path.join(__dirname, "./*.entity.{ts,js}")}`],
-      logging: true
+      entities: [`${path.join(__dirname, "./*.row.{ts,js}")}`]
     });
   }
 
@@ -39,7 +38,7 @@ export class ConnectionFactory {
       url: this.writingConnectionUrl,
       migrationsRun: true,
       migrations: Object.values(migrations),
-      entities: [`${path.join(__dirname, "./*.entity.{ts,js}")}`],
+      entities: [`${path.join(__dirname, "./*.row.{ts,js}")}`],
       logging: true
     });
   }

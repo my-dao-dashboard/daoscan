@@ -1,6 +1,6 @@
 import { RepositoryFactory } from "./repository.factory";
 import { ConnectionFactory } from "./connection.factory";
-import { EthereumBlockRow } from "./ethereum-block-row.entity";
+import { EthereumBlockRow } from "./ethereum-block.row";
 import faker from "faker";
 
 const mockRepository = faker.random.word();

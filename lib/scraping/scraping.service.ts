@@ -12,7 +12,6 @@ import {
   ShareTransferEvent
 } from "../shared/organisation-events";
 import { BlocksQueue } from "../queues/blocks.queue";
-import { bind } from "decko";
 import { ScrapingQueue } from "../queues/scraping.queue";
 import { TOKEN_ABI, TOKEN_CONTROLLER_ABI } from "./aragon.constants";
 import { ApplicationsRepository } from "../storage/applications.repository";
@@ -39,19 +38,6 @@ export class ScrapingService {
     @Inject(EthereumBlockRowRepository.name) private readonly ethereumBlockRowRepository: EthereumBlockRowRepository
   ) {
     this.scrapers = [new AragonScraper(this.ethereum.web3, applicationsRepository, this.ethereum)];
-  }
-
-  @bind()
-  async parseBlock(eventBody: string): Promise<{ events: OrganisationEvent[] }> {
-    const data = JSON.parse(eventBody);
-    const id = Number(data.id);
-    console.log(`Starting parsing block #${id}...`);
-    const block = await this.extendedBlock(id);
-    const events = await this.fromBlock(block);
-    await this.scrapingQueue.sendBatch(events);
-    await this.ethereumBlockRowRepository.markParsed(id, block.hash);
-    console.log(`Parsed block #${id}: events=${events.length}`);
-    return { events };
   }
 
   extendedBlock(id: number): Promise<ExtendedBlock> {

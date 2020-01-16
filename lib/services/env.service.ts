@@ -4,6 +4,7 @@ import { ConfigurationError } from "../shared/errors";
 
 export interface IEnvService {
   readString(name: ENV): string;
+  isProduction: boolean;
 }
 
 @Service(EnvService.name)
@@ -14,5 +15,15 @@ export class EnvService implements IEnvService {
       throw new ConfigurationError(`Missing ${name} env`);
     }
     return value;
+  }
+
+  get isProduction() {
+    const stage = this.readString(ENV.STAGE);
+    return stage.toLowerCase() === "prod";
+  }
+
+  get isNotDev() {
+    const stage = this.readString(ENV.STAGE);
+    return stage.toLowerCase() !== "dev";
   }
 }

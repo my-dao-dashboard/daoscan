@@ -8,18 +8,18 @@ import { AragonScraper } from "./aragon.scraper";
 import { ApplicationsRepository } from "../storage/applications.repository";
 import { ScrapingQueue } from "../queues/scraping.queue";
 import { EthereumBlockRowRepository } from "../rel-storage/ethereum-block-row.repository";
+import { RevertBlockScenario } from "./revert-block.scenario";
 
-type Result = { events: OrganisationEvent[] };
-
-@Service(ParseBlockScenario.name)
-export class ParseBlockScenario implements Scenario<number, Result> {
+@Service(AddBlockScenario.name)
+export class AddBlockScenario implements Scenario<number, OrganisationEvent[]> {
   private readonly scrapers: Scraper[];
 
   constructor(
     @Inject(EthereumService.name) private readonly ethereum: EthereumService,
     @Inject(ApplicationsRepository.name) private readonly applicationsRepository: ApplicationsRepository,
     @Inject(ScrapingQueue.name) private readonly scrapingQueue: ScrapingQueue,
-    @Inject(EthereumBlockRowRepository.name) private readonly ethereumBlockRowRepository: EthereumBlockRowRepository
+    @Inject(EthereumBlockRowRepository.name) private readonly ethereumBlockRowRepository: EthereumBlockRowRepository,
+    @Inject(RevertBlockScenario.name) private readonly revertBlockScenario: RevertBlockScenario
   ) {
     this.scrapers = [new AragonScraper(this.ethereum.web3, applicationsRepository, this.ethereum)];
   }
@@ -41,14 +41,13 @@ export class ParseBlockScenario implements Scenario<number, Result> {
     await this.ethereumBlockRowRepository.markParsed(block.number, block.hash);
   }
 
-  async execute(id: number): Promise<{ events: OrganisationEvent[] }> {
-    console.log(`Starting parsing block #${id}...`);
+  async execute(id: number): Promise<OrganisationEvent[]> {
+    console.log(`Adding block #${id}...`);
     const block = await this.extendedBlock(id);
     const events = await this.eventsFromBlock(block);
-    console.log(events)
     await this.fanoutEvents(events);
     await this.markBlockParsed(block);
-    console.log(`Parsed block #${id}: events=${events.length}`);
-    return { events };
+    console.log(`Added block #${id}: events=${events.length}`);
+    return events;
   }
 }

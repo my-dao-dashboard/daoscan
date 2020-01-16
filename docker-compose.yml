@@ -1,0 +1,18 @@
+version: '3.7'
+
+volumes:
+  postgres:
+    driver: local
+
+services:
+  postgres:
+    image: 'postgres:11'
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./scripts/postgres/1-create-database.sql:/docker-entrypoint-initdb.d/1-create-database.sql
+    ports:
+      - 5432:5432
+  elasticmq:
+    image: 's12v/elasticmq:latest'
+    ports:
+      - 9324:9324

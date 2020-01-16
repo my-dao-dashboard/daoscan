@@ -3,12 +3,12 @@ import { ENV } from "../shared/env";
 import { ConnectionFactory, CreateConnectionFunction } from "./connection.factory";
 import faker from "faker";
 import path from "path";
-import * as migrations from './migrations'
+import * as migrations from "./migrations";
 
 const READ_URL = faker.internet.url();
 const WRITE_URL = faker.internet.url();
 
-const env: EnvService = {
+const env = ({
   readString: jest.fn((env: ENV) => {
     switch (env) {
       case ENV.WRITE_DATABASE_URL:
@@ -19,7 +19,7 @@ const env: EnvService = {
         throw new Error("Not supported here");
     }
   })
-};
+} as unknown) as EnvService;
 
 test("reading", async () => {
   const connectionFactory = new ConnectionFactory(env);

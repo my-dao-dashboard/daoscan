@@ -10,5 +10,5 @@ export const tickBlock = scrapingController.tickBlock;
 export const parseBlock = scrapingController.parseBlock;
 export const saveOrganisationEvent = scrapingController.saveOrganisationEvent;
 
-export const parseParticipants = httpHandler(scrapingController.parseParticipants);
+// export const parseParticipants = httpHandler(scrapingController.parseParticipants);
 export const readExtendedBlock = httpHandler(scrapingController.readExtendedBlock);

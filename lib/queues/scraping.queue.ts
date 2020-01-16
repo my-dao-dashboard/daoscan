@@ -12,10 +12,11 @@ export class ScrapingQueue {
     @Inject(QueueService.name) private readonly queue: IQueueService,
     @Inject(EnvService.name) private readonly env: IEnvService
   ) {
-    this.queueName = env.readString(ENV.SCRAPING_SQS_URL);
+    this.queueName = 'foo' //env.readString(ENV.SCRAPING_SQS_URL);
   }
 
   sendBatch(events: OrganisationEvent[]): Promise<void> {
+    console.log('sendBatchq', this.queueName)
     return this.queue.sendBatch(this.queueName, events);
   }
 

@@ -1,6 +1,7 @@
 import { SQS } from "aws-sdk";
 import * as _ from "lodash";
-import { Service } from "typedi";
+import { Inject, Service } from "typedi";
+import { EnvService } from "../services/env.service";
 
 export interface IQueueService {
   sendBatch(queueUrl: string, payloads: any[]): Promise<void>;
@@ -9,7 +10,7 @@ export interface IQueueService {
 
 @Service(QueueService.name)
 export class QueueService implements IQueueService {
-  constructor(private readonly sqs: SQS = new SQS()) {}
+  constructor(@Inject(EnvService.name) private readonly env: EnvService, private readonly sqs: SQS = new SQS()) {}
 
   async sendBatch(queueUrl: string, payloads: any[]): Promise<void> {
     if (payloads.length) {
@@ -31,23 +32,28 @@ export class QueueService implements IQueueService {
       QueueUrl: queueUrl,
       Entries: entries
     };
-    console.debug(`Posting message to queue ${queueUrl}`, message);
-    return new Promise((resolve, reject) => {
-      this.sqs.sendMessageBatch(message, error => {
-        error ? reject(error) : resolve();
+    console.debug(`Posting chunked messages to queue ${queueUrl}`, message);
+    if (this.env.isNotDev) {
+      return new Promise((resolve, reject) => {
+        this.sqs.sendMessageBatch(message, error => {
+          error ? reject(error) : resolve();
+        });
       });
-    });
+    }
   }
 
-  send(queueUrl: string, payload: any): Promise<void> {
+  async send(queueUrl: string, payload: any): Promise<void> {
     const message: SQS.Types.SendMessageRequest = {
       QueueUrl: queueUrl,
       MessageBody: JSON.stringify(payload)
     };
-    return new Promise((resolve, reject) => {
-      this.sqs.sendMessage(message, error => {
-        error ? reject(error) : resolve();
+    console.debug(`Posting message to queue ${queueUrl}`, message);
+    if (this.env.isNotDev) {
+      return new Promise((resolve, reject) => {
+        this.sqs.sendMessage(message, error => {
+          error ? reject(error) : resolve();
+        });
       });
-    });
+    }
   }
 }

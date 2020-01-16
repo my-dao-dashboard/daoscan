@@ -13,6 +13,7 @@
     "apollo-server-lambda": "^2.9.15",
     "aws-sdk": "^2.600.0",
     "axios": "^0.19.1",
+    "axios-retry": "^3.1.2",
     "bignumber.js": "^9.0.0",
     "decko": "^1.2.0",
     "graphql": "^14.5.8",
@@ -24,8 +25,7 @@
     "typedi": "^0.8.0",
     "typeorm": "^0.2.22",
     "uuid": "^3.3.3",
-    "web3": "^1.2.4",
-    "axios-retry": "^3.1.2"
+    "web3": "^1.2.4"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.39",
@@ -41,8 +41,10 @@
     "jest": "^24.9.0",
     "prettier": "^1.19.1",
     "serverless": "^1.60.5",
+    "serverless-cloudside-plugin": "^1.0.3",
     "serverless-domain-manager": "^3.3.0",
     "serverless-offline": "^5.12.1",
+    "serverless-offline-sqs-local": "^1.0.2",
     "serverless-plugin-typescript": "^1.1.9",
     "ts-jest": "^24.3.0",
     "ts-node": "^8.5.4",

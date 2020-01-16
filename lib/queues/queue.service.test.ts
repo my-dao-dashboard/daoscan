@@ -1,6 +1,7 @@
 import { QueueService } from "./queue.service";
 import * as _ from "lodash";
 import { SQS } from "aws-sdk";
+import { IEnvService } from "../services/env.service";
 
 const sendMessage = jest.fn((message, callback) => {
   callback(null);
@@ -9,6 +10,10 @@ const sendMessage = jest.fn((message, callback) => {
 const sendMessageBatch = jest.fn((messages, callback) => {
   callback(null);
 });
+
+const env = ({
+  isProduction: true
+} as unknown) as IEnvService;
 
 const SQSMocked = {
   sendMessage: sendMessage,
@@ -32,7 +37,7 @@ const QUEUE_URL = "foo";
 
 test("constructor", async () => {
   const sqs = SQSMocked as unknown;
-  const queueService = new QueueService(sqs as SQS);
+  const queueService = new QueueService(env, sqs as SQS);
   const message = { foo: "hello" };
   await queueService.send(QUEUE_URL, message);
   expect((sqs as any).sendMessage).toBeCalledTimes(1);
@@ -40,7 +45,7 @@ test("constructor", async () => {
 
 describe("send", () => {
   test("send object", async () => {
-    const queueService = new QueueService();
+    const queueService = new QueueService(env);
     const message = { foo: "hello" };
     await queueService.send(QUEUE_URL, message);
     expect(SQSMocked.sendMessage).toBeCalledTimes(1);
@@ -51,7 +56,7 @@ describe("send", () => {
   });
 
   test("send rejected", async () => {
-    const queueService = new QueueService();
+    const queueService = new QueueService(env);
     const message = { foo: "hello" };
     const error = new Error("Oops");
     SQSMocked.sendMessage = jest.fn((message, callback) => {
@@ -64,7 +69,7 @@ describe("send", () => {
 describe("sendBatch", () => {
   test("send no", async () => {
     const times = 0;
-    const queueService = new QueueService();
+    const queueService = new QueueService(env);
     const messages = _.times(times).map(() => ({ foo: "hello" }));
     await queueService.sendBatch(QUEUE_URL, messages);
     expect(SQSMocked.sendMessageBatch).toBeCalledTimes(0);
@@ -72,7 +77,7 @@ describe("sendBatch", () => {
 
   test("send few", async () => {
     const times = 5;
-    const queueService = new QueueService();
+    const queueService = new QueueService(env);
     const messages = _.times(times).map(() => ({ foo: "hello" }));
     await queueService.sendBatch(QUEUE_URL, messages);
     expect(SQSMocked.sendMessageBatch).toBeCalledTimes(1);
@@ -86,7 +91,7 @@ describe("sendBatch", () => {
 
   test("reject", async () => {
     const times = 5;
-    const queueService = new QueueService();
+    const queueService = new QueueService(env);
     const messages = _.times(times).map(() => ({ foo: "hello" }));
     const error = new Error("Oops");
     SQSMocked.sendMessageBatch = jest.fn((messages, callback) => {
@@ -97,7 +102,7 @@ describe("sendBatch", () => {
 
   test("send whole batch", async () => {
     const times = 15;
-    const queueService = new QueueService();
+    const queueService = new QueueService(env);
     const messages = _.times(times).map(i => ({ foo: `hello, ${i}` }));
     await queueService.sendBatch(QUEUE_URL, messages);
     expect(SQSMocked.sendMessageBatch).toBeCalledTimes(2);

@@ -1,5 +1,5 @@
 import { Inject, Service } from "typedi";
-import { EthereumBlockRow } from "./ethereum-block-row.entity";
+import { EthereumBlockRow } from "./ethereum-block.row";
 import { RepositoryFactory } from "./repository.factory";
 
 @Service(EthereumBlockRowRepository.name)
@@ -12,8 +12,14 @@ export class EthereumBlockRowRepository {
   }
 
   async isPresent(id: number): Promise<boolean> {
-    const found = await this.byId(id)
-    return Boolean(found)
+    const found = await this.byId(id);
+    return Boolean(found);
+  }
+
+  async delete(id: number): Promise<void> {
+    const repository = await this.repositoryFactory.writing(EthereumBlockRow);
+    await repository.delete({ id });
+    console.log(`Deleted block #${id}`)
   }
 
   async markParsed(id: number, hash: string): Promise<void> {
