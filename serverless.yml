@@ -75,9 +75,11 @@ functions:
     handler: functions/scraping.tickBlock
     events:
       - schedule: rate(1 minute)
+    concurrency: 1
   scraping-parseBlock:
     handler: functions/scraping.parseBlock
     timeout: 300
+    concurrency: 1
     events:
       - http:
           path: block

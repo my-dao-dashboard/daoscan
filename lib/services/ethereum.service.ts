@@ -73,8 +73,15 @@ export class EthereumService {
 
   async canonicalAddress(addressOrName: string): Promise<string> {
     if (this.web3.utils.isAddress(addressOrName)) {
+      console.log('isAddress', addressOrName)
       return addressOrName.toLowerCase();
     } else {
+      console.log('ens', addressOrName)
+      try {
+        const fromEnsA = await this.web3.eth.ens.getAddress(addressOrName);
+      } catch (e) {
+        console.error(e)
+      }
       const fromEns = await this.web3.eth.ens.getAddress(addressOrName);
       return fromEns.toLowerCase();
     }

@@ -9,6 +9,7 @@ import { Service, Inject } from "typedi";
 import { EthereumBlockRowRepository } from "../rel-storage/ethereum-block-row.repository";
 import { BlocksQueue } from "../queues/blocks.queue";
 import { TickBlockScenario } from "./tick-block.scenario";
+import { ParseBlockScenario } from "./parse-block.scenario";
 
 function isAPIGatewayEvent(event: any): event is APIGatewayEvent {
   return !!event.httpMethod && !!event.path;
@@ -21,16 +22,23 @@ export class ScrapingController {
     @Inject(EthereumService.name) private readonly ethereum: EthereumService,
     @Inject(EthereumBlockRowRepository.name) private readonly ethereumBlockRowRepository: EthereumBlockRowRepository,
     @Inject(BlocksQueue.name) private readonly blocksQueue: BlocksQueue,
-    @Inject(TickBlockScenario.name) private readonly tickBlockScenario: TickBlockScenario
+    @Inject(TickBlockScenario.name) private readonly tickBlockScenario: TickBlockScenario,
+    @Inject(ParseBlockScenario.name) private readonly parseBlockScenario: ParseBlockScenario
   ) {}
 
-  parseBlock(event: APIGatewayEvent): Promise<{ body: string; statusCode: number }>;
-  parseBlock(event: SQSEvent): Promise<void>;
+  async parseBlockFromPayload(payload: string): Promise<{ events: OrganisationEvent[] }> {
+    const data = JSON.parse(payload);
+    const id = Number(data.id);
+    const result = await this.parseBlockScenario.execute(id);
+    console.log("Got events:", result.events);
+    return result;
+  }
+
   @bind()
   async parseBlock(event: APIGatewayEvent | SQSEvent): Promise<{ body: string; statusCode: number } | void> {
     if (isAPIGatewayEvent(event)) {
       if (event.body) {
-        const result = await this.scrapingService.parseBlock(event.body);
+        const result = await this.parseBlockFromPayload(event.body);
         return ok(result);
       } else {
         throw new BadRequestError("Expect body with block id");
@@ -38,7 +46,7 @@ export class ScrapingController {
     } else {
       await Promise.all(
         event.Records.map(async record => {
-          await this.scrapingService.parseBlock(record.body);
+          await this.parseBlockFromPayload(record.body);
         })
       );
     }

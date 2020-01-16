@@ -105,11 +105,17 @@ export class AragonScraper implements Scraper {
         .filter(t => t.to && (whitelist.has(t.to.toLowerCase()) || whitelist.size === 0))
         .filter(t => abiMap.has(t.input.slice(0, 10)))
         .map(async t => {
+          console.log("a");
           const signature = t.input.slice(0, 10);
+          console.log("b");
           const abi = abiMap.get(signature)!;
+          console.log("c");
           const parameters = this.ethereum.codec.decodeParameters(abi, "0x" + t.input.slice(10));
+          console.log("d");
           const ensName = `${parameters.name}.aragonid.eth`;
+          console.log("e", ensName);
           const address = await this.ethereum.canonicalAddress(ensName);
+          console.log("f");
 
           const event: OrganisationCreatedEvent = {
             kind: ORGANISATION_EVENT.CREATED,
