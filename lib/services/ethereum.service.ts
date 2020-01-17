@@ -3,12 +3,11 @@ import { BlockTransactionString, Transaction, TransactionReceipt } from "web3-et
 import { Log } from "web3-core/types";
 import * as _ from "lodash";
 import { Inject, Service } from "typedi";
-import { ENV } from "../shared/env";
-import { EnvService, IEnvService } from "./env.service";
 import { AbiItem } from "web3-utils";
 import { AbiCodec } from "./abi-codec";
 import { Contract, ContractOptions } from "web3-eth-contract";
 import { TransactionConfig } from "web3-core";
+import { ENV, EnvService } from "./env.service";
 
 export interface ExtendedTransactionReceipt extends TransactionReceipt {
   input: string;
@@ -19,23 +18,25 @@ export interface ExtendedBlock extends BlockTransactionString {
   logs: Log[];
 }
 
+type BlockNumber = number | "latest";
+
 @Service(EthereumService.name)
 export class EthereumService {
-  readonly web3: Web3;
+  private readonly web3: Web3;
   readonly codec: AbiCodec;
 
-  constructor(@Inject(EnvService.name) env: IEnvService) {
+  constructor(@Inject(EnvService.name) env: EnvService) {
     const endpoint = env.readString(ENV.ETHEREUM_RPC);
     const provider = new Web3.providers.HttpProvider(endpoint);
     this.web3 = new Web3(provider);
     this.codec = new AbiCodec(this.web3);
   }
 
-  block(number: string | number): Promise<BlockTransactionString> {
+  block(number: BlockNumber): Promise<BlockTransactionString> {
     return this.web3.eth.getBlock(number);
   }
 
-  async extendedBlock(number: string | number): Promise<ExtendedBlock> {
+  async extendedBlock(number: BlockNumber): Promise<ExtendedBlock> {
     const block = await this.block(number);
     const receipts = await Promise.all(
       block.transactions.map(async txid => {
@@ -73,22 +74,10 @@ export class EthereumService {
 
   async canonicalAddress(addressOrName: string): Promise<string> {
     if (this.web3.utils.isAddress(addressOrName)) {
-      console.log('isAddress', addressOrName)
       return addressOrName.toLowerCase();
     } else {
-      console.log('ens', addressOrName)
-      try {
-        const fromEnsA = await this.web3.eth.ens.getAddress(addressOrName);
-      } catch (e) {
-        console.error(e)
-      }
       const fromEns = await this.web3.eth.ens.getAddress(addressOrName);
       return fromEns.toLowerCase();
     }
-  }
-
-  async latestBlockNumber(): Promise<number> {
-    const block = await this.web3.eth.getBlock("latest");
-    return block.number;
   }
 }

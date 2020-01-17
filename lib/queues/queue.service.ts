@@ -33,7 +33,7 @@ export class QueueService implements IQueueService {
       Entries: entries
     };
     console.debug(`Posting chunked messages to queue ${queueUrl}`, message);
-    if (this.env.isNotDev) {
+    if (this.env.canQueue) {
       return new Promise((resolve, reject) => {
         this.sqs.sendMessageBatch(message, error => {
           error ? reject(error) : resolve();
@@ -48,7 +48,7 @@ export class QueueService implements IQueueService {
       MessageBody: JSON.stringify(payload)
     };
     console.debug(`Posting message to queue ${queueUrl}`, message);
-    if (this.env.isNotDev) {
+    if (this.env.canQueue) {
       return new Promise((resolve, reject) => {
         this.sqs.sendMessage(message, error => {
           error ? reject(error) : resolve();

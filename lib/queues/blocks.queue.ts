@@ -1,7 +1,6 @@
 import { IQueueService, QueueService } from "./queue.service";
 import { Service, Inject } from "typedi";
-import { EnvService, IEnvService } from "../services/env.service";
-import { ENV } from "../shared/env";
+import { ENV, EnvService } from "../services/env.service";
 
 @Service(BlocksQueue.name)
 export class BlocksQueue {
@@ -9,14 +8,17 @@ export class BlocksQueue {
 
   constructor(
     @Inject(QueueService.name) private readonly queue: IQueueService,
-    @Inject(EnvService.name) env: IEnvService
+    @Inject(EnvService.name) env: EnvService
   ) {
     this.queueName = env.readString(ENV.BLOCKS_SQS_URL);
   }
 
-  async send(id: number): Promise<void> {
-    await this.queue.send(this.queueName, {
-      id
+  async sendBatch(ids: number[]) {
+    const payload = ids.map(id => {
+      return {
+        id
+      };
     });
+    await this.queue.sendBatch(this.queueName, payload);
   }
 }

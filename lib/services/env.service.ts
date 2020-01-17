@@ -1,14 +1,18 @@
 import { Service } from "typedi";
-import { ENV } from "../shared/env";
 import { ConfigurationError } from "../shared/errors";
 
-export interface IEnvService {
-  readString(name: ENV): string;
-  isProduction: boolean;
+export enum ENV {
+  BLOCKS_SQS_URL = "BLOCKS_SQS_URL",
+  SCRAPING_SQS_URL = "SCRAPING_SQS_URL",
+  ETHEREUM_RPC = "ETHEREUM_RPC",
+  READ_DATABASE_URL = "READ_DATABASE_URL",
+  WRITE_DATABASE_URL = "WRITE_DATABASE_URL",
+  UTIL_SECRET = "UTIL_SECRET",
+  STAGE = "STAGE"
 }
 
 @Service(EnvService.name)
-export class EnvService implements IEnvService {
+export class EnvService {
   readString(name: ENV): string {
     const value = process.env[name];
     if (!value) {
@@ -17,12 +21,7 @@ export class EnvService implements IEnvService {
     return value;
   }
 
-  get isProduction() {
-    const stage = this.readString(ENV.STAGE);
-    return stage.toLowerCase() === "prod";
-  }
-
-  get isNotDev() {
+  get canQueue(): boolean {
     const stage = this.readString(ENV.STAGE);
     return stage.toLowerCase() !== "dev";
   }

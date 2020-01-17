@@ -1,14 +1,12 @@
 import "reflect-metadata";
 
 import { Container } from "typedi";
-import { httpHandler } from "../lib/shared/http-handler";
-import { ScrapingController } from "../lib/scraping/scraping.controller";
+import { BlockController } from "../lib/scraping/block.controller";
+import { CommandController } from "../lib/scraping/command.controller";
 
-const scrapingController = Container.get(ScrapingController);
+const blockController = Container.get(BlockController);
+const commandController = Container.get(CommandController);
 
-export const tickBlock = scrapingController.tickBlock;
-export const parseBlock = scrapingController.parseBlock;
-export const saveOrganisationEvent = scrapingController.saveOrganisationEvent;
-
-// export const parseParticipants = httpHandler(scrapingController.parseParticipants);
-export const readExtendedBlock = httpHandler(scrapingController.readExtendedBlock);
+export const tickBlock = blockController.tick;
+export const addBlock = blockController.add;
+export const handleCommand = commandController.handle;

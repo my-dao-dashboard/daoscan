@@ -1,7 +1,7 @@
 import { Container } from "typedi";
-import { UtilController } from "../lib/util/util.controller";
 import { httpHandler } from "../lib/shared/http-handler";
+import { MigrationController } from "../lib/util/migration.controller";
 
-const controller = Container.get(UtilController);
+const controller = Container.get(MigrationController);
 
-export const migrateUp = httpHandler(controller.migrateUp);
+export const upMigration = httpHandler(controller.up);

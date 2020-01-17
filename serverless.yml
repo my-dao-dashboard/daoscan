@@ -5,8 +5,8 @@ org: ukstv
 custom:
   stage: ${opt:stage, self:provider.stage}
   domains:
-    prod: 'daoscan.net'
-    beta: 'beta.daoscan.net'
+    prod: "daoscan.net"
+    beta: "beta.daoscan.net"
   customDomain:
     domainName: ${self:custom.domains.${self:custom.stage}}
     stage: ${self:custom.stage}
@@ -26,34 +26,11 @@ provider:
       Ref: ScrapingQueue
     BLOCKS_SQS_URL:
       Ref: BlocksQueue
-    ORGANISATIONS_TABLE: ${self:custom.stage}-organisations
-    APPLICATIONS_TABLE: ${self:custom.stage}-applications
-    APPLICATIONS_PER_ADDRESS_INDEX: byProxyAddress
-    PARTICIPANTS_TABLE: ${self:custom.stage}-participants
-    PARTICIPANTS_INDEX: by-participant
-
     STAGE: ${self:custom.stage}
     READ_DATABASE_URL: ${file(resources/${self:custom.stage}.env.yaml):READ_DATABASE_URL}
     WRITE_DATABASE_URL: ${file(resources/${self:custom.stage}.env.yaml):WRITE_DATABASE_URL}
     UTIL_SECRET: ${file(resources/${self:custom.stage}.env.yaml):UTIL_SECRET}
   iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - dynamodb:DescribeTable
-        - dynamodb:Query
-        - dynamodb:Scan
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
-        - dynamodb:BatchWriteItem
-      Resource:
-        - "Fn::GetAtt": [OrganisationsTable, Arn]
-        - "Fn::GetAtt": [ApplicationsTable, Arn]
-        - "Fn::GetAtt": [ParticipantsTable, Arn]
-        - "Fn::GetAtt": [BlocksTable, Arn]
-        - "Fn::Join": ["/", [{ "Fn::GetAtt": ["ParticipantsTable", "Arn"] }, "index", "by-participant"]]
-        - "Fn::Join": ["/", [{ "Fn::GetAtt": ["ApplicationsTable", "Arn"] }, "index", "byProxyAddress"]]
     - Effect: Allow
       Action:
         - sqs:SendMessageBatch
@@ -72,81 +49,33 @@ plugins:
   - serverless-domain-manager
 
 functions:
-  scraping-tickBlock:
+  scraping-block-tick:
     handler: functions/scraping.tickBlock
+    concurrency: 1
     events:
       - schedule: rate(1 minute)
-    concurrency: 1
-  scraping-parseBlock:
-    handler: functions/scraping.parseBlock
+      - http:
+          path: tick
+          method: get
+  scraping-block-add:
+    handler: functions/scraping.addBlock
     timeout: 300
     concurrency: 1
     events:
       - http:
           path: block
           method: post
-          cors: true
       - sqs:
           arn:
             Fn::GetAtt:
               - BlocksQueue
               - Arn
-  scraping-saveOgranisationEvent:
-    handler: functions/scraping.saveOrganisationEvent
-    events:
-      - sqs:
-          arn:
-            Fn::GetAtt:
-              - ScrapingQueue
-              - Arn
-  scraping-parseParticipants:
-    handler: functions/scraping.parseParticipants
+  util-migration-up:
+    handler: functions/util.upMigration
     events:
       - http:
-          path: parse-participants
+          path: util/migration/up
           method: post
-          cors: true
-  api-read-participants-by-organisation:
-    handler: functions/api.readParticipants
-    events:
-      - http:
-          path: get-participants/{organisationAddress}
-          method: get
-  api-read-organisations-by-participant:
-    handler: functions/api.readOrganisations
-    events:
-      - http:
-          path: get-organisations/{participantAddress}
-          method: get
-  tmp-all-orgs:
-    handler: functions/api.allOrgs
-    events:
-      - http:
-          path: all-orgs
-          method: get
-  tmpExtendedBlock:
-    handler: functions/scraping.readExtendedBlock
-    events:
-      - http:
-          path: extended-block/{id}
-          method: get
-  util-migrateUp:
-    handler: functions/util.migrateUp
-    events:
-      - http:
-          path: util/migrate-up
-          method: post
-  api-graphql:
-    handler: functions/api.graphql
-    events:
-      - http:
-          path: graphql
-          method: post
-          cors: true
-      - http:
-          path: graphql
-          method: get
 
 resources:
-  - ${file(resources/dynamodb.yml)}
   - ${file(resources/sqs.yml)}

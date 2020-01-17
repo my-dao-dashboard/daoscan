@@ -12,7 +12,3 @@ services:
       - ./scripts/postgres/1-create-database.sql:/docker-entrypoint-initdb.d/1-create-database.sql
     ports:
       - 5432:5432
-  elasticmq:
-    image: 's12v/elasticmq:latest'
-    ports:
-      - 9324:9324
