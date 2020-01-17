@@ -30,7 +30,7 @@ export class BlockTickScenario implements Scenario<void, Block[]> {
   }
 
   blocksWorthAdding(recent: Block[], stored: Block[]) {
-    return _.differenceWith(recent, stored, (a, b) => a.id == b.id && a.hash == b.hash);
+    return _.differenceWith(recent, stored, (a, b) => a.equals(b));
   }
 
   async execute() {

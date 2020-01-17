@@ -13,7 +13,7 @@ export class BlockFactory {
   async allFromStorage(ids: number[]): Promise<Block[]> {
     const rows = await this.repository.allByIds(ids);
     return rows.map(row => {
-      return new Block({ id: row.id, hash: row.hash });
+      return new Block({ id: row.id, hash: row.hash.toLowerCase() });
     });
   }
 
@@ -21,7 +21,7 @@ export class BlockFactory {
     const ethereumBlock = await this.ethereum.block(id);
     const props = {
       id: ethereumBlock.number,
-      hash: ethereumBlock.hash
+      hash: ethereumBlock.hash.toLowerCase()
     };
     return new Block(props);
   }
