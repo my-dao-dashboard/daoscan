@@ -5,6 +5,7 @@ import { EthereumService } from "../services/ethereum.service";
 import { BlockRepository } from "../storage/block.repository";
 import _ from "lodash";
 import { BlockTransactionString } from "web3-eth";
+import { BlockAddEvent } from "./block-add.event";
 
 const DEPTH = 20;
 
@@ -52,8 +53,10 @@ export class BlockTickScenario implements Scenario<void, Block[]> {
     const recentBlocks = await this.recentBlocks(recentBlockNumbers);
     const storedBlocks = await this.storedBlocks(recentBlockNumbers);
     const worthAdding = this.blocksWorthAdding(recentBlocks, storedBlocks);
-    const ids = worthAdding.map(b => b.id);
-    await this.queue.sendBatch(ids);
+    const events = worthAdding.map<BlockAddEvent>(b => {
+      return { id: b.id };
+    });
+    await this.queue.sendBatch(events);
     return worthAdding;
   }
 }

@@ -50,15 +50,15 @@ plugins:
 
 functions:
   scraping-block-tick:
-    handler: functions/scraping.tickBlock
+    handler: functions/scraping.blockTick
     concurrency: 1
     events:
       - schedule: rate(1 minute)
       - http:
-          path: tick
-          method: get
+          path: block/tick
+          method: put
   scraping-block-add:
-    handler: functions/scraping.addBlock
+    handler: functions/scraping.blockAdd
     timeout: 300
     concurrency: 1
     events:

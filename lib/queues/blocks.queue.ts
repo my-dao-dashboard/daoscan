@@ -1,6 +1,7 @@
 import { IQueueService, QueueService } from "./queue.service";
 import { Service, Inject } from "typedi";
 import { ENV, EnvService } from "../services/env.service";
+import { BlockAddEvent } from "../scraping/block-add.event";
 
 @Service(BlocksQueue.name)
 export class BlocksQueue {
@@ -13,12 +14,7 @@ export class BlocksQueue {
     this.queueName = env.readString(ENV.BLOCKS_SQS_URL);
   }
 
-  async sendBatch(ids: number[]) {
-    const payload = ids.map(id => {
-      return {
-        id
-      };
-    });
-    await this.queue.sendBatch(this.queueName, payload);
+  async sendBatch(events: BlockAddEvent[]) {
+    await this.queue.sendBatch(this.queueName, events);
   }
 }
