@@ -1,7 +1,7 @@
 import { SQS } from "aws-sdk";
 import * as _ from "lodash";
 import { Inject, Service } from "typedi";
-import { EnvService } from "../services/env.service";
+import { EnvService } from "./env.service";
 
 export interface IQueueService {
   sendBatch(queueUrl: string, payloads: any[]): Promise<void>;

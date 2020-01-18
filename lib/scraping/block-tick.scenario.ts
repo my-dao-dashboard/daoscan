@@ -1,6 +1,6 @@
 import { Scenario } from "../shared/scenario";
 import { Inject, Service } from "typedi";
-import { BlocksQueue } from "../queues/blocks.queue";
+import { BlocksQueue } from "./blocks.queue";
 import _ from "lodash";
 import { BlockAddEvent } from "./block-add.event";
 import { Block } from "./block";

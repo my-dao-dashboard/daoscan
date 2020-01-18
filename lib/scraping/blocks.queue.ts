@@ -1,7 +1,7 @@
-import { IQueueService, QueueService } from "./queue.service";
+import { IQueueService, QueueService } from "../services/queue.service";
 import { Service, Inject } from "typedi";
 import { ENV, EnvService } from "../services/env.service";
-import { BlockAddEvent } from "../scraping/block-add.event";
+import { BlockAddEvent } from "./block-add.event";
 
 @Service(BlocksQueue.name)
 export class BlocksQueue {

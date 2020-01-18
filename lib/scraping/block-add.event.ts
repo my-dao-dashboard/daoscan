@@ -1,5 +1,5 @@
 import { BadRequestError } from "../shared/errors";
-import {Block} from "./block";
+import { Block } from "./block";
 
 export interface BlockAddEvent {
   id: number;
@@ -7,7 +7,7 @@ export interface BlockAddEvent {
 
 export namespace BlockAddEvent {
   export function fromBlock(block: Block): BlockAddEvent {
-    return { id: block.id }
+    return { id: block.id };
   }
 
   export function fromString(payload: string | null): BlockAddEvent {

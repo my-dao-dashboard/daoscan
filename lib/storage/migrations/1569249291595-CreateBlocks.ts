@@ -11,7 +11,7 @@ export class CreateBlocks1569249291595 implements MigrationInterface {
         columns: [
           {
             name: "id",
-            type: "integer",
+            type: "bigint",
             isNullable: false,
             isUnique: true
           },
