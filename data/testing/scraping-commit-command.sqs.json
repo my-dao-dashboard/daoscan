@@ -1,0 +1,7 @@
+{
+  "Records": [
+    {
+      "body": "{\"kind\":\"COMMIT\",\"event\":{\"kind\":\"ORGANISATION_CREATED\",\"platform\":\"ARAGON\",\"name\":\"consensus.aragonid.eth\",\"address\":\"0x87069fa9543071d042af6105479ea163f333422c\",\"txid\":\"0xc5b96ae45eb318775c9605a0c40c4c8fddcecf00b7a3787c1e3597626149e1a1\",\"blockNumber\":9220156,\"blockHash\":\"0x304b8e000e027b4692d2e7a65c601f55fa54cd90f8225942fd9c9c435b004ce7\",\"timestamp\":1578224324}}"
+    }
+  ]
+}

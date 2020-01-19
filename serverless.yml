@@ -70,6 +70,14 @@ functions:
             Fn::GetAtt:
               - BlocksQueue
               - Arn
+  scraping-command-handle:
+    handler: functions/scraping.commandHandle
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - ScrapingQueue
+              - Arn
   util-migration-up:
     handler: functions/util.upMigration
     events:

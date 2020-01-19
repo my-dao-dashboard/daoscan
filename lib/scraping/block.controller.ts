@@ -20,7 +20,6 @@ export class BlockController {
       await this.addScenario.execute(blockAddEvent);
       return ok();
     } else {
-      console.log('sqs', event)
       await Promise.all(
         event.Records.map(async record => {
           const blockAddEvent = BlockAddEvent.fromString(record.body);

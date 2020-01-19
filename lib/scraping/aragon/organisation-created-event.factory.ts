@@ -1,7 +1,7 @@
 import { Inject, Service } from "typedi";
 import { EthereumService, ExtendedTransactionReceipt } from "../../services/ethereum.service";
 import { AbiInput } from "web3-utils";
-import { OrganisationCreatedEvent, SCRAPING_EVENT_KIND } from "../event";
+import { OrganisationCreatedEvent, SCRAPING_EVENT_KIND } from "../events/event";
 import { PLATFORM } from "../../domain/platform";
 import { Block } from "../block";
 

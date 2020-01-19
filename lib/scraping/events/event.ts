@@ -1,5 +1,4 @@
-import { PLATFORM } from "../domain/platform";
-import { Block } from "./block";
+import { PLATFORM } from "../../domain/platform";
 
 export enum SCRAPING_EVENT_KIND {
   ORGANISATION_CREATED = "ORGANISATION_CREATED",
@@ -21,15 +20,13 @@ export interface OrganisationCreatedEvent extends Event {
   address: string;
 }
 
-export interface AppInstalledEvent extends Event {
-  kind: SCRAPING_EVENT_KIND.APP_INSTALLED;
-  organisationAddress: string;
-  appId: string;
-  proxyAddress: string;
-}
+// export interface AppInstalledEvent extends Event {
+//   kind: SCRAPING_EVENT_KIND.APP_INSTALLED;
+//   organisationAddress: string;
+//   appId: string;
+//   proxyAddress: string;
+// }
 
-export type ScrapingEvent = OrganisationCreatedEvent | AppInstalledEvent;
+// export type ScrapingEvent = OrganisationCreatedEvent | AppInstalledEvent;
 
-export interface EventFactory {
-  fromBlock(block: Block): Promise<ScrapingEvent[]>;
-}
+export type ScrapingEvent = OrganisationCreatedEvent;
