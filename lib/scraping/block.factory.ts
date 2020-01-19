@@ -15,23 +15,23 @@ export class BlockFactory {
 
   fromRow(row: Row): Block {
     const props = {
-      id: row.id,
+      id: BigInt(row.id),
       hash: row.hash.toLowerCase()
     };
     return new Block(props, this.repository, this.ethereum, this.commandFactory);
   }
 
-  async allFromStorage(ids: number[]): Promise<Block[]> {
+  async allFromStorage(ids: bigint[]): Promise<Block[]> {
     const rows = await this.repository.allByIds(ids);
     return rows.map(row => {
       return this.fromRow(row);
     });
   }
 
-  async fromEthereum(id: number | "latest"): Promise<Block> {
+  async fromEthereum(id: number | "latest" | bigint): Promise<Block> {
     const ethereumBlock = await this.ethereum.block(id);
     const props = {
-      id: ethereumBlock.number,
+      id: BigInt(ethereumBlock.number),
       hash: ethereumBlock.hash.toLowerCase()
     };
     return new Block(props, this.repository, this.ethereum, this.commandFactory);

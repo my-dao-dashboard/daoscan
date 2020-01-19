@@ -1,12 +1,13 @@
 import _ from "lodash";
 import { BlockRepository } from "../storage/block.repository";
+import { Block as Row } from "../storage/block.row";
 import { Command } from "./command";
 import { EthereumService, ExtendedBlock, ExtendedTransactionReceipt } from "../services/ethereum.service";
 import { CommandFactory } from "./command.factory";
 import { Memoize } from "typescript-memoize";
 
 export interface BlockProps {
-  id: number;
+  id: bigint;
   hash: string;
 }
 
@@ -18,12 +19,12 @@ export class Block {
     private readonly commandFactory: CommandFactory
   ) {}
 
-  get id(): number {
+  get id(): bigint {
     return this.props.id;
   }
 
   get hash(): string {
-    return this.props.hash;
+    return this.props.hash.toLowerCase();
   }
 
   async isOverwrite() {
@@ -57,5 +58,12 @@ export class Block {
 
   toJSON() {
     return this.props;
+  }
+
+  async save(): Promise<void> {
+    const row = new Row();
+    row.id = this.id;
+    row.hash = this.hash;
+    await this.repository.save(row);
   }
 }

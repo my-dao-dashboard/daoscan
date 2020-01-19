@@ -1,10 +1,11 @@
 import { BeforeInsert, BeforeUpdate, Column, Entity, PrimaryColumn } from "typeorm";
+import { bigintTransformer } from "./bigint.transformer";
 
 @Entity("blocks")
 export class Block {
-  @PrimaryColumn()
+  @PrimaryColumn("bigint", { transformer: bigintTransformer })
   // @ts-ignore
-  id: number;
+  id: bigint;
 
   @Column()
   // @ts-ignore

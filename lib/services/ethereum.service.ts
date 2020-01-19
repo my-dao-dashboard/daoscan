@@ -18,7 +18,7 @@ export interface ExtendedBlock extends BlockTransactionString {
   logs: Log[];
 }
 
-type BlockNumber = number | "latest";
+type BlockNumber = number | "latest" | bigint
 
 @Service(EthereumService.name)
 export class EthereumService {
@@ -33,7 +33,7 @@ export class EthereumService {
   }
 
   block(number: BlockNumber): Promise<BlockTransactionString> {
-    return this.web3.eth.getBlock(number);
+    return this.web3.eth.getBlock(number.toString());
   }
 
   async extendedBlock(number: BlockNumber): Promise<ExtendedBlock> {

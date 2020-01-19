@@ -1,12 +1,15 @@
 import { Inject, Service } from "typedi";
 import { Block } from "./block";
-import { Command, CommitCommand, COMMAND_KIND, RevertCommand } from "./command";
+import { Command, CommitCommand, RevertCommand } from "./command";
 import { UnreachableCaseError } from "../shared/unreachable-case-error";
 import { EventFactory } from "./events/event.factory";
+import { COMMAND_KIND } from "./command.kind";
 
 @Service(CommandFactory.name)
 export class CommandFactory {
-  constructor(@Inject(EventFactory.name) private readonly eventFactory: EventFactory) {}
+  constructor(
+    @Inject(EventFactory.name) private readonly eventFactory: EventFactory,
+  ) {}
 
   fromString(payload: string): Command {
     const parsed = JSON.parse(payload);

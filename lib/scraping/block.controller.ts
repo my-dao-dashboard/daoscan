@@ -3,27 +3,26 @@ import { bind } from "decko";
 import { BlockTickScenario } from "./block-tick.scenario";
 import { APIGatewayEvent, SQSEvent } from "aws-lambda";
 import { isHttp, ok } from "../shared/http-handler";
-import { BlockAddEvent } from "./block-add.event";
-import { BlockAddScenario } from "./block-add.scenario";
+import { BlockAddEventFactory } from "./block-add.event";
 
 @Service(BlockController.name)
 export class BlockController {
   constructor(
     @Inject(BlockTickScenario.name) private readonly tickScenario: BlockTickScenario,
-    @Inject(BlockAddScenario.name) private readonly addScenario: BlockAddScenario
+    @Inject(BlockAddEventFactory.name) private readonly eventFactory: BlockAddEventFactory
   ) {}
 
   @bind()
   async add(event: APIGatewayEvent | SQSEvent) {
     if (isHttp(event)) {
-      const blockAddEvent = BlockAddEvent.fromString(event.body);
-      await this.addScenario.execute(blockAddEvent);
+      const blockAddEvent = this.eventFactory.fromString(event.body);
+      await blockAddEvent.commit();
       return ok();
     } else {
       await Promise.all(
         event.Records.map(async record => {
-          const blockAddEvent = BlockAddEvent.fromString(record.body);
-          await this.addScenario.execute(blockAddEvent);
+          const blockAddEvent = this.eventFactory.fromString(record.body);
+          await blockAddEvent.commit();
         })
       );
     }

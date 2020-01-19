@@ -1,6 +1,7 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
 import { PLATFORM } from "../domain/platform";
 import { ScrapingEvent } from "../scraping/events/scraping-event";
+import { bigintTransformer } from "./bigint.transformer";
 
 @Entity("events")
 export class Event {
@@ -8,9 +9,9 @@ export class Event {
   // @ts-ignore
   id: string;
 
-  @Column()
+  @Column("bigint", { transformer: bigintTransformer })
   // @ts-ignore
-  blockId: number;
+  blockId: bigint;
 
   @Column()
   // @ts-ignore

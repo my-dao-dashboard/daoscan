@@ -3,7 +3,9 @@ import { EthereumService, ExtendedTransactionReceipt } from "../../services/ethe
 import { AbiInput } from "web3-utils";
 import { PLATFORM } from "../../domain/platform";
 import { Block } from "../block";
-import { OrganisationCreatedEvent } from "../events/organisation-created.event";
+import { ConnectionFactory } from "../../storage/connection.factory";
+import { SCRAPING_EVENT_KIND } from "../events/scraping-event.interface";
+import { OrganisationCreatedEvent } from "../events/scraping-event";
 
 export const KIT_ADDRESSES = new Set(
   [
@@ -363,7 +365,10 @@ export const KIT_SIGNATURES = new Map<string, AbiInput[]>([
 
 @Service(OrganisationCreatedEventFactory.name)
 export class OrganisationCreatedEventFactory {
-  constructor(@Inject(EthereumService.name) private readonly ethereum: EthereumService) {}
+  constructor(
+    @Inject(EthereumService.name) private readonly ethereum: EthereumService,
+    @Inject(ConnectionFactory.name) private readonly connectionFactory: ConnectionFactory
+  ) {}
 
   isSuitableReceipt(receipt: ExtendedTransactionReceipt): boolean {
     const destination = receipt.to?.toLowerCase();
@@ -377,16 +382,16 @@ export class OrganisationCreatedEventFactory {
     const ensName = `${parameters.name}.aragonid.eth`;
     const address = await this.ethereum.canonicalAddress(ensName);
     const timestamp = await block.timestamp();
-    const props = {
+    return {
+      kind: SCRAPING_EVENT_KIND.ORGANISATION_CREATED,
       platform: PLATFORM.ARAGON,
       name: ensName,
       address: address.toLowerCase(),
       txid: receipt.transactionHash,
-      blockNumber: receipt.blockNumber,
+      blockNumber: Number(receipt.blockNumber),
       blockHash: receipt.blockHash,
       timestamp: Number(timestamp)
     };
-    return new OrganisationCreatedEvent(props);
   }
 
   async fromBlock(block: Block): Promise<OrganisationCreatedEvent[]> {

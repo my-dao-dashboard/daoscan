@@ -11,7 +11,7 @@ export class CreateEvents1569249291700 implements MigrationInterface {
         columns: [
           {
             name: "id",
-            type: "UUID",
+            type: "varchar(68)",
             isNullable: false,
             isUnique: true
           },
@@ -29,12 +29,6 @@ export class CreateEvents1569249291700 implements MigrationInterface {
           },
           {
             name: "platform",
-            type: "varchar(400)",
-            isNullable: false,
-            isUnique: false
-          },
-          {
-            name: "kind",
             type: "varchar(400)",
             isNullable: false,
             isUnique: false

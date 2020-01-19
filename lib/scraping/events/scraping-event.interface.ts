@@ -12,4 +12,6 @@ export interface IScrapingEvent {
   blockHash: string;
   timestamp: number;
   txid: string;
+
+  commit(): Promise<void>;
 }

@@ -10,8 +10,9 @@ export class CommandRevertScenario implements Scenario<RevertCommand, void> {
   ) {}
 
   async execute(command: RevertCommand): Promise<void> {
-    const event = this.eventFactory.fromStorage(command);
-    console.log(event);
+    console.log('TODO CommandRevertScenario.execute')
+    // const event = this.eventFactory.fromStorage(command);
+    // console.log(event);
     // find event
     // recover
     //

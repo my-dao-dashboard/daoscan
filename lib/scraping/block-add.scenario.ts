@@ -25,5 +25,6 @@ export class BlockAddScenario implements Scenario<BlockAddEvent, void> {
     console.log("isOverwrite", await block.isOverwrite());
     const commands = await block.commands();
     await this.fanout(commands);
+    await block.save();
   }
 }
