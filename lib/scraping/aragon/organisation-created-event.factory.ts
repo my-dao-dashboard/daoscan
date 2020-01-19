@@ -1,9 +1,9 @@
 import { Inject, Service } from "typedi";
 import { EthereumService, ExtendedTransactionReceipt } from "../../services/ethereum.service";
 import { AbiInput } from "web3-utils";
-import { OrganisationCreatedEvent, SCRAPING_EVENT_KIND } from "../events/event";
 import { PLATFORM } from "../../domain/platform";
 import { Block } from "../block";
+import { OrganisationCreatedEvent } from "../events/organisation-created.event";
 
 export const KIT_ADDRESSES = new Set(
   [
@@ -377,8 +377,7 @@ export class OrganisationCreatedEventFactory {
     const ensName = `${parameters.name}.aragonid.eth`;
     const address = await this.ethereum.canonicalAddress(ensName);
     const timestamp = await block.timestamp();
-    return {
-      kind: SCRAPING_EVENT_KIND.ORGANISATION_CREATED,
+    const props = {
       platform: PLATFORM.ARAGON,
       name: ensName,
       address: address.toLowerCase(),
@@ -387,6 +386,7 @@ export class OrganisationCreatedEventFactory {
       blockHash: receipt.blockHash,
       timestamp: Number(timestamp)
     };
+    return new OrganisationCreatedEvent(props);
   }
 
   async fromBlock(block: Block): Promise<OrganisationCreatedEvent[]> {

@@ -1,6 +1,6 @@
 import { Inject, Service } from "typedi";
 import { Block } from "../block";
-import { ScrapingEvent } from "../events/event";
+import { ScrapingEvent } from "../events/scraping-event";
 import { OrganisationCreatedEventFactory } from "./organisation-created-event.factory";
 import { IEventFactory } from "../events/event.factory";
 import {StoredEvent} from "../command";

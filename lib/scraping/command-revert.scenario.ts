@@ -1,14 +1,11 @@
 import { Scenario } from "../shared/scenario";
 import { RevertCommand } from "./command";
 import { Inject, Service } from "typedi";
-import { OrganisationCreatedEventDelta } from "./events/organisation-created-event.delta";
-import { UnreachableCaseError } from "../shared/unreachable-case-error";
 import { EventFactory } from "./events/event.factory";
 
 @Service(CommandRevertScenario.name)
 export class CommandRevertScenario implements Scenario<RevertCommand, void> {
   constructor(
-    @Inject(OrganisationCreatedEventDelta.name) private readonly organisationCreated: OrganisationCreatedEventDelta,
     @Inject(EventFactory.name) private readonly eventFactory: EventFactory
   ) {}
 

@@ -1,18 +1,18 @@
-import { ScrapingEvent } from "./events/event";
+import { ScrapingEvent } from "./events/scraping-event";
 import { BadRequestError } from "../shared/errors";
 
-export enum KIND {
+export enum COMMAND_KIND {
   COMMIT = "COMMIT",
   REVERT = "REVERT"
 }
 
-export namespace KIND {
-  export function fromString(s: string): KIND {
+export namespace COMMAND_KIND {
+  export function fromString(s: string): COMMAND_KIND {
     switch (s) {
-      case KIND.COMMIT:
-        return KIND.COMMIT;
-      case KIND.REVERT:
-        return KIND.REVERT;
+      case COMMAND_KIND.COMMIT:
+        return COMMAND_KIND.COMMIT;
+      case COMMAND_KIND.REVERT:
+        return COMMAND_KIND.REVERT;
       default:
         throw new BadRequestError(`Unexpected command kind ${s}`);
     }
@@ -20,7 +20,7 @@ export namespace KIND {
 }
 
 export interface CommitCommand {
-  kind: KIND.COMMIT;
+  kind: COMMAND_KIND.COMMIT;
   event: ScrapingEvent;
 }
 
@@ -31,7 +31,7 @@ export interface StoredEvent {
 }
 
 export interface RevertCommand extends StoredEvent {
-  kind: KIND.REVERT;
+  kind: COMMAND_KIND.REVERT;
 }
 
 export type Command = CommitCommand | RevertCommand;

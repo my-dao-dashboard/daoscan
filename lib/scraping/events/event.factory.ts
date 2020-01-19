@@ -1,6 +1,6 @@
 import { Inject, Service } from "typedi";
 import { Block } from "../block";
-import { ScrapingEvent } from "./event";
+import { ScrapingEvent } from "./scraping-event";
 import { AragonEventFactory } from "../aragon/aragon-event.factory";
 import { StoredEvent } from "../command";
 

@@ -1,6 +1,6 @@
 import { Inject, Service } from "typedi";
 import { Block } from "./block";
-import { Command, CommitCommand, KIND, RevertCommand } from "./command";
+import { Command, CommitCommand, COMMAND_KIND, RevertCommand } from "./command";
 import { UnreachableCaseError } from "../shared/unreachable-case-error";
 import { EventFactory } from "./events/event.factory";
 
@@ -10,11 +10,11 @@ export class CommandFactory {
 
   fromString(payload: string): Command {
     const parsed = JSON.parse(payload);
-    const kind = KIND.fromString(parsed.kind);
+    const kind = COMMAND_KIND.fromString(parsed.kind);
     switch (kind) {
-      case KIND.COMMIT:
+      case COMMAND_KIND.COMMIT:
         return parsed as CommitCommand;
-      case KIND.REVERT:
+      case COMMAND_KIND.REVERT:
         return parsed as RevertCommand;
       default:
         throw new UnreachableCaseError(kind);
@@ -25,7 +25,7 @@ export class CommandFactory {
     const events = await this.eventFactory.fromBlock(block);
     return events.map<CommitCommand>(event => {
       return {
-        kind: KIND.COMMIT,
+        kind: COMMAND_KIND.COMMIT,
         event
       };
     });

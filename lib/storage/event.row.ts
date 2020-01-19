@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
 import { PLATFORM } from "../domain/platform";
-import { SCRAPING_EVENT_KIND, ScrapingEvent } from "../scraping/events/event";
+import { ScrapingEvent } from "../scraping/events/scraping-event";
 
 @Entity("events")
 export class Event {
@@ -19,10 +19,6 @@ export class Event {
   @Column({ type: "enum", enum: PLATFORM })
   // @ts-ignore
   platform: PLATFORM;
-
-  @Column({ type: "enum", enum: SCRAPING_EVENT_KIND })
-  // @ts-ignore
-  kind: SCRAPING_EVENT_KIND;
 
   @Column({ type: "simple-json" })
   // @ts-ignore
