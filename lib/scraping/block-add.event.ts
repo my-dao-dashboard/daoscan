@@ -2,6 +2,7 @@ import { BadRequestError } from "../shared/errors";
 import { Block } from "./block";
 import { Inject, Service } from "typedi";
 import { BlockAddScenario } from "./block-add.scenario";
+import { Command } from "./command";
 
 export class BlockAddEvent {
   constructor(readonly id: bigint, private readonly blockAddScenario: BlockAddScenario) {}
@@ -12,8 +13,8 @@ export class BlockAddEvent {
     };
   }
 
-  async commit() {
-    await this.blockAddScenario.execute(this);
+  commit(): Promise<Command[]> {
+    return this.blockAddScenario.execute(this);
   }
 }
 

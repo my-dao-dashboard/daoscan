@@ -1,13 +1,19 @@
-import { Column, Entity, PrimaryColumn } from "typeorm";
+import { Column, Entity, PrimaryColumn, ValueTransformer } from "typeorm";
 import { PLATFORM } from "../domain/platform";
 import { ScrapingEvent } from "../scraping/events/scraping-event";
 import { bigintTransformer } from "./bigint.transformer";
+import { UUID } from "./uuid";
+
+export const uuidTransformer: ValueTransformer = {
+  to: (entityValue: UUID) => entityValue.toString(),
+  from: (databaseValue: string): UUID => new UUID(databaseValue)
+};
 
 @Entity("events")
 export class Event {
-  @PrimaryColumn()
+  @PrimaryColumn("varchar", { transformer: uuidTransformer })
   // @ts-ignore
-  id: string;
+  id: UUID;
 
   @Column("bigint", { transformer: bigintTransformer })
   // @ts-ignore

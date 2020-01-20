@@ -32,9 +32,13 @@ export class Block {
   }
 
   async commands(): Promise<Command[]> {
-    // TODO Put revert command
+    let commands: Command[] = [];
+    if (this.isOverwrite()) {
+      const revertCommands = await this.commandFactory.revertBlock(this);
+      commands = commands.concat(revertCommands)
+    }
     const commitCommands = await this.commandFactory.commitBlock(this);
-    return commitCommands;
+    return commands.concat(commitCommands);
   }
 
   @Memoize()

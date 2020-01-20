@@ -4,6 +4,7 @@ import { BlockTickScenario } from "./block-tick.scenario";
 import { APIGatewayEvent, SQSEvent } from "aws-lambda";
 import { isHttp, ok } from "../shared/http-handler";
 import { BlockAddEventFactory } from "./block-add.event";
+import { BlockAddScenario } from "./block-add.scenario";
 
 @Service(BlockController.name)
 export class BlockController {
@@ -16,8 +17,8 @@ export class BlockController {
   async add(event: APIGatewayEvent | SQSEvent) {
     if (isHttp(event)) {
       const blockAddEvent = this.eventFactory.fromString(event.body);
-      await blockAddEvent.commit();
-      return ok();
+      const commands = await blockAddEvent.commit();
+      return ok({ commands });
     } else {
       await Promise.all(
         event.Records.map(async record => {

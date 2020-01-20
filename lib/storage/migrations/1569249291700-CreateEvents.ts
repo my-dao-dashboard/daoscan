@@ -11,7 +11,7 @@ export class CreateEvents1569249291700 implements MigrationInterface {
         columns: [
           {
             name: "id",
-            type: "varchar(68)",
+            type: "varchar(400)",
             isNullable: false,
             isUnique: true
           },
@@ -37,7 +37,7 @@ export class CreateEvents1569249291700 implements MigrationInterface {
             name: "payload",
             type: "text",
             isNullable: false,
-            isUnique: false
+            isUnique: true
           }
         ]
       })
