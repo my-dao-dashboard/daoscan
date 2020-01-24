@@ -6,6 +6,8 @@ import { Block } from "../block";
 import { ConnectionFactory } from "../../storage/connection.factory";
 import { SCRAPING_EVENT_KIND } from "../events/scraping-event.interface";
 import { OrganisationCreatedEvent } from "../events/scraping-event";
+import { logEvents } from "./events-from-logs";
+import { BlockchainEvent } from "../blockchain-event";
 
 export const KIT_ADDRESSES = new Set(
   [
@@ -363,6 +365,15 @@ export const KIT_SIGNATURES = new Map<string, AbiInput[]>([
   ]
 ]);
 
+export interface DeployInstanceParams {
+  dao: string;
+}
+
+export const DEPLOY_INSTANCE_EVENT: BlockchainEvent<DeployInstanceParams> = {
+  signature: "0x8f42a14c9fe9e09f4fe8eeee69ae878731c838b6497425d4c30e1d09336cf34b",
+  abi: [{ indexed: false, name: "dao", type: "address" }]
+};
+
 @Service(OrganisationCreatedEventFactory.name)
 export class OrganisationCreatedEventFactory {
   constructor(
@@ -394,7 +405,7 @@ export class OrganisationCreatedEventFactory {
     };
   }
 
-  async fromBlock(block: Block): Promise<OrganisationCreatedEvent[]> {
+  async fromTransactions(block: Block): Promise<OrganisationCreatedEvent[]> {
     const receipts = await block.receipts();
     const suitableReceipts = receipts.filter(r => this.isSuitableReceipt(r));
     return Promise.all(
@@ -402,5 +413,29 @@ export class OrganisationCreatedEventFactory {
         return await this.fromReceipt(block, receipt);
       })
     );
+  }
+
+  async fromEvents(block: Block): Promise<OrganisationCreatedEvent[]> {
+    const extendedBlock = await block.extendedBlock();
+    const timestamp = await block.timestamp();
+    return logEvents(this.ethereum.codec, extendedBlock, DEPLOY_INSTANCE_EVENT).map(e => {
+      const organisationAddress = e.dao;
+      return {
+        kind: SCRAPING_EVENT_KIND.ORGANISATION_CREATED,
+        platform: PLATFORM.ARAGON,
+        name: organisationAddress.toLowerCase(),
+        address: organisationAddress.toLowerCase(),
+        txid: e.txid,
+        blockNumber: Number(e.blockNumber),
+        blockHash: block.hash,
+        timestamp: Number(timestamp)
+      };
+    });
+  }
+
+  async fromBlock(block: Block): Promise<OrganisationCreatedEvent[]> {
+    const fromTransactions = await this.fromTransactions(block);
+    const fromEvents = await this.fromEvents(block);
+    return fromTransactions.concat(fromEvents);
   }
 }
