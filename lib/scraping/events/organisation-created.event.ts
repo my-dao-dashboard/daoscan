@@ -40,6 +40,14 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
     return this.props.name;
   }
 
+  get timestamp() {
+    return this.props.timestamp;
+  }
+
+  get txid() {
+    return this.props.txid;
+  }
+
   toJSON() {
     return {
       ...this.props,

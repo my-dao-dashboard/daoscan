@@ -2,7 +2,7 @@ import { Inject, Service } from "typedi";
 import { Block } from "./block";
 import { Command, CommitCommand, RevertCommand } from "./command";
 import { UnreachableCaseError } from "../shared/unreachable-case-error";
-import { EventFactory } from "./events/event.factory";
+import { ScrapingEventFactory } from "./events/scraping-event.factory";
 import { COMMAND_KIND } from "./command.kind";
 import { EventRepository } from "../storage/event.repository";
 import { OrganisationCreatedEventDelta } from "./events/organisation-created-event.delta";
@@ -11,7 +11,7 @@ import { AppInstalledEventDelta } from "./events/app-installed-event.delta";
 @Service(CommandFactory.name)
 export class CommandFactory {
   constructor(
-    @Inject(EventFactory.name) private readonly eventFactory: EventFactory,
+    @Inject(ScrapingEventFactory.name) private readonly eventFactory: ScrapingEventFactory,
     @Inject(EventRepository.name) private readonly eventRepository: EventRepository,
     @Inject(OrganisationCreatedEventDelta.name) private readonly organisationCreated: OrganisationCreatedEventDelta,
     @Inject(AppInstalledEventDelta.name) private readonly appInstalled: AppInstalledEventDelta
@@ -24,7 +24,8 @@ export class CommandFactory {
     const kind = COMMAND_KIND.fromString(parsed.kind);
     switch (kind) {
       case COMMAND_KIND.COMMIT:
-        return new CommitCommand(parsed.event, this.organisationCreated, this.appInstalled);
+        const event = this.eventFactory.fromJSON(parsed.event);
+        return new CommitCommand(event, this.organisationCreated, this.appInstalled);
       case COMMAND_KIND.REVERT:
         return new RevertCommand(parsed.eventId, this.eventRepository, this.organisationCreated, this.appInstalled);
       default:
