@@ -1,5 +1,6 @@
 import { SCRAPING_EVENT_KIND } from "./scraping-event.kind";
 import { PLATFORM } from "../../domain/platform";
+import { IScrapingEvent } from "./scraping-event.interface";
 
 interface Props {
   blockNumber: number;
@@ -12,7 +13,7 @@ interface Props {
   proxyAddress: string;
 }
 
-export class AppInstalledEvent {
+export class AppInstalledEvent implements IScrapingEvent {
   readonly kind = SCRAPING_EVENT_KIND.APP_INSTALLED;
   private readonly props: Props;
 

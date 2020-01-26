@@ -10,6 +10,7 @@ import { BlockAddScenario } from "./block-add.scenario";
 export class BlockController {
   constructor(
     @Inject(BlockTickScenario.name) private readonly tickScenario: BlockTickScenario,
+    @Inject(BlockAddScenario.name) private readonly addScenario: BlockAddScenario,
     @Inject(BlockAddEventFactory.name) private readonly eventFactory: BlockAddEventFactory
   ) {}
 
@@ -17,13 +18,13 @@ export class BlockController {
   async add(event: APIGatewayEvent | SQSEvent) {
     if (isHttp(event)) {
       const blockAddEvent = this.eventFactory.fromString(event.body);
-      const commands = await blockAddEvent.commands();
+      const commands = await this.addScenario.execute(blockAddEvent)
       return ok({ commands });
     } else {
       await Promise.all(
         event.Records.map(async record => {
           const blockAddEvent = this.eventFactory.fromString(record.body);
-          await blockAddEvent.commands();
+          await this.addScenario.execute(blockAddEvent)
         })
       );
     }

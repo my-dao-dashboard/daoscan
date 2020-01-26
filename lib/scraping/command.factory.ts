@@ -5,12 +5,16 @@ import { UnreachableCaseError } from "../shared/unreachable-case-error";
 import { EventFactory } from "./events/event.factory";
 import { COMMAND_KIND } from "./command.kind";
 import { EventRepository } from "../storage/event.repository";
+import { OrganisationCreatedEventDelta } from "./events/organisation-created-event.delta";
+import { AppInstalledEventDelta } from "./events/app-installed-event.delta";
 
 @Service(CommandFactory.name)
 export class CommandFactory {
   constructor(
     @Inject(EventFactory.name) private readonly eventFactory: EventFactory,
-    @Inject(EventRepository.name) private readonly eventRepository: EventRepository
+    @Inject(EventRepository.name) private readonly eventRepository: EventRepository,
+    @Inject(OrganisationCreatedEventDelta.name) private readonly organisationCreated: OrganisationCreatedEventDelta,
+    @Inject(AppInstalledEventDelta.name) private readonly appInstalled: AppInstalledEventDelta
   ) {}
 
   fromString(payload: string): Command {
@@ -20,9 +24,9 @@ export class CommandFactory {
     const kind = COMMAND_KIND.fromString(parsed.kind);
     switch (kind) {
       case COMMAND_KIND.COMMIT:
-        return new CommitCommand(parsed.event);
+        return new CommitCommand(parsed.event, this.organisationCreated, this.appInstalled);
       case COMMAND_KIND.REVERT:
-        return new RevertCommand(parsed.eventId);
+        return new RevertCommand(parsed.eventId, this.eventRepository, this.organisationCreated, this.appInstalled);
       default:
         throw new UnreachableCaseError(kind);
     }
@@ -31,14 +35,15 @@ export class CommandFactory {
   async commitBlock(block: Block): Promise<CommitCommand[]> {
     const events = await this.eventFactory.fromBlock(block);
     return events.map<CommitCommand>(event => {
-      return new CommitCommand(event);
+      return new CommitCommand(event, this.organisationCreated, this.appInstalled);
     });
   }
 
   async revertBlock(block: Block): Promise<RevertCommand[]> {
     const rows = await this.eventRepository.allForBlock(block.id, block.hash);
     return rows.map<RevertCommand>(row => {
-      return new RevertCommand(row.id.toString());
+      const eventId = row.id.toString();
+      return new RevertCommand(eventId, this.eventRepository, this.organisationCreated, this.appInstalled);
     });
   }
 }

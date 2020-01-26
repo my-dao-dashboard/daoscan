@@ -4,7 +4,7 @@ import { PLATFORM } from "../../domain/platform";
 import { Block } from "../block";
 import { ConnectionFactory } from "../../storage/connection.factory";
 import { logEvents } from "./events-from-logs";
-import { BlockchainEvent } from "../blockchain-event";
+import { BlockchainEvent } from "./blockchain-event";
 import { APP_ID } from "../../storage/app-id";
 import { TOKEN_CONTROLLER_ABI } from "./token-controller.abi";
 import { AppInstalledEvent } from "../events/app-installed.event";

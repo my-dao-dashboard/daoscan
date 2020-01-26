@@ -2,19 +2,14 @@ import { BadRequestError } from "../shared/errors";
 import { Block } from "./block";
 import { Inject, Service } from "typedi";
 import { BlockAddScenario } from "./block-add.scenario";
-import { Command } from "./command";
 
 export class BlockAddEvent {
-  constructor(readonly id: bigint, private readonly blockAddScenario: BlockAddScenario) {}
+  constructor(readonly id: bigint) {}
 
   toJSON() {
     return {
       id: this.id.toString()
     };
-  }
-
-  commands(): Promise<Command[]> {
-    return this.blockAddScenario.execute(this);
   }
 }
 
@@ -23,14 +18,14 @@ export class BlockAddEventFactory {
   constructor(@Inject(BlockAddScenario.name) private readonly blockAddScenario: BlockAddScenario) {}
 
   fromBlock(block: Block): BlockAddEvent {
-    return new BlockAddEvent(block.id, this.blockAddScenario);
+    return new BlockAddEvent(block.id);
   }
 
   fromString(payload: string | null): BlockAddEvent {
     if (payload) {
       const parsed = JSON.parse(payload);
       if (parsed.id) {
-        return new BlockAddEvent(BigInt(parsed.id), this.blockAddScenario);
+        return new BlockAddEvent(BigInt(parsed.id));
       }
     }
     throw new BadRequestError(`Expect BlockAddEvent in payload`);

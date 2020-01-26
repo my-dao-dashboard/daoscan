@@ -1,6 +1,6 @@
 import { Indexed } from "./indexed";
 import { ExtendedBlock } from "../../services/ethereum.service";
-import { BlockchainEvent } from "../blockchain-event";
+import { BlockchainEvent } from "./blockchain-event";
 import { Log } from "web3-core";
 import { AbiCodec } from "../../services/abi-codec";
 
