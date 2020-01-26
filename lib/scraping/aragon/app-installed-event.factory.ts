@@ -3,12 +3,11 @@ import { EthereumService } from "../../services/ethereum.service";
 import { PLATFORM } from "../../domain/platform";
 import { Block } from "../block";
 import { ConnectionFactory } from "../../storage/connection.factory";
-import { SCRAPING_EVENT_KIND } from "../events/scraping-event.interface";
-import { AppInstalledEvent } from "../events/scraping-event";
 import { logEvents } from "./events-from-logs";
 import { BlockchainEvent } from "../blockchain-event";
 import { APP_ID } from "../../storage/app-id";
 import { TOKEN_CONTROLLER_ABI } from "./token-controller.abi";
+import { AppInstalledEvent } from "../events/app-installed.event";
 
 export interface NewAppProxyParams {
   proxy: string;
@@ -65,8 +64,7 @@ export class AppInstalledEventFactory {
     const nativeEvents = logEvents(this.ethereum.codec, extendedBlock, NEW_APP_PROXY_EVENT);
     const appInstalledPromised = nativeEvents.map<Promise<AppInstalledEvent>>(async e => {
       const organisationAddress = await this.kernelAddress(e.proxy);
-      return {
-        kind: SCRAPING_EVENT_KIND.APP_INSTALLED,
+      return new AppInstalledEvent({
         organisationAddress: organisationAddress.toLowerCase(),
         appId: e.appId,
         proxyAddress: e.proxy,
@@ -75,7 +73,7 @@ export class AppInstalledEventFactory {
         blockHash: block.hash,
         timestamp: timestamp,
         txid: e.txid
-      };
+      });
     });
     return Promise.all(appInstalledPromised);
   }
@@ -88,8 +86,7 @@ export class AppInstalledEventFactory {
       const tokenControllerAddress = e.proxyAddress;
       const tokenController = this.ethereum.contract(TOKEN_CONTROLLER_ABI, tokenControllerAddress);
       const tokenAddress = await tokenController.methods.token().call();
-      return {
-        kind: SCRAPING_EVENT_KIND.APP_INSTALLED,
+      return new AppInstalledEvent({
         platform: PLATFORM.ARAGON,
         organisationAddress: e.organisationAddress,
         appId: APP_ID.SHARE,
@@ -98,7 +95,7 @@ export class AppInstalledEventFactory {
         blockHash: e.blockHash,
         blockNumber: e.blockNumber,
         timestamp: e.timestamp
-      };
+      });
     });
     return Promise.all(promised);
   }

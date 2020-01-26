@@ -1,14 +1,36 @@
 import { ScrapingEvent } from "./events/scraping-event";
 import { COMMAND_KIND } from "./command.kind";
 
-export interface CommitCommand {
-  kind: COMMAND_KIND.COMMIT,
-  event: ScrapingEvent
+export class CommitCommand {
+  readonly kind = COMMAND_KIND.COMMIT;
+  readonly event: ScrapingEvent;
+
+  constructor(event: ScrapingEvent) {
+    this.event = event;
+  }
+
+  toJSON() {
+    return {
+      kind: this.kind,
+      event: this.event
+    };
+  }
 }
 
-export interface RevertCommand {
-  kind: COMMAND_KIND.REVERT,
-  eventId: string
+export class RevertCommand {
+  readonly kind = COMMAND_KIND.REVERT;
+  readonly eventId: string;
+
+  constructor(eventId: string) {
+    this.eventId = eventId;
+  }
+
+  toJSON() {
+    return {
+      kind: this.kind,
+      eventId: this.eventId
+    };
+  }
 }
 
 export type Command = CommitCommand | RevertCommand;

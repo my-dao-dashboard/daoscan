@@ -3,10 +3,10 @@ import { Delta } from "./delta";
 import { Event } from "../../storage/event.row";
 import { Organisation } from "../../storage/organisation.row";
 import { ConnectionFactory } from "../../storage/connection.factory";
-import { OrganisationCreatedEvent } from "./scraping-event";
 import { UUID } from "../../storage/uuid";
 import { EventRepository } from "../../storage/event.repository";
 import { OrganisationRepository } from "../../storage/organisation.repository";
+import { OrganisationCreatedEvent } from "./organisation-created.event";
 
 @Service(OrganisationCreatedEventDelta.name)
 export class OrganisationCreatedEventDelta implements Delta<OrganisationCreatedEvent> {

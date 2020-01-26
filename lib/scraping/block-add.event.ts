@@ -13,7 +13,7 @@ export class BlockAddEvent {
     };
   }
 
-  commit(): Promise<Command[]> {
+  commands(): Promise<Command[]> {
     return this.blockAddScenario.execute(this);
   }
 }

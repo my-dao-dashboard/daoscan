@@ -14,15 +14,15 @@ export class CommandFactory {
   ) {}
 
   fromString(payload: string): Command {
-    console.log('trying to parse', payload)
+    console.log("trying to parse", payload);
     const parsed = JSON.parse(payload);
-    console.log('parsed', parsed)
+    console.log("parsed", parsed);
     const kind = COMMAND_KIND.fromString(parsed.kind);
     switch (kind) {
       case COMMAND_KIND.COMMIT:
-        return parsed as CommitCommand;
+        return new CommitCommand(parsed.event);
       case COMMAND_KIND.REVERT:
-        return parsed as RevertCommand;
+        return new RevertCommand(parsed.eventId);
       default:
         throw new UnreachableCaseError(kind);
     }
@@ -31,20 +31,14 @@ export class CommandFactory {
   async commitBlock(block: Block): Promise<CommitCommand[]> {
     const events = await this.eventFactory.fromBlock(block);
     return events.map<CommitCommand>(event => {
-      return {
-        kind: COMMAND_KIND.COMMIT,
-        event
-      };
+      return new CommitCommand(event);
     });
   }
 
   async revertBlock(block: Block): Promise<RevertCommand[]> {
     const rows = await this.eventRepository.allForBlock(block.id, block.hash);
     return rows.map<RevertCommand>(row => {
-      return {
-        kind: COMMAND_KIND.REVERT,
-        eventId: row.id.toString()
-      };
+      return new RevertCommand(row.id.toString());
     });
   }
 }

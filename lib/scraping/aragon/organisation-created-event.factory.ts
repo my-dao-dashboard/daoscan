@@ -4,10 +4,9 @@ import { AbiInput } from "web3-utils";
 import { PLATFORM } from "../../domain/platform";
 import { Block } from "../block";
 import { ConnectionFactory } from "../../storage/connection.factory";
-import { SCRAPING_EVENT_KIND } from "../events/scraping-event.interface";
-import { OrganisationCreatedEvent } from "../events/scraping-event";
 import { logEvents } from "./events-from-logs";
 import { BlockchainEvent } from "../blockchain-event";
+import { OrganisationCreatedEvent } from "../events/organisation-created.event";
 
 export const KIT_ADDRESSES = new Set(
   [
@@ -393,8 +392,7 @@ export class OrganisationCreatedEventFactory {
     const ensName = `${parameters.name}.aragonid.eth`;
     const address = await this.ethereum.canonicalAddress(ensName);
     const timestamp = await block.timestamp();
-    return {
-      kind: SCRAPING_EVENT_KIND.ORGANISATION_CREATED,
+    return new OrganisationCreatedEvent({
       platform: PLATFORM.ARAGON,
       name: ensName,
       address: address.toLowerCase(),
@@ -402,7 +400,7 @@ export class OrganisationCreatedEventFactory {
       blockNumber: Number(receipt.blockNumber),
       blockHash: receipt.blockHash,
       timestamp: Number(timestamp)
-    };
+    });
   }
 
   async fromTransactions(block: Block): Promise<OrganisationCreatedEvent[]> {
@@ -420,8 +418,7 @@ export class OrganisationCreatedEventFactory {
     const timestamp = await block.timestamp();
     return logEvents(this.ethereum.codec, extendedBlock, DEPLOY_INSTANCE_EVENT).map(e => {
       const organisationAddress = e.dao;
-      return {
-        kind: SCRAPING_EVENT_KIND.ORGANISATION_CREATED,
+      return new OrganisationCreatedEvent({
         platform: PLATFORM.ARAGON,
         name: organisationAddress.toLowerCase(),
         address: organisationAddress.toLowerCase(),
@@ -429,7 +426,7 @@ export class OrganisationCreatedEventFactory {
         blockNumber: Number(e.blockNumber),
         blockHash: block.hash,
         timestamp: Number(timestamp)
-      };
+      });
     });
   }
 

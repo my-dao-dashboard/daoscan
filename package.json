@@ -3,7 +3,7 @@
   "version": "1.0.0-alpha.0",
   "license": "AGPL-3.0-only",
   "scripts": {
-    "build": "serverless build",
+    "build": "serverless package",
     "deploy:beta": "rm -rf .build/ && serverless deploy --stage beta",
     "deploy:prod": "rm -rf .build/ && serverless deploy --stage prod",
     "start": "serverless offline --useSeparateProcesses",

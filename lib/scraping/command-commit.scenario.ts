@@ -1,7 +1,7 @@
 import { Inject, Service } from "typedi";
 import { Scenario } from "../shared/scenario";
 import { CommitCommand } from "./command";
-import { SCRAPING_EVENT_KIND } from "./events/scraping-event.interface";
+import { SCRAPING_EVENT_KIND } from "./events/scraping-event.kind";
 import { UnreachableCaseError } from "../shared/unreachable-case-error";
 import { OrganisationCreatedEventDelta } from "./events/organisation-created-event.delta";
 import { AppInstalledEventDelta } from "./events/app-installed-event.delta";

@@ -2,11 +2,11 @@ import { Inject, Service } from "typedi";
 import { Delta } from "./delta";
 import { Event } from "../../storage/event.row";
 import { ConnectionFactory } from "../../storage/connection.factory";
-import { AppInstalledEvent } from "./scraping-event";
 import { UUID } from "../../storage/uuid";
 import { EventRepository } from "../../storage/event.repository";
 import { Application } from "../../storage/application.row";
 import { ApplicationRepository } from "../../storage/application.repository";
+import { AppInstalledEvent } from "./app-installed.event";
 
 @Service(AppInstalledEventDelta.name)
 export class AppInstalledEventDelta implements Delta<AppInstalledEvent> {
