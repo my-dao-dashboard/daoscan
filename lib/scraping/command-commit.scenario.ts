@@ -4,11 +4,13 @@ import { CommitCommand } from "./command";
 import { SCRAPING_EVENT_KIND } from "./events/scraping-event.interface";
 import { UnreachableCaseError } from "../shared/unreachable-case-error";
 import { OrganisationCreatedEventDelta } from "./events/organisation-created-event.delta";
+import { AppInstalledEventDelta } from "./events/app-installed-event.delta";
 
 @Service(CommandCommitScenario.name)
 export class CommandCommitScenario implements Scenario<CommitCommand, void> {
   constructor(
-    @Inject(OrganisationCreatedEventDelta.name) private readonly organisationCreated: OrganisationCreatedEventDelta
+    @Inject(OrganisationCreatedEventDelta.name) private readonly organisationCreated: OrganisationCreatedEventDelta,
+    @Inject(AppInstalledEventDelta.name) private readonly appInstalled: AppInstalledEventDelta
   ) {}
 
   async execute(command: CommitCommand): Promise<void> {
@@ -16,8 +18,7 @@ export class CommandCommitScenario implements Scenario<CommitCommand, void> {
     console.log("Committing event", event);
     switch (event.kind) {
       case SCRAPING_EVENT_KIND.APP_INSTALLED:
-        console.log("TODO CommandCommitScenario.execute for app installed");
-        return;
+        return this.appInstalled.commit(event);
       case SCRAPING_EVENT_KIND.ORGANISATION_CREATED:
         return this.organisationCreated.commit(event);
       default:

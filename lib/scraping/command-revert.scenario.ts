@@ -5,14 +5,16 @@ import { EventFactory } from "./events/event.factory";
 import { EventRepository } from "../storage/event.repository";
 import { SCRAPING_EVENT_KIND } from "./events/scraping-event.interface";
 import { UnreachableCaseError } from "../shared/unreachable-case-error";
-import {OrganisationCreatedEventDelta} from "./events/organisation-created-event.delta";
+import { OrganisationCreatedEventDelta } from "./events/organisation-created-event.delta";
+import { AppInstalledEventDelta } from "./events/app-installed-event.delta";
 
 @Service(CommandRevertScenario.name)
 export class CommandRevertScenario implements Scenario<RevertCommand, void> {
   constructor(
     @Inject(EventFactory.name) private readonly eventFactory: EventFactory,
     @Inject(EventRepository.name) private readonly eventRepository: EventRepository,
-    @Inject(OrganisationCreatedEventDelta.name) private readonly organisationCreated: OrganisationCreatedEventDelta
+    @Inject(OrganisationCreatedEventDelta.name) private readonly organisationCreated: OrganisationCreatedEventDelta,
+    @Inject(AppInstalledEventDelta.name) private readonly appInstalled: AppInstalledEventDelta
   ) {}
 
   async execute(command: RevertCommand): Promise<void> {
@@ -23,10 +25,9 @@ export class CommandRevertScenario implements Scenario<RevertCommand, void> {
       const event = eventRow.payload;
       switch (event.kind) {
         case SCRAPING_EVENT_KIND.ORGANISATION_CREATED:
-          return this.organisationCreated.revert(event)
+          return this.organisationCreated.revert(event);
         case SCRAPING_EVENT_KIND.APP_INSTALLED:
-          console.log("TODO CommandRevertScenario.execute for APP_INSTALLED");
-          return;
+          return this.appInstalled.revert(event);
         default:
           throw new UnreachableCaseError(event);
       }

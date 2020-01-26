@@ -1,0 +1,7 @@
+{
+  "Records": [
+    {
+      "body": "{\"kind\":\"COMMIT\",\"event\":{\"kind\":\"APP_INSTALLED\",\"organisationAddress\":\"0xb788256177f8398babddb1118bc4aa0557ed8c65\",\"appId\":\"0xe3262375f45a6e2026b7e7b18c2b807434f2508fe1a2a3dfb493c7df8f4aad6a\",\"proxyAddress\":\"0x0e35B49466c4bff5B91d677c4d90727a15225e4a\",\"platform\":\"ARAGON\",\"blockNumber\":8403326,\"blockHash\":\"0x0eef3cab54194e1410aaa674903f4f4ecb6a08700b2bffa9643369c0afbd091d\",\"timestamp\":1566520194,\"txid\":\"0x9e9652504320aceef93a0db5274b873c1ab2bc25a88a928e3caa00d6f6ebaa56\"}}"
+    }
+  ]
+}
