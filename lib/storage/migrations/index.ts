@@ -4,3 +4,4 @@ export * from "./1569249291700-CreateEvents";
 export * from "./1569249291800-CreateApplications";
 export * from "./1569249291900-CreateMembership";
 export * from "./1569249292000-AdjustMembershipsName";
+export * from "./1569249292100-LinkOrganisationAndEvent";

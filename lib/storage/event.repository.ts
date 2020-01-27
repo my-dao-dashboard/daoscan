@@ -1,6 +1,7 @@
 import { Inject, Service } from "typedi";
 import { RepositoryFactory } from "./repository.factory";
 import { Event } from "./event.row";
+import {UUID} from "./uuid";
 
 @Service(EventRepository.name)
 export class EventRepository {

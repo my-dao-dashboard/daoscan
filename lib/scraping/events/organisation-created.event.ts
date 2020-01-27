@@ -74,6 +74,7 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
       organisationRow.id = this.address.toLowerCase();
       organisationRow.name = this.name;
       organisationRow.platform = this.platform;
+      organisationRow.eventId = eventRow.id;
 
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {
@@ -94,18 +95,14 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
     eventRow.payload = this;
     const found = await this.eventRepository.findSame(eventRow);
     if (found) {
-      const organisationRow = await this.organisationRepository.byId(this.address);
-      if (organisationRow) {
-        const writing = await this.connectionFactory.writing();
-        await writing.transaction(async entityManager => {
-          await entityManager.delete(Organisation, { id: this.address });
-          console.log("Deleted organisation", organisationRow);
-          await entityManager.delete(Event, { id: found.id });
-          console.log("Deleted event", found);
-        });
-      } else {
-        console.log("Can not find organisation", this);
-      }
+      const organisationRows = await this.organisationRepository.allByEventId(found.id)
+      const writing = await this.connectionFactory.writing();
+      await writing.transaction(async entityManager => {
+        await entityManager.delete(Organisation, organisationRows);
+        console.log("Deleted organisation", organisationRows);
+        await entityManager.delete(Event, { id: found.id });
+        console.log("Deleted event", found);
+      });
     } else {
       console.log("Can not find event", this);
     }
