@@ -6,13 +6,23 @@ import { SCRAPING_EVENT_KIND } from "./scraping-event.kind";
 import { UnreachableCaseError } from "../../shared/unreachable-case-error";
 import { AppInstalledEvent } from "./app-installed.event";
 import { OrganisationCreatedEvent } from "./organisation-created.event";
+import { EventRepository } from "../../storage/event.repository";
 
 @Service(ScrapingEventFactory.name)
 export class ScrapingEventFactory {
-  constructor(@Inject(AragonEventFactory.name) private readonly aragon: AragonEventFactory) {}
+  constructor(
+    @Inject(AragonEventFactory.name) private readonly aragon: AragonEventFactory,
+    @Inject(EventRepository.name) private readonly eventRepository: EventRepository
+  ) {}
 
-  fromStorage(eventId: string) {
-    
+  async fromStorage(eventId: string): Promise<ScrapingEvent | undefined> {
+    const row = await this.eventRepository.byId(eventId);
+    if (row) {
+      const payload = row.payload;
+      return this.fromJSON(payload);
+    } else {
+      return undefined;
+    }
   }
 
   fromJSON(json: ScrapingEvent): AppInstalledEvent | OrganisationCreatedEvent {

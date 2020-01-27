@@ -5,6 +5,7 @@ import { AppInstalledEventDelta } from "./events/app-installed-event.delta";
 import { SCRAPING_EVENT_KIND } from "./events/scraping-event.kind";
 import { UnreachableCaseError } from "../shared/unreachable-case-error";
 import { EventRepository } from "../storage/event.repository";
+import { ScrapingEventFactory } from "./events/scraping-event.factory";
 
 interface GenericCommand {
   readonly kind: COMMAND_KIND;
@@ -51,7 +52,7 @@ export class RevertCommand implements GenericCommand {
 
   constructor(
     eventId: string,
-    private readonly eventRepository: EventRepository,
+    private readonly scrapingEventFactory: ScrapingEventFactory,
     private readonly organisationCreated: OrganisationCreatedEventDelta,
     private readonly appInstalled: AppInstalledEventDelta
   ) {
@@ -60,10 +61,8 @@ export class RevertCommand implements GenericCommand {
 
   async execute(): Promise<void> {
     console.log("Trying to revert event", this);
-    const eventId = this.eventId;
-    const eventRow = await this.eventRepository.byId(eventId);
-    if (eventRow) {
-      const event = eventRow.payload;
+    const event = await this.scrapingEventFactory.fromStorage(this.eventId);
+    if (event) {
       switch (event.kind) {
         case SCRAPING_EVENT_KIND.ORGANISATION_CREATED:
           return this.organisationCreated.revert(event);
@@ -73,7 +72,7 @@ export class RevertCommand implements GenericCommand {
           throw new UnreachableCaseError(event);
       }
     } else {
-      console.log(`No event found`, eventRow);
+      console.log(`No event found`, this.eventId);
     }
   }
 

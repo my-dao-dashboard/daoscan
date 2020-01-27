@@ -24,10 +24,10 @@ export class CommandFactory {
     const kind = COMMAND_KIND.fromString(parsed.kind);
     switch (kind) {
       case COMMAND_KIND.COMMIT:
-        const event = this.eventFactory.fromJSON(parsed.event);
-        return new CommitCommand(event, this.organisationCreated, this.appInstalled);
+        const commitEvent = this.eventFactory.fromJSON(parsed.event);
+        return new CommitCommand(commitEvent, this.organisationCreated, this.appInstalled);
       case COMMAND_KIND.REVERT:
-        return new RevertCommand(parsed.eventId, this.eventRepository, this.organisationCreated, this.appInstalled);
+        return new RevertCommand(parsed.eventId, this.eventFactory, this.organisationCreated, this.appInstalled);
       default:
         throw new UnreachableCaseError(kind);
     }
@@ -44,7 +44,7 @@ export class CommandFactory {
     const rows = await this.eventRepository.allForBlock(block.id, block.hash);
     return rows.map<RevertCommand>(row => {
       const eventId = row.id.toString();
-      return new RevertCommand(eventId, this.eventRepository, this.organisationCreated, this.appInstalled);
+      return new RevertCommand(eventId, this.eventFactory, this.organisationCreated, this.appInstalled);
     });
   }
 }
