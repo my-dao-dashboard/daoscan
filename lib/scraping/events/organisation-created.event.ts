@@ -6,6 +6,7 @@ import { UUID } from "../../storage/uuid";
 import { Organisation } from "../../storage/organisation.row";
 import { EventRepository } from "../../storage/event.repository";
 import { ConnectionFactory } from "../../storage/connection.factory";
+import { OrganisationRepository } from "../../storage/organisation.repository";
 
 export interface OrganisationCreatedEventProps {
   blockNumber: number;
@@ -24,6 +25,7 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
   constructor(
     props: OrganisationCreatedEventProps,
     private readonly eventRepository: EventRepository,
+    private readonly organisationRepository: OrganisationRepository,
     private readonly connectionFactory: ConnectionFactory
   ) {
     this.props = props;
@@ -80,6 +82,32 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
         const savedEvent = await entityManager.save(eventRow);
         console.log("Saved event", savedEvent);
       });
+    }
+  }
+
+  async revert(): Promise<void> {
+    const eventRow = new Event();
+    eventRow.id = new UUID();
+    eventRow.platform = this.platform;
+    eventRow.blockHash = this.blockHash;
+    eventRow.blockId = BigInt(this.blockNumber);
+    eventRow.payload = this;
+    const found = await this.eventRepository.findSame(eventRow);
+    if (found) {
+      const organisationRow = await this.organisationRepository.byId(this.address);
+      if (organisationRow) {
+        const writing = await this.connectionFactory.writing();
+        await writing.transaction(async entityManager => {
+          await entityManager.delete(Organisation, { id: this.address });
+          console.log("Deleted organisation", organisationRow);
+          await entityManager.delete(Event, { id: found.id });
+          console.log("Deleted event", found);
+        });
+      } else {
+        console.log("Can not find organisation", this);
+      }
+    } else {
+      console.log("Can not find event", this);
     }
   }
 

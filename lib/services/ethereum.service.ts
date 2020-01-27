@@ -18,7 +18,7 @@ export interface ExtendedBlock extends BlockTransactionString {
   logs: Log[];
 }
 
-type BlockNumber = number | "latest" | bigint
+type BlockNumber = number | "latest" | bigint;
 
 @Service(EthereumService.name)
 export class EthereumService {

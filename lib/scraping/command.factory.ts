@@ -5,16 +5,12 @@ import { UnreachableCaseError } from "../shared/unreachable-case-error";
 import { ScrapingEventFactory } from "./events/scraping-event.factory";
 import { COMMAND_KIND } from "./command.kind";
 import { EventRepository } from "../storage/event.repository";
-import { OrganisationCreatedEventDelta } from "./events/organisation-created-event.delta";
-import { AppInstalledEventDelta } from "./events/app-installed-event.delta";
 
 @Service(CommandFactory.name)
 export class CommandFactory {
   constructor(
     @Inject(ScrapingEventFactory.name) private readonly eventFactory: ScrapingEventFactory,
-    @Inject(EventRepository.name) private readonly eventRepository: EventRepository,
-    @Inject(OrganisationCreatedEventDelta.name) private readonly organisationCreated: OrganisationCreatedEventDelta,
-    @Inject(AppInstalledEventDelta.name) private readonly appInstalled: AppInstalledEventDelta
+    @Inject(EventRepository.name) private readonly eventRepository: EventRepository
   ) {}
 
   fromString(payload: string): Command {
@@ -27,7 +23,7 @@ export class CommandFactory {
         const commitEvent = this.eventFactory.fromJSON(parsed.event);
         return new CommitCommand(commitEvent);
       case COMMAND_KIND.REVERT:
-        return new RevertCommand(parsed.eventId, this.eventFactory, this.organisationCreated, this.appInstalled);
+        return new RevertCommand(parsed.eventId, this.eventFactory);
       default:
         throw new UnreachableCaseError(kind);
     }
@@ -44,7 +40,7 @@ export class CommandFactory {
     const rows = await this.eventRepository.allForBlock(block.id, block.hash);
     return rows.map<RevertCommand>(row => {
       const eventId = row.id.toString();
-      return new RevertCommand(eventId, this.eventFactory, this.organisationCreated, this.appInstalled);
+      return new RevertCommand(eventId, this.eventFactory);
     });
   }
 }

@@ -18,13 +18,13 @@ export class BlockController {
   async add(event: APIGatewayEvent | SQSEvent) {
     if (isHttp(event)) {
       const blockAddEvent = this.eventFactory.fromString(event.body);
-      const commands = await this.addScenario.execute(blockAddEvent)
+      const commands = await this.addScenario.execute(blockAddEvent);
       return ok({ commands });
     } else {
       await Promise.all(
         event.Records.map(async record => {
           const blockAddEvent = this.eventFactory.fromString(record.body);
-          await this.addScenario.execute(blockAddEvent)
+          await this.addScenario.execute(blockAddEvent);
         })
       );
     }

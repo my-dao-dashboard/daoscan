@@ -13,6 +13,6 @@ export class OrganisationRepository {
 
   async byId(id: string): Promise<Organisation | undefined> {
     const repository = await this.repositoryFactory.writing(Organisation);
-    return  repository.findOne({ id });
+    return repository.findOne({ id });
   }
 }

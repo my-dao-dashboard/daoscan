@@ -1,9 +1,9 @@
-import {Inject, Service} from "typedi";
-import {Scenario} from "../shared/scenario";
-import {BlockAddEvent} from "./block-add.event";
-import {BlockFactory} from "./block.factory";
-import {ScrapingQueue} from "./scraping.queue";
-import {Command} from "./command";
+import { Inject, Service } from "typedi";
+import { Scenario } from "../shared/scenario";
+import { BlockAddEvent } from "./block-add.event";
+import { BlockFactory } from "./block.factory";
+import { ScrapingQueue } from "./scraping.queue";
+import { Command } from "./command";
 
 @Service(BlockAddScenario.name)
 export class BlockAddScenario implements Scenario<BlockAddEvent, Command[]> {
@@ -21,6 +21,6 @@ export class BlockAddScenario implements Scenario<BlockAddEvent, Command[]> {
     const commands = await block.commands();
     await this.fanout(commands);
     await block.save();
-    return commands
+    return commands;
   }
 }

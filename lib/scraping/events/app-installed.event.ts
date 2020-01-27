@@ -6,6 +6,7 @@ import { UUID } from "../../storage/uuid";
 import { EventRepository } from "../../storage/event.repository";
 import { Application } from "../../storage/application.row";
 import { ConnectionFactory } from "../../storage/connection.factory";
+import { ApplicationRepository } from "../../storage/application.repository";
 
 export interface AppInstalledEventProps {
   blockNumber: number;
@@ -25,6 +26,7 @@ export class AppInstalledEvent implements IScrapingEvent {
   constructor(
     props: AppInstalledEventProps,
     private readonly eventRepository: EventRepository,
+    private readonly applicationRepository: ApplicationRepository,
     private readonly connectionFactory: ConnectionFactory
   ) {
     this.props = props;
@@ -80,6 +82,27 @@ export class AppInstalledEvent implements IScrapingEvent {
         const savedEvent = await entityManager.save(eventRow);
         console.log("Saved event", savedEvent);
       });
+    }
+  }
+
+  async revert(): Promise<void> {
+    console.log("AppInstalledEventDelta.revert", this);
+    const [eventRow, found] = await this.findRow();
+    if (found) {
+      const applicationRow = await this.applicationRepository.byId(this.proxyAddress);
+      if (applicationRow) {
+        const writing = await this.connectionFactory.writing();
+        await writing.transaction(async entityManager => {
+          await entityManager.delete(Application, { id: this.proxyAddress });
+          console.log("Deleted application", applicationRow);
+          await entityManager.delete(Event, { id: found.id });
+          console.log("Deleted event", found);
+        });
+      } else {
+        console.log("Can not find organisation", this);
+      }
+    } else {
+      console.log("Can not find event", this);
     }
   }
 

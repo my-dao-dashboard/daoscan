@@ -9,6 +9,7 @@ import { APP_ID } from "../../storage/app-id";
 import { TOKEN_CONTROLLER_ABI } from "./token-controller.abi";
 import { AppInstalledEvent, AppInstalledEventProps } from "../events/app-installed.event";
 import { EventRepository } from "../../storage/event.repository";
+import { ApplicationRepository } from "../../storage/application.repository";
 
 export interface NewAppProxyParams {
   proxy: string;
@@ -41,6 +42,7 @@ export class AppInstalledEventFactory {
   constructor(
     @Inject(EthereumService.name) private readonly ethereum: EthereumService,
     @Inject(EventRepository.name) private readonly eventRepository: EventRepository,
+    @Inject(ApplicationRepository.name) private readonly applicationRepository: ApplicationRepository,
     @Inject(ConnectionFactory.name) private readonly connectionFactory: ConnectionFactory
   ) {}
 
@@ -103,7 +105,7 @@ export class AppInstalledEventFactory {
   }
 
   fromJSON(json: AppInstalledEventProps) {
-    return new AppInstalledEvent(json, this.eventRepository, this.connectionFactory);
+    return new AppInstalledEvent(json, this.eventRepository, this.applicationRepository, this.connectionFactory);
   }
 
   async fromBlock(block: Block): Promise<AppInstalledEvent[]> {

@@ -35,7 +35,7 @@ export class Block {
     let commands: Command[] = [];
     if (this.isOverwrite()) {
       const revertCommands = await this.commandFactory.revertBlock(this);
-      commands = commands.concat(revertCommands)
+      commands = commands.concat(revertCommands);
     }
     const commitCommands = await this.commandFactory.commitBlock(this);
     return commands.concat(commitCommands);

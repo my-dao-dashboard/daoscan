@@ -1,9 +1,5 @@
 import { ScrapingEvent } from "./events/scraping-event";
 import { COMMAND_KIND } from "./command.kind";
-import { OrganisationCreatedEventDelta } from "./events/organisation-created-event.delta";
-import { AppInstalledEventDelta } from "./events/app-installed-event.delta";
-import { SCRAPING_EVENT_KIND } from "./events/scraping-event.kind";
-import { UnreachableCaseError } from "../shared/unreachable-case-error";
 import { ScrapingEventFactory } from "./events/scraping-event.factory";
 
 interface GenericCommand {
@@ -38,12 +34,7 @@ export class RevertCommand implements GenericCommand {
   readonly kind = COMMAND_KIND.REVERT;
   readonly eventId: string;
 
-  constructor(
-    eventId: string,
-    private readonly scrapingEventFactory: ScrapingEventFactory,
-    private readonly organisationCreated: OrganisationCreatedEventDelta,
-    private readonly appInstalled: AppInstalledEventDelta
-  ) {
+  constructor(eventId: string, private readonly scrapingEventFactory: ScrapingEventFactory) {
     this.eventId = eventId;
   }
 
@@ -51,14 +42,7 @@ export class RevertCommand implements GenericCommand {
     console.log("Trying to revert event", this);
     const event = await this.scrapingEventFactory.fromStorage(this.eventId);
     if (event) {
-      switch (event.kind) {
-        case SCRAPING_EVENT_KIND.ORGANISATION_CREATED:
-          return this.organisationCreated.revert(event);
-        case SCRAPING_EVENT_KIND.APP_INSTALLED:
-          return this.appInstalled.revert(event);
-        default:
-          throw new UnreachableCaseError(event);
-      }
+      await event.revert();
     } else {
       console.log(`No event found`, this.eventId);
     }

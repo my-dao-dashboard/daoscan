@@ -8,6 +8,7 @@ import { logEvents } from "./events-from-logs";
 import { BlockchainEvent } from "./blockchain-event";
 import { OrganisationCreatedEvent, OrganisationCreatedEventProps } from "../events/organisation-created.event";
 import { EventRepository } from "../../storage/event.repository";
+import { OrganisationRepository } from "../../storage/organisation.repository";
 
 export const KIT_ADDRESSES = new Set(
   [
@@ -379,7 +380,8 @@ export class OrganisationCreatedEventFactory {
   constructor(
     @Inject(EthereumService.name) private readonly ethereum: EthereumService,
     @Inject(ConnectionFactory.name) private readonly connectionFactory: ConnectionFactory,
-    @Inject(EventRepository.name) private readonly eventRepository: EventRepository
+    @Inject(EventRepository.name) private readonly eventRepository: EventRepository,
+    @Inject(OrganisationRepository.name) private readonly organisationRepository: OrganisationRepository
   ) {}
 
   isSuitableReceipt(receipt: ExtendedTransactionReceipt): boolean {
@@ -433,7 +435,12 @@ export class OrganisationCreatedEventFactory {
   }
 
   fromJSON(json: OrganisationCreatedEventProps) {
-    return new OrganisationCreatedEvent(json, this.eventRepository, this.connectionFactory);
+    return new OrganisationCreatedEvent(
+      json,
+      this.eventRepository,
+      this.organisationRepository,
+      this.connectionFactory
+    );
   }
 
   async fromBlock(block: Block): Promise<OrganisationCreatedEvent[]> {
