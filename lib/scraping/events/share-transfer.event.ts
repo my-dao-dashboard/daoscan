@@ -79,28 +79,23 @@ export class ShareTransferEvent implements IScrapingEvent {
     eventRow.blockHash = this.blockHash;
     eventRow.blockId = BigInt(this.blockNumber);
     eventRow.payload = this;
-    const found = await this.eventRepository.findSame(eventRow);
-    if (Boolean(found)) {
-      console.log("Already committed", this);
-    } else {
-      const fromRow = await this.fromRow();
-      const toRow = await this.toRow();
-      const writing = await this.connectionFactory.writing();
-      await writing.transaction(async entityManager => {
-        const savedEvent = await entityManager.save(eventRow);
-        console.log("Saved event", savedEvent);
-        if (fromRow.accountId !== ZERO_ADDRESS) {
-          fromRow.eventId = savedEvent.id;
-          const savedFromRow = await entityManager.save(fromRow);
-          console.log("Saved from", savedFromRow);
-        }
-        if (toRow.accountId !== ZERO_ADDRESS) {
-          toRow.eventId = savedEvent.id;
-          const savedToRow = await entityManager.save(toRow);
-          console.log("Saved to", savedToRow);
-        }
-      });
-    }
+    const fromRow = await this.fromRow();
+    const toRow = await this.toRow();
+    const writing = await this.connectionFactory.writing();
+    await writing.transaction(async entityManager => {
+      const savedEvent = await entityManager.save(eventRow);
+      console.log("Saved event", savedEvent);
+      if (fromRow.accountId !== ZERO_ADDRESS) {
+        fromRow.eventId = savedEvent.id;
+        const savedFromRow = await entityManager.save(fromRow);
+        console.log("Saved from", savedFromRow);
+      }
+      if (toRow.accountId !== ZERO_ADDRESS) {
+        toRow.eventId = savedEvent.id;
+        const savedToRow = await entityManager.save(toRow);
+        console.log("Saved to", savedToRow);
+      }
+    });
   }
 
   async revert(): Promise<void> {
@@ -135,12 +130,7 @@ export class ShareTransferEvent implements IScrapingEvent {
     toRow.organisationId = this.organisationAddress;
     toRow.balanceDelta = BigInt(this.amount);
     toRow.kind = MEMBERSHIP_KIND.PARTICIPANT;
-    const found = await this.membershipRepository.findSame(toRow);
-    if (found) {
-      return found;
-    } else {
-      return toRow;
-    }
+    return toRow;
   }
 
   async fromRow() {
@@ -150,12 +140,7 @@ export class ShareTransferEvent implements IScrapingEvent {
     fromRow.organisationId = this.organisationAddress;
     fromRow.balanceDelta = BigInt(this.amount);
     fromRow.kind = MEMBERSHIP_KIND.PARTICIPANT;
-    const found = await this.membershipRepository.findSame(fromRow);
-    if (found) {
-      return found;
-    } else {
-      return fromRow;
-    }
+    return fromRow;
   }
 
   toJSON(): any {

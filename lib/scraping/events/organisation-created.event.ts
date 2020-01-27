@@ -66,24 +66,19 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
     eventRow.blockHash = this.blockHash;
     eventRow.blockId = BigInt(this.blockNumber);
     eventRow.payload = this;
-    const found = await this.eventRepository.byId(eventRow.id);
-    if (Boolean(found)) {
-      console.log("Already committed", this.toJSON());
-    } else {
-      const organisationRow = new Organisation();
-      organisationRow.id = eventRow.id;
-      organisationRow.name = this.name;
-      organisationRow.platform = this.platform;
-      organisationRow.address = this.address;
+    const organisationRow = new Organisation();
+    organisationRow.id = eventRow.id;
+    organisationRow.name = this.name;
+    organisationRow.platform = this.platform;
+    organisationRow.address = this.address;
 
-      const writing = await this.connectionFactory.writing();
-      await writing.transaction(async entityManager => {
-        const savedOrganisation = await entityManager.save(organisationRow);
-        console.log("Saved organisation", savedOrganisation);
-        const savedEvent = await entityManager.save(eventRow);
-        console.log("Saved event", savedEvent);
-      });
-    }
+    const writing = await this.connectionFactory.writing();
+    await writing.transaction(async entityManager => {
+      const savedOrganisation = await entityManager.save(organisationRow);
+      console.log("Saved organisation", savedOrganisation);
+      const savedEvent = await entityManager.save(eventRow);
+      console.log("Saved event", savedEvent);
+    });
   }
 
   async revert(): Promise<void> {

@@ -1,4 +1,6 @@
 import { Column, Entity, PrimaryColumn, ValueTransformer } from "typeorm";
+import { uuidTransformer } from "./event.row";
+import { UUID } from "./uuid";
 
 export const addressTransformer: ValueTransformer = {
   to: (entityValue: string) => entityValue.toLowerCase(),
@@ -7,9 +9,9 @@ export const addressTransformer: ValueTransformer = {
 
 @Entity("applications")
 export class Application {
-  @PrimaryColumn("varchar", { transformer: addressTransformer })
+  @PrimaryColumn("varchar", { transformer: uuidTransformer })
   // @ts-ignore
-  id: string;
+  id: UUID;
 
   @Column()
   // @ts-ignore
@@ -18,4 +20,8 @@ export class Application {
   @Column()
   // @ts-ignore
   appId: string;
+
+  @Column("varchar", { transformer: addressTransformer })
+  // @ts-ignore
+  address: string;
 }

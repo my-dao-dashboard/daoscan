@@ -67,46 +67,43 @@ export class AppInstalledEvent implements IScrapingEvent {
   async commit(): Promise<void> {
     console.log("Committing event", this.toJSON());
     const [eventRow, found] = await this.findRow();
-    if (Boolean(found)) {
-      console.log("Already committed", this.toJSON());
-    } else {
-      const applicationRow = new Application();
-      applicationRow.id = this.proxyAddress;
-      applicationRow.appId = this.appId;
-      applicationRow.organisationId = this.organisationAddress;
+    const applicationRow = new Application();
+    applicationRow.id = eventRow.id;
+    applicationRow.address = this.proxyAddress;
+    applicationRow.appId = this.appId;
+    applicationRow.organisationId = this.organisationAddress;
 
-      const writing = await this.connectionFactory.writing();
-      await writing.transaction(async entityManager => {
-        const savedApplication = await entityManager.save(applicationRow);
-        console.log("Saved application", savedApplication);
-        const savedEvent = await entityManager.save(eventRow);
-        console.log("Saved event", savedEvent);
-      });
-    }
+    const writing = await this.connectionFactory.writing();
+    await writing.transaction(async entityManager => {
+      const savedApplication = await entityManager.save(applicationRow);
+      console.log("Saved application", savedApplication);
+      const savedEvent = await entityManager.save(eventRow);
+      console.log("Saved event", savedEvent);
+    });
   }
 
   async revert(): Promise<void> {
-    console.log("AppInstalledEventDelta.revert", this);
+    console.log("AppInstalledEvent.revert", this.toJSON());
     const [eventRow, found] = await this.findRow();
     if (found) {
-      const applicationRow = await this.applicationRepository.byId(this.proxyAddress);
+      const applicationRow = await this.applicationRepository.byId(found.id);
       if (applicationRow) {
         const writing = await this.connectionFactory.writing();
         await writing.transaction(async entityManager => {
-          await entityManager.delete(Application, { id: this.proxyAddress });
+          await entityManager.delete(Application, applicationRow);
           console.log("Deleted application", applicationRow);
-          await entityManager.delete(Event, { id: found.id });
+          await entityManager.delete(Event, found);
           console.log("Deleted event", found);
         });
       } else {
-        console.log("Can not find organisation", this);
+        console.log("Can not find application", this.toJSON());
       }
     } else {
       console.log("Can not find event", this);
     }
   }
 
-  async findRow() {
+  async findRow(): Promise<[Event, Event | undefined]> {
     const eventRow = new Event();
     eventRow.id = new UUID();
     eventRow.platform = this.platform;

@@ -15,13 +15,13 @@ export class AragonEventFactory {
 
   async fromBlock(block: Block): Promise<ScrapingEvent[]> {
     const organisationCreatedEvents = await this.organisationCreated.fromBlock(block);
-    // const appInstalledEvents = await this.appInstalled.fromBlock(block);
-    // const shareTransferEvents = await this.shareTransfer.fromBlock(block, appInstalledEvents);
+    const appInstalledEvents = await this.appInstalled.fromBlock(block);
+    const shareTransferEvents = await this.shareTransfer.fromBlock(block, appInstalledEvents);
 
     let result = new Array<ScrapingEvent>();
     return result
       .concat(organisationCreatedEvents)
-      // .concat(appInstalledEvents)
-      // .concat(shareTransferEvents);
+      .concat(appInstalledEvents)
+      .concat(shareTransferEvents);
   }
 }

@@ -24,19 +24,4 @@ export class MembershipRepository {
       eventId: eventId
     });
   }
-
-  async delete(id: UUID) {
-    const repository = await this.repositoryFactory.writing(Membership);
-    return repository.delete({ id });
-  }
-
-  async findSame(row: Membership) {
-    const repository = await this.repositoryFactory.reading(Membership);
-    return repository.findOne({
-      accountId: row.accountId,
-      organisationId: row.organisationId,
-      balanceDelta: row.balanceDelta,
-      kind: row.kind
-    });
-  }
 }
