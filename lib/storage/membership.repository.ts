@@ -7,14 +7,15 @@ import { UUID } from "./uuid";
 export class MembershipRepository {
   constructor(@Inject(RepositoryFactory.name) private readonly repositoryFactory: RepositoryFactory) {}
 
-  async allOrganisationAddresses(accountId: string) {
-    const membershipRepository = await this.repositoryFactory.reading(Membership)
-    const organisationAddresses = await membershipRepository.createQueryBuilder('membership')
-      .where('membership.accountId = :accountId', {accountId})
-      .groupBy('membership.organisationId')
-      .select('membership.organisationId')
-      .getRawMany()
-    console.log('organisationAddresses', organisationAddresses)
+  async allOrganisationAddresses(accountAddress: string) {
+    const membershipRepository = await this.repositoryFactory.reading(Membership);
+    const records = await membershipRepository
+      .createQueryBuilder("membership")
+      .where("membership.accountAddress = :accountAddress", { accountAddress: accountAddress })
+      .groupBy("membership.organisationAddress")
+      .select("membership.organisationAddress", "organisationAddress")
+      .getRawMany();
+    return records.map(r => r.organisationAddress);
   }
 
   async byEventId(eventId: UUID): Promise<Membership[]> {

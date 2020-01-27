@@ -4,25 +4,25 @@ import { bind } from "decko";
 import { EthereumService } from "../services/ethereum.service";
 import { OrganisationPresentation } from "./organisation.presentation";
 import { MembershipRepository } from "../storage/membership.repository";
-
-// @Inject(OrganisationResolver.name) private readonly organisationResolver: OrganisationResolver,
+import { OrganisationResolver } from "./organisation.resolver";
+import _ from "lodash";
 
 @Service(AccountResolver.name)
 export class AccountResolver {
   constructor(
     @Inject(EthereumService.name) private readonly ethereum: EthereumService,
-    @Inject(MembershipRepository.name) private readonly membershipRepository: MembershipRepository
+    @Inject(MembershipRepository.name) private readonly membershipRepository: MembershipRepository,
+    @Inject(OrganisationResolver.name) private readonly organisationResolver: OrganisationResolver
   ) {}
 
   @bind()
   async organisations(root: AccountPresentation): Promise<Partial<OrganisationPresentation>[]> {
     const participantAddress = await this.ethereum.canonicalAddress(root.address);
-    const participantEntities = await this.membershipRepository.allOrganisationAddresses(participantAddress);
-    return [];
-    // const organisationAddresses = participantEntities.map(p => p.organisationAddress);
-    // const organisationsPromised = organisationAddresses.map(address => {
-    //   return this.organisationResolver.organisation(address);
-    // });
-    // return Promise.all(organisationsPromised);
+    const organisationAddresses = await this.membershipRepository.allOrganisationAddresses(participantAddress);
+    const promised = organisationAddresses.map(async address => {
+      return this.organisationResolver.organisation(address);
+    });
+    const organisations = await Promise.all(promised);
+    return _.compact(organisations);
   }
 }

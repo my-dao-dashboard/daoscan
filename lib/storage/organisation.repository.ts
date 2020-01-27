@@ -7,6 +7,13 @@ import { UUID } from "./uuid";
 export class OrganisationRepository {
   constructor(@Inject(RepositoryFactory.name) private readonly repositoryFactory: RepositoryFactory) {}
 
+  async byAddress(address: string) {
+    const repository = await this.repositoryFactory.reading(Organisation)
+    return repository.findOne({
+      address: address
+    })
+  }
+
   async save(row: Organisation): Promise<void> {
     const repository = await this.repositoryFactory.writing(Organisation);
     await repository.save(row);

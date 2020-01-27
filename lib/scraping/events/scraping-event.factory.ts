@@ -20,8 +20,8 @@ export class ScrapingEventFactory {
     @Inject(ShareTransferEventFactory.name) private readonly shareTransfer: ShareTransferEventFactory
   ) {}
 
-  async fromStorage(eventId: string): Promise<ScrapingEvent | undefined> {
-    const row = await this.eventRepository.byId(new UUID(eventId));
+  async fromStorage(eventId: UUID): Promise<ScrapingEvent | undefined> {
+    const row = await this.eventRepository.byId(eventId);
     if (row) {
       const payload = row.payload;
       return this.fromJSON(payload);

@@ -1,6 +1,7 @@
 import { ScrapingEvent } from "./events/scraping-event";
 import { COMMAND_KIND } from "./command.kind";
 import { ScrapingEventFactory } from "./events/scraping-event.factory";
+import { UUID } from "../storage/uuid";
 
 interface GenericCommand {
   readonly kind: COMMAND_KIND;
@@ -40,7 +41,7 @@ export class RevertCommand implements GenericCommand {
 
   async execute(): Promise<void> {
     console.log("Trying to revert event", this.toJSON());
-    const event = await this.scrapingEventFactory.fromStorage(this.eventId);
+    const event = await this.scrapingEventFactory.fromStorage(new UUID(this.eventId));
     if (event) {
       await event.revert();
     } else {
