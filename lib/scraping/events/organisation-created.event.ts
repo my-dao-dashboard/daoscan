@@ -1,8 +1,13 @@
 import { SCRAPING_EVENT_KIND } from "./scraping-event.kind";
 import { PLATFORM } from "../../domain/platform";
 import { IScrapingEvent } from "./scraping-event.interface";
+import { Event } from "../../storage/event.row";
+import { UUID } from "../../storage/uuid";
+import { Organisation } from "../../storage/organisation.row";
+import { EventRepository } from "../../storage/event.repository";
+import { ConnectionFactory } from "../../storage/connection.factory";
 
-interface Props {
+export interface OrganisationCreatedEventProps {
   blockNumber: number;
   blockHash: string;
   platform: PLATFORM;
@@ -14,9 +19,13 @@ interface Props {
 
 export class OrganisationCreatedEvent implements IScrapingEvent {
   readonly kind = SCRAPING_EVENT_KIND.ORGANISATION_CREATED;
-  private readonly props: Props;
+  private readonly props: OrganisationCreatedEventProps;
 
-  constructor(props: Props) {
+  constructor(
+    props: OrganisationCreatedEventProps,
+    private readonly eventRepository: EventRepository,
+    private readonly connectionFactory: ConnectionFactory
+  ) {
     this.props = props;
   }
 
@@ -46,6 +55,32 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
 
   get txid() {
     return this.props.txid;
+  }
+
+  async commit(): Promise<void> {
+    const eventRow = new Event();
+    eventRow.id = new UUID();
+    eventRow.platform = this.platform;
+    eventRow.blockHash = this.blockHash;
+    eventRow.blockId = BigInt(this.blockNumber);
+    eventRow.payload = this;
+    const found = await this.eventRepository.findSame(eventRow);
+    if (Boolean(found)) {
+      console.log("Already committed", this);
+    } else {
+      const organisationRow = new Organisation();
+      organisationRow.id = this.address.toLowerCase();
+      organisationRow.name = this.name;
+      organisationRow.platform = this.platform;
+
+      const writing = await this.connectionFactory.writing();
+      await writing.transaction(async entityManager => {
+        const savedOrganisation = await entityManager.save(organisationRow);
+        console.log("Saved organisation", savedOrganisation);
+        const savedEvent = await entityManager.save(eventRow);
+        console.log("Saved event", savedEvent);
+      });
+    }
   }
 
   toJSON() {

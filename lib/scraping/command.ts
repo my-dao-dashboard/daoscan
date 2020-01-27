@@ -4,7 +4,6 @@ import { OrganisationCreatedEventDelta } from "./events/organisation-created-eve
 import { AppInstalledEventDelta } from "./events/app-installed-event.delta";
 import { SCRAPING_EVENT_KIND } from "./events/scraping-event.kind";
 import { UnreachableCaseError } from "../shared/unreachable-case-error";
-import { EventRepository } from "../storage/event.repository";
 import { ScrapingEventFactory } from "./events/scraping-event.factory";
 
 interface GenericCommand {
@@ -17,25 +16,14 @@ export class CommitCommand implements GenericCommand {
   readonly kind = COMMAND_KIND.COMMIT;
   readonly event: ScrapingEvent;
 
-  constructor(
-    event: ScrapingEvent,
-    private readonly organisationCreated: OrganisationCreatedEventDelta,
-    private readonly appInstalled: AppInstalledEventDelta
-  ) {
+  constructor(event: ScrapingEvent) {
     this.event = event;
   }
 
   async execute(): Promise<void> {
     const event = this.event;
     console.log("Committing event", event);
-    switch (event.kind) {
-      case SCRAPING_EVENT_KIND.APP_INSTALLED:
-        return this.appInstalled.commit(event);
-      case SCRAPING_EVENT_KIND.ORGANISATION_CREATED:
-        return this.organisationCreated.commit(event);
-      default:
-        throw new UnreachableCaseError(event);
-    }
+    await event.commit();
   }
 
   toJSON() {

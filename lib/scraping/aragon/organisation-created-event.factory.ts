@@ -6,7 +6,8 @@ import { Block } from "../block";
 import { ConnectionFactory } from "../../storage/connection.factory";
 import { logEvents } from "./events-from-logs";
 import { BlockchainEvent } from "./blockchain-event";
-import { OrganisationCreatedEvent } from "../events/organisation-created.event";
+import { OrganisationCreatedEvent, OrganisationCreatedEventProps } from "../events/organisation-created.event";
+import { EventRepository } from "../../storage/event.repository";
 
 export const KIT_ADDRESSES = new Set(
   [
@@ -377,7 +378,8 @@ export const DEPLOY_INSTANCE_EVENT: BlockchainEvent<DeployInstanceParams> = {
 export class OrganisationCreatedEventFactory {
   constructor(
     @Inject(EthereumService.name) private readonly ethereum: EthereumService,
-    @Inject(ConnectionFactory.name) private readonly connectionFactory: ConnectionFactory
+    @Inject(ConnectionFactory.name) private readonly connectionFactory: ConnectionFactory,
+    @Inject(EventRepository.name) private readonly eventRepository: EventRepository
   ) {}
 
   isSuitableReceipt(receipt: ExtendedTransactionReceipt): boolean {
@@ -392,7 +394,7 @@ export class OrganisationCreatedEventFactory {
     const ensName = `${parameters.name}.aragonid.eth`;
     const address = await this.ethereum.canonicalAddress(ensName);
     const timestamp = await block.timestamp();
-    return new OrganisationCreatedEvent({
+    return this.fromJSON({
       platform: PLATFORM.ARAGON,
       name: ensName,
       address: address.toLowerCase(),
@@ -418,7 +420,7 @@ export class OrganisationCreatedEventFactory {
     const timestamp = await block.timestamp();
     return logEvents(this.ethereum.codec, extendedBlock, DEPLOY_INSTANCE_EVENT).map(e => {
       const organisationAddress = e.dao;
-      return new OrganisationCreatedEvent({
+      return this.fromJSON({
         platform: PLATFORM.ARAGON,
         name: organisationAddress.toLowerCase(),
         address: organisationAddress.toLowerCase(),
@@ -428,6 +430,10 @@ export class OrganisationCreatedEventFactory {
         timestamp: Number(timestamp)
       });
     });
+  }
+
+  fromJSON(json: OrganisationCreatedEventProps) {
+    return new OrganisationCreatedEvent(json, this.eventRepository, this.connectionFactory);
   }
 
   async fromBlock(block: Block): Promise<OrganisationCreatedEvent[]> {

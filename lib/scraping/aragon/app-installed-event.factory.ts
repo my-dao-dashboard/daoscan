@@ -7,7 +7,8 @@ import { logEvents } from "./events-from-logs";
 import { BlockchainEvent } from "./blockchain-event";
 import { APP_ID } from "../../storage/app-id";
 import { TOKEN_CONTROLLER_ABI } from "./token-controller.abi";
-import { AppInstalledEvent } from "../events/app-installed.event";
+import { AppInstalledEvent, AppInstalledEventProps } from "../events/app-installed.event";
+import { EventRepository } from "../../storage/event.repository";
 
 export interface NewAppProxyParams {
   proxy: string;
@@ -39,6 +40,7 @@ export const NEW_APP_PROXY_EVENT: BlockchainEvent<NewAppProxyParams> = {
 export class AppInstalledEventFactory {
   constructor(
     @Inject(EthereumService.name) private readonly ethereum: EthereumService,
+    @Inject(EventRepository.name) private readonly eventRepository: EventRepository,
     @Inject(ConnectionFactory.name) private readonly connectionFactory: ConnectionFactory
   ) {}
 
@@ -64,7 +66,7 @@ export class AppInstalledEventFactory {
     const nativeEvents = logEvents(this.ethereum.codec, extendedBlock, NEW_APP_PROXY_EVENT);
     const appInstalledPromised = nativeEvents.map<Promise<AppInstalledEvent>>(async e => {
       const organisationAddress = await this.kernelAddress(e.proxy);
-      return new AppInstalledEvent({
+      return this.fromJSON({
         organisationAddress: organisationAddress.toLowerCase(),
         appId: e.appId,
         proxyAddress: e.proxy,
@@ -86,7 +88,7 @@ export class AppInstalledEventFactory {
       const tokenControllerAddress = e.proxyAddress;
       const tokenController = this.ethereum.contract(TOKEN_CONTROLLER_ABI, tokenControllerAddress);
       const tokenAddress = await tokenController.methods.token().call();
-      return new AppInstalledEvent({
+      return this.fromJSON({
         platform: PLATFORM.ARAGON,
         organisationAddress: e.organisationAddress,
         appId: APP_ID.SHARE,
@@ -98,6 +100,10 @@ export class AppInstalledEventFactory {
       });
     });
     return Promise.all(promised);
+  }
+
+  fromJSON(json: AppInstalledEventProps) {
+    return new AppInstalledEvent(json, this.eventRepository, this.connectionFactory);
   }
 
   async fromBlock(block: Block): Promise<AppInstalledEvent[]> {

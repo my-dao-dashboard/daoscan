@@ -25,7 +25,7 @@ export class CommandFactory {
     switch (kind) {
       case COMMAND_KIND.COMMIT:
         const commitEvent = this.eventFactory.fromJSON(parsed.event);
-        return new CommitCommand(commitEvent, this.organisationCreated, this.appInstalled);
+        return new CommitCommand(commitEvent);
       case COMMAND_KIND.REVERT:
         return new RevertCommand(parsed.eventId, this.eventFactory, this.organisationCreated, this.appInstalled);
       default:
@@ -36,7 +36,7 @@ export class CommandFactory {
   async commitBlock(block: Block): Promise<CommitCommand[]> {
     const events = await this.eventFactory.fromBlock(block);
     return events.map<CommitCommand>(event => {
-      return new CommitCommand(event, this.organisationCreated, this.appInstalled);
+      return new CommitCommand(event);
     });
   }
 

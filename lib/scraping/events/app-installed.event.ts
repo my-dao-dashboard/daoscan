@@ -1,8 +1,13 @@
 import { SCRAPING_EVENT_KIND } from "./scraping-event.kind";
 import { PLATFORM } from "../../domain/platform";
 import { IScrapingEvent } from "./scraping-event.interface";
+import { Event } from "../../storage/event.row";
+import { UUID } from "../../storage/uuid";
+import { EventRepository } from "../../storage/event.repository";
+import { Application } from "../../storage/application.row";
+import { ConnectionFactory } from "../../storage/connection.factory";
 
-interface Props {
+export interface AppInstalledEventProps {
   blockNumber: number;
   blockHash: string;
   platform: PLATFORM;
@@ -15,9 +20,13 @@ interface Props {
 
 export class AppInstalledEvent implements IScrapingEvent {
   readonly kind = SCRAPING_EVENT_KIND.APP_INSTALLED;
-  private readonly props: Props;
+  private readonly props: AppInstalledEventProps;
 
-  constructor(props: Props) {
+  constructor(
+    props: AppInstalledEventProps,
+    private readonly eventRepository: EventRepository,
+    private readonly connectionFactory: ConnectionFactory
+  ) {
     this.props = props;
   }
 
@@ -51,6 +60,38 @@ export class AppInstalledEvent implements IScrapingEvent {
 
   get timestamp() {
     return this.props.timestamp;
+  }
+
+  async commit(): Promise<void> {
+    console.log("Committing event", this);
+    const [eventRow, found] = await this.findRow();
+    if (Boolean(found)) {
+      console.log("Already committed", this);
+    } else {
+      const applicationRow = new Application();
+      applicationRow.id = this.proxyAddress;
+      applicationRow.appId = this.appId;
+      applicationRow.organisationId = this.organisationAddress;
+
+      const writing = await this.connectionFactory.writing();
+      await writing.transaction(async entityManager => {
+        const savedApplication = await entityManager.save(applicationRow);
+        console.log("Saved application", savedApplication);
+        const savedEvent = await entityManager.save(eventRow);
+        console.log("Saved event", savedEvent);
+      });
+    }
+  }
+
+  async findRow() {
+    const eventRow = new Event();
+    eventRow.id = new UUID();
+    eventRow.platform = this.platform;
+    eventRow.blockHash = this.blockHash;
+    eventRow.blockId = BigInt(this.blockNumber);
+    eventRow.payload = this;
+    const found = await this.eventRepository.findSame(eventRow);
+    return [eventRow, found];
   }
 
   toJSON() {
