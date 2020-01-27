@@ -15,7 +15,7 @@ export class Application {
 
   @Column()
   // @ts-ignore
-  organisationId: string;
+  organisationAddress: string;
 
   @Column()
   // @ts-ignore

@@ -12,11 +12,11 @@ export class Membership {
 
   @Column()
   // @ts-ignore
-  organisationId: string;
+  organisationAddress: string;
 
   @Column()
   // @ts-ignore
-  accountId: string; // member address
+  accountAddress: string; // member address
 
   @Column("varchar", { transformer: uuidTransformer })
   // @ts-ignore

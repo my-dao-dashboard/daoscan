@@ -85,12 +85,12 @@ export class ShareTransferEvent implements IScrapingEvent {
     await writing.transaction(async entityManager => {
       const savedEvent = await entityManager.save(eventRow);
       console.log("Saved event", savedEvent);
-      if (fromRow.accountId !== ZERO_ADDRESS) {
+      if (fromRow.accountAddress !== ZERO_ADDRESS) {
         fromRow.eventId = savedEvent.id;
         const savedFromRow = await entityManager.save(fromRow);
         console.log("Saved from", savedFromRow);
       }
-      if (toRow.accountId !== ZERO_ADDRESS) {
+      if (toRow.accountAddress !== ZERO_ADDRESS) {
         toRow.eventId = savedEvent.id;
         const savedToRow = await entityManager.save(toRow);
         console.log("Saved to", savedToRow);
@@ -126,8 +126,8 @@ export class ShareTransferEvent implements IScrapingEvent {
   async toRow() {
     const toRow = new Membership();
     toRow.id = new UUID();
-    toRow.accountId = this.to;
-    toRow.organisationId = this.organisationAddress;
+    toRow.accountAddress = this.to;
+    toRow.organisationAddress = this.organisationAddress;
     toRow.balanceDelta = BigInt(this.amount);
     toRow.kind = MEMBERSHIP_KIND.PARTICIPANT;
     return toRow;
@@ -136,8 +136,8 @@ export class ShareTransferEvent implements IScrapingEvent {
   async fromRow() {
     const fromRow = new Membership();
     fromRow.id = new UUID();
-    fromRow.accountId = this.from;
-    fromRow.organisationId = this.organisationAddress;
+    fromRow.accountAddress = this.from;
+    fromRow.organisationAddress = this.organisationAddress;
     fromRow.balanceDelta = BigInt(this.amount);
     fromRow.kind = MEMBERSHIP_KIND.PARTICIPANT;
     return fromRow;

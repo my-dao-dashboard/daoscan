@@ -13,7 +13,7 @@ export class ApplicationRepository {
       address: address
     });
     if (applicationRow) {
-      return applicationRow.organisationId;
+      return applicationRow.organisationAddress;
     } else {
       return undefined;
     }

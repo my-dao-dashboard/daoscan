@@ -71,7 +71,7 @@ export class AppInstalledEvent implements IScrapingEvent {
     applicationRow.id = eventRow.id;
     applicationRow.address = this.proxyAddress;
     applicationRow.appId = this.appId;
-    applicationRow.organisationId = this.organisationAddress;
+    applicationRow.organisationAddress = this.organisationAddress;
 
     const writing = await this.connectionFactory.writing();
     await writing.transaction(async entityManager => {

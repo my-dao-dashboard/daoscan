@@ -8,7 +8,6 @@ export class MembershipRepository {
   constructor(@Inject(RepositoryFactory.name) private readonly repositoryFactory: RepositoryFactory) {}
 
   async allOrganisationAddresses(accountId: string) {
-    console.log('accountid', accountId)
     const membershipRepository = await this.repositoryFactory.reading(Membership)
     const organisationAddresses = await membershipRepository.createQueryBuilder('membership')
       .where('membership.accountId = :accountId', {accountId})
