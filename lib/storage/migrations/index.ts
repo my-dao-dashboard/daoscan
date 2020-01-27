@@ -5,3 +5,5 @@ export * from "./1569249291800-CreateApplications";
 export * from "./1569249291900-CreateMembership";
 export * from "./1569249292000-AdjustMembershipsName";
 export * from "./1569249292100-LinkOrganisationAndEvent";
+export * from "./1569249292200-RecreateOrganisations";
+export * from "./1569249292300-EventPayloadIsNotUnique";

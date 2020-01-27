@@ -12,12 +12,7 @@ export class OrganisationRepository {
     await repository.save(row);
   }
 
-  async allByEventId(eventId: UUID) {
-    const repository = await this.repositoryFactory.reading(Organisation);
-    return repository.find({ eventId: eventId });
-  }
-
-  async byId(id: string): Promise<Organisation | undefined> {
+  async byId(id: UUID): Promise<Organisation | undefined> {
     const repository = await this.repositoryFactory.reading(Organisation);
     return repository.findOne({ id });
   }

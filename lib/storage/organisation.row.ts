@@ -4,9 +4,9 @@ import { UUID } from "./uuid";
 
 @Entity("organisations")
 export class Organisation {
-  @PrimaryColumn()
+  @PrimaryColumn("varchar", { transformer: uuidTransformer })
   // @ts-ignore
-  id: string;
+  id: UUID; // event id
 
   @Column()
   // @ts-ignore
@@ -16,7 +16,7 @@ export class Organisation {
   // @ts-ignore
   platform: string;
 
-  @Column("varchar", { transformer: uuidTransformer })
+  @Column()
   // @ts-ignore
-  eventId: UUID;
+  address: string;
 }

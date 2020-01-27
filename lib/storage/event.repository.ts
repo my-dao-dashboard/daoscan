@@ -1,13 +1,13 @@
 import { Inject, Service } from "typedi";
 import { RepositoryFactory } from "./repository.factory";
 import { Event } from "./event.row";
-import {UUID} from "./uuid";
+import { UUID } from "./uuid";
 
 @Service(EventRepository.name)
 export class EventRepository {
   constructor(@Inject(RepositoryFactory.name) private readonly repositoryFactory: RepositoryFactory) {}
 
-  async byId(id: string): Promise<Event | undefined> {
+  async byId(id: UUID): Promise<Event | undefined> {
     const repository = await this.repositoryFactory.reading(Event);
     return repository.findOne({ id });
   }

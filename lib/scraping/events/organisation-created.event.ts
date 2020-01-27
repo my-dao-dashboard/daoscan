@@ -66,15 +66,15 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
     eventRow.blockHash = this.blockHash;
     eventRow.blockId = BigInt(this.blockNumber);
     eventRow.payload = this;
-    const found = await this.eventRepository.findSame(eventRow);
+    const found = await this.eventRepository.byId(eventRow.id);
     if (Boolean(found)) {
-      console.log("Already committed", this);
+      console.log("Already committed", this.toJSON());
     } else {
       const organisationRow = new Organisation();
-      organisationRow.id = this.address.toLowerCase();
+      organisationRow.id = eventRow.id;
       organisationRow.name = this.name;
       organisationRow.platform = this.platform;
-      organisationRow.eventId = eventRow.id;
+      organisationRow.address = this.address;
 
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {
@@ -95,7 +95,7 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
     eventRow.payload = this;
     const found = await this.eventRepository.findSame(eventRow);
     if (found) {
-      const organisationRows = await this.organisationRepository.allByEventId(found.id)
+      const organisationRows = await this.organisationRepository.byId(found.id);
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {
         await entityManager.delete(Organisation, organisationRows);

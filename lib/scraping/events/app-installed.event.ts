@@ -68,7 +68,7 @@ export class AppInstalledEvent implements IScrapingEvent {
     console.log("Committing event", this.toJSON());
     const [eventRow, found] = await this.findRow();
     if (Boolean(found)) {
-      console.log("Already committed", this);
+      console.log("Already committed", this.toJSON());
     } else {
       const applicationRow = new Application();
       applicationRow.id = this.proxyAddress;

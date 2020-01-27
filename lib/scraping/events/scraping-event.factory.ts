@@ -8,6 +8,7 @@ import { EventRepository } from "../../storage/event.repository";
 import { OrganisationCreatedEventFactory } from "../aragon/organisation-created-event.factory";
 import { AppInstalledEventFactory } from "../aragon/app-installed-event.factory";
 import { ShareTransferEventFactory } from "../aragon/share-transfer-event.factory";
+import { UUID } from "../../storage/uuid";
 
 @Service(ScrapingEventFactory.name)
 export class ScrapingEventFactory {
@@ -20,7 +21,7 @@ export class ScrapingEventFactory {
   ) {}
 
   async fromStorage(eventId: string): Promise<ScrapingEvent | undefined> {
-    const row = await this.eventRepository.byId(eventId);
+    const row = await this.eventRepository.byId(new UUID(eventId));
     if (row) {
       const payload = row.payload;
       return this.fromJSON(payload);
