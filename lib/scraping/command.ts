@@ -18,7 +18,7 @@ export class CommitCommand implements GenericCommand {
 
   async execute(): Promise<void> {
     const event = this.event;
-    console.log("Committing event", event);
+    console.log("Committing event", event.toJSON());
     await event.commit();
   }
 
@@ -39,7 +39,7 @@ export class RevertCommand implements GenericCommand {
   }
 
   async execute(): Promise<void> {
-    console.log("Trying to revert event", this);
+    console.log("Trying to revert event", this.toJSON());
     const event = await this.scrapingEventFactory.fromStorage(this.eventId);
     if (event) {
       await event.revert();

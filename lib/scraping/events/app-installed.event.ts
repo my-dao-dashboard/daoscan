@@ -65,7 +65,7 @@ export class AppInstalledEvent implements IScrapingEvent {
   }
 
   async commit(): Promise<void> {
-    console.log("Committing event", this);
+    console.log("Committing event", this.toJSON());
     const [eventRow, found] = await this.findRow();
     if (Boolean(found)) {
       console.log("Already committed", this);

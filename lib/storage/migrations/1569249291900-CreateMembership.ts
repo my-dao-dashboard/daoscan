@@ -51,6 +51,6 @@ export class CreateMembership1569249291900 implements MigrationInterface {
   }
 
   async down(queryRunner: QueryRunner): Promise<any> {
-    await queryRunner.dropTable("memberships");
+    await queryRunner.dropTable("memberhsips");
   }
 }

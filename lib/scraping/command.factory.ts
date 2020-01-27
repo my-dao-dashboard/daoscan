@@ -17,13 +17,17 @@ export class CommandFactory {
     console.log("trying to parse", payload);
     const parsed = JSON.parse(payload);
     console.log("parsed", parsed);
-    const kind = COMMAND_KIND.fromString(parsed.kind);
+    return this.fromJSON(parsed);
+  }
+
+  fromJSON(payload: any): Command {
+    const kind = COMMAND_KIND.fromString(payload.kind);
     switch (kind) {
       case COMMAND_KIND.COMMIT:
-        const commitEvent = this.eventFactory.fromJSON(parsed.event);
+        const commitEvent = this.eventFactory.fromJSON(payload.event);
         return new CommitCommand(commitEvent);
       case COMMAND_KIND.REVERT:
-        return new RevertCommand(parsed.eventId, this.eventFactory);
+        return new RevertCommand(payload.eventId, this.eventFactory);
       default:
         throw new UnreachableCaseError(kind);
     }

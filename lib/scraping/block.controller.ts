@@ -5,6 +5,7 @@ import { APIGatewayEvent, SQSEvent } from "aws-lambda";
 import { isHttp, ok } from "../shared/http-handler";
 import { BlockAddEventFactory } from "./block-add.event";
 import { BlockAddScenario } from "./block-add.scenario";
+import { CommandFactory } from "./command.factory";
 
 @Service(BlockController.name)
 export class BlockController {
@@ -19,6 +20,14 @@ export class BlockController {
     if (isHttp(event)) {
       const blockAddEvent = this.eventFactory.fromString(event.body);
       const commands = await this.addScenario.execute(blockAddEvent);
+      const inplace = event.queryStringParameters?.inplace;
+      if (inplace) {
+        await Promise.all(
+          commands.map(async command => {
+            await command.execute();
+          })
+        );
+      }
       return ok({ commands });
     } else {
       await Promise.all(

@@ -1,0 +1,35 @@
+type Participant {
+  address: String!
+  shares: Token
+}
+
+type Token {
+  name: String
+  symbol: String!
+  amount: String!
+  decimals: Int
+}
+
+type Organisation {
+  address: String!
+  platform: String!
+  name: String!
+  txid: String!
+  timestamp: Int
+  blockNumber: Int
+  totalSupply: Token!
+  shareValue(symbol: String!): Token!
+  bank: [Token]
+  participants: [Participant]
+  participant(address: String!): Participant
+}
+
+type Account {
+  address: String!
+  organisations: [Organisation]
+}
+
+type Query {
+  account(address: String!): Account
+  organisation(address: String): Organisation
+}

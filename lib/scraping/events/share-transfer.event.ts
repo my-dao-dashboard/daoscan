@@ -8,7 +8,7 @@ import { UUID } from "../../storage/uuid";
 import { MEMBERSHIP_KIND } from "../../storage/membership.kind";
 import { MembershipRepository } from "../../storage/membership.repository";
 import { ConnectionFactory } from "../../storage/connection.factory";
-import { Organisation } from "../../storage/organisation.row";
+import { ZERO_ADDRESS } from "../../shared/zero-address";
 
 export interface ShareTransferEventProps {
   platform: PLATFORM.ARAGON;
@@ -89,12 +89,16 @@ export class ShareTransferEvent implements IScrapingEvent {
       await writing.transaction(async entityManager => {
         const savedEvent = await entityManager.save(eventRow);
         console.log("Saved event", savedEvent);
-        fromRow.eventId = savedEvent.id;
-        const savedFromRow = await entityManager.save(fromRow);
-        console.log("Saved from", savedFromRow);
-        toRow.eventId = savedEvent.id;
-        const savedToRow = await entityManager.save(toRow);
-        console.log("Saved to", savedToRow);
+        if (fromRow.accountId !== ZERO_ADDRESS) {
+          fromRow.eventId = savedEvent.id;
+          const savedFromRow = await entityManager.save(fromRow);
+          console.log("Saved from", savedFromRow);
+        }
+        if (toRow.accountId !== ZERO_ADDRESS) {
+          toRow.eventId = savedEvent.id;
+          const savedToRow = await entityManager.save(toRow);
+          console.log("Saved to", savedToRow);
+        }
       });
     }
   }

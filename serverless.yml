@@ -85,6 +85,15 @@ functions:
       - http:
           path: util/migration/up
           method: post
+  querying-graphql:
+    handler: functions/querying.graphql
+    events:
+      - http:
+          path: graphql
+          method: post
+      - http:
+          path: graphql
+          method: get
 
 resources:
   - ${file(resources/sqs.yml)}
