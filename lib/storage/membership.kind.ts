@@ -1,0 +1,3 @@
+export enum MEMBERSHIP_KIND {
+  PARTICIPANT = "PARTICIPANT"
+}

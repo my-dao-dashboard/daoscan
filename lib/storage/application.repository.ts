@@ -11,6 +11,18 @@ export class ApplicationRepository {
     await repository.save(row);
   }
 
+  async organisationAddressByApplicationAddress(proxyAddress: string): Promise<string | undefined> {
+    const repository = await this.repositoryFactory.reading(Application);
+    const applicationRow = await repository.findOne({
+      id: proxyAddress
+    });
+    if (applicationRow) {
+      return applicationRow.organisationId;
+    } else {
+      return undefined;
+    }
+  }
+
   async byId(id: string): Promise<Application | undefined> {
     const repository = await this.repositoryFactory.writing(Application);
     return repository.findOne({ id });
