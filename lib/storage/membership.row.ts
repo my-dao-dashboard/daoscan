@@ -4,7 +4,7 @@ import { uuidTransformer } from "./event.row";
 import { MEMBERSHIP_KIND } from "./membership.kind";
 import { bigintTransformer } from "./bigint.transformer";
 
-@Entity()
+@Entity("memberships")
 export class Membership {
   @PrimaryColumn("varchar", { transformer: uuidTransformer })
   // @ts-ignore
