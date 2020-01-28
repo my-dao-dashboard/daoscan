@@ -67,12 +67,21 @@ export class OrganisationResolver {
     );
     if (participant) {
       const shares = await this.balance.balanceOf(participantAddress, token);
-      return {
-        address: participantAddress,
-        shares
-      };
+      return new ParticipantPresentation(participantAddress, shares);
     } else {
       return null;
     }
+  }
+
+  @bind()
+  async participants(root: OrganisationPresentation): Promise<ParticipantPresentation[]> {
+    const organisationAddress = await this.ethereum.canonicalAddress(root.address);
+    const token = await this.organisationService.tokenContract(organisationAddress);
+    const participants = await this.membershipRepository.allByOrganisationAddress(organisationAddress);
+    const promised = participants.map(async p => {
+      const shares = await this.balance.balanceOf(p.accountAddress, token);
+      return new ParticipantPresentation(p.accountAddress, shares);
+    });
+    return await Promise.all(promised);
   }
 }

@@ -25,6 +25,13 @@ export class MembershipRepository {
     });
   }
 
+  async allByOrganisationAddress(organisationAddress: string) {
+    const repository = await this.repositoryFactory.reading(Membership);
+    return repository.find({
+      organisationAddress: organisationAddress
+    });
+  }
+
   async byAddressInOrganisation(organisationAddress: string, accountAddress: string): Promise<Membership | undefined> {
     const repository = await this.repositoryFactory.reading(Membership);
     return repository.findOne({

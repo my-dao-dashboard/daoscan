@@ -5,16 +5,8 @@ import fs from "fs";
 import path from "path";
 import { makeExecutableSchema } from "graphql-tools";
 import { AccountPresentation } from "./account.presentation";
-import { EthereumService } from "../services/ethereum.service";
 import { AccountResolver } from "./account.resolver";
 import { OrganisationResolver } from "./organisation.resolver";
-// import { AccountResolver } from "./account.resolver";
-// import { OrganisationResolver } from "./organisation.resolver";
-// import { ParticipantResolver } from "./participant.resolver";
-// import { AccountResolver } from "./account.resolver";
-
-// @Inject(OrganisationResolver.name) private readonly organisationResolver: OrganisationResolver,
-// @Inject(ParticipantResolver.name) private readonly participantResolver: ParticipantResolver,
 
 @Service(GraphqlController.name)
 export class GraphqlController {
@@ -63,7 +55,7 @@ export class GraphqlController {
         totalSupply: this.organisationResolver.totalSupply,
         bank: this.organisationResolver.bank,
         shareValue: this.organisationResolver.shareValue,
-        //   participants: this.organisationResolver.participants,
+        participants: this.organisationResolver.participants,
         participant: this.organisationResolver.participant
       },
       Account: {
