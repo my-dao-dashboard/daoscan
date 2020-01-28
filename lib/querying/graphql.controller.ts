@@ -64,7 +64,7 @@ export class GraphqlController {
         bank: this.organisationResolver.bank,
         shareValue: this.organisationResolver.shareValue,
         //   participants: this.organisationResolver.participants,
-        //   participant: this.organisationResolver.participant,
+        participant: this.organisationResolver.participant
       },
       Account: {
         organisations: this.accountResolver.organisations

@@ -8,6 +8,9 @@ import { ScrapingEventFactory } from "../scraping/events/scraping-event.factory"
 import { SCRAPING_EVENT_KIND } from "../scraping/events/scraping-event.kind";
 import { TokenPresentation } from "./token.presentation";
 import { OrganisationService } from "./organisation.service";
+import { ParticipantPresentation } from "./participant.presentation";
+import { MembershipRepository } from "../storage/membership.repository";
+import { BalanceService } from "./balance.service";
 
 @Service(OrganisationResolver.name)
 export class OrganisationResolver {
@@ -16,7 +19,9 @@ export class OrganisationResolver {
     @Inject(OrganisationRepository.name) private readonly organisationRepository: OrganisationRepository,
     @Inject(EventRepository.name) private readonly eventRepository: EventRepository,
     @Inject(ScrapingEventFactory.name) private readonly scrapingEventFactory: ScrapingEventFactory,
-    @Inject(OrganisationService.name) private readonly organisationService: OrganisationService
+    @Inject(OrganisationService.name) private readonly organisationService: OrganisationService,
+    @Inject(MembershipRepository.name) private readonly membershipRepository: MembershipRepository,
+    @Inject(BalanceService.name) private readonly balance: BalanceService
   ) {}
 
   @bind()
@@ -46,5 +51,28 @@ export class OrganisationResolver {
   async shareValue(root: OrganisationPresentation, args: { symbol: string }): Promise<TokenPresentation> {
     const organisationAddress = await this.ethereum.canonicalAddress(root.address);
     return this.organisationService.shareValue(organisationAddress, args.symbol);
+  }
+
+  @bind()
+  async participant(
+    root: OrganisationPresentation,
+    args: { address: string }
+  ): Promise<ParticipantPresentation | null> {
+    const organisationAddress = await this.ethereum.canonicalAddress(root.address);
+    const participantAddress = await this.ethereum.canonicalAddress(args.address);
+    const token = await this.organisationService.tokenContract(organisationAddress);
+    const participant = await this.membershipRepository.byAddressInOrganisation(
+      organisationAddress,
+      participantAddress
+    );
+    if (participant) {
+      const shares = await this.balance.balanceOf(participantAddress, token);
+      return {
+        address: participantAddress,
+        shares
+      };
+    } else {
+      return null;
+    }
   }
 }

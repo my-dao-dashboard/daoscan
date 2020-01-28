@@ -24,4 +24,12 @@ export class MembershipRepository {
       eventId: eventId
     });
   }
+
+  async byAddressInOrganisation(organisationAddress: string, accountAddress: string): Promise<Membership | undefined> {
+    const repository = await this.repositoryFactory.reading(Membership);
+    return repository.findOne({
+      organisationAddress: organisationAddress,
+      accountAddress: accountAddress
+    });
+  }
 }
