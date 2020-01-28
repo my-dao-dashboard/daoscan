@@ -22,7 +22,7 @@ provider:
   runtime: nodejs12.x
   region: "us-east-1"
   environment:
-    ETHEREUM_RPC: "http://mainnet.eth.daoscan.net"
+    ETHEREUM_RPC: "https://mainnet.infura.io/v3/e201ebd046304d9d89a598b6c73baa8c"
     SCRAPING_SQS_URL:
       Ref: ScrapingQueue
     BLOCKS_SQS_URL:

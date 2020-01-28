@@ -7,6 +7,7 @@ import { makeExecutableSchema } from "graphql-tools";
 import { AccountPresentation } from "./account.presentation";
 import { AccountResolver } from "./account.resolver";
 import { OrganisationResolver } from "./organisation.resolver";
+import {GlobalStatsResolver} from "./global-stats.resolver";
 
 @Service(GraphqlController.name)
 export class GraphqlController {
@@ -14,7 +15,8 @@ export class GraphqlController {
 
   constructor(
     @Inject(AccountResolver.name) private readonly accountResolver: AccountResolver,
-    @Inject(OrganisationResolver.name) private readonly organisationResolver: OrganisationResolver
+    @Inject(OrganisationResolver.name) private readonly organisationResolver: OrganisationResolver,
+    @Inject(GlobalStatsResolver.name) private readonly globalStatsResolver: GlobalStatsResolver
   ) {
     const server = new ApolloServer({
       schema: this.schema(),
@@ -49,7 +51,8 @@ export class GraphqlController {
         },
         organisation: (root: undefined, args: { address: string }) => {
           return this.organisationResolver.organisation(args.address);
-        }
+        },
+        stats: this.globalStatsResolver.globalStats
       },
       Organisation: {
         totalSupply: this.organisationResolver.totalSupply,

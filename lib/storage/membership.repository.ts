@@ -7,6 +7,14 @@ import { UUID } from "./uuid";
 export class MembershipRepository {
   constructor(@Inject(RepositoryFactory.name) private readonly repositoryFactory: RepositoryFactory) {}
 
+  async participantsCount() {
+    const repository = await this.repositoryFactory.reading(Membership);
+    return repository
+      .createQueryBuilder("membership")
+      .select('DISTINCT("accountAddress")')
+      .getRawMany()
+  }
+
   async allOrganisationAddresses(accountAddress: string) {
     const membershipRepository = await this.repositoryFactory.reading(Membership);
     const records = await membershipRepository

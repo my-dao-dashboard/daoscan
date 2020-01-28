@@ -29,7 +29,14 @@ type Account {
   organisations: [Organisation]
 }
 
+type GlobalStats {
+  organisationsCount: Int
+  participantsCount: Int
+  membershipsCount: Int
+}
+
 type Query {
   account(address: String!): Account
   organisation(address: String): Organisation
+  stats: GlobalStats
 }

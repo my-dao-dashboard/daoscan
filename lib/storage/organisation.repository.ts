@@ -14,6 +14,11 @@ export class OrganisationRepository {
     })
   }
 
+  async count() {
+    const repository = await this.repositoryFactory.reading(Organisation)
+    return repository.count()
+  }
+
   async save(row: Organisation): Promise<void> {
     const repository = await this.repositoryFactory.writing(Organisation);
     await repository.save(row);

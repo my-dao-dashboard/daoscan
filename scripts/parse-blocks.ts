@@ -6,7 +6,7 @@ axiosRetry(axios, { retries: 10, retryCondition: () => true, retryDelay: (retryC
 
 const ENDPOINT = "https://daoscan.net/block";
 
-const START_BLOCK = 6606172;
+const START_BLOCK = 6617472;
 const END_BLOCK = 7_000_000;
 const PAGE = 50;
 
