@@ -6,6 +6,8 @@ import { OrganisationRepository } from "../storage/organisation.repository";
 import { EventRepository } from "../storage/event.repository";
 import { ScrapingEventFactory } from "../scraping/events/scraping-event.factory";
 import { SCRAPING_EVENT_KIND } from "../scraping/events/scraping-event.kind";
+import { TokenPresentation } from "./token.presentation";
+import { OrganisationService } from "./organisation.service";
 
 @Service(OrganisationResolver.name)
 export class OrganisationResolver {
@@ -13,7 +15,8 @@ export class OrganisationResolver {
     @Inject(EthereumService.name) private readonly ethereum: EthereumService,
     @Inject(OrganisationRepository.name) private readonly organisationRepository: OrganisationRepository,
     @Inject(EventRepository.name) private readonly eventRepository: EventRepository,
-    @Inject(ScrapingEventFactory.name) private readonly scrapingEventFactory: ScrapingEventFactory
+    @Inject(ScrapingEventFactory.name) private readonly scrapingEventFactory: ScrapingEventFactory,
+    @Inject(OrganisationService.name) private readonly organisationService: OrganisationService
   ) {}
 
   @bind()
@@ -25,5 +28,11 @@ export class OrganisationResolver {
     const event = await this.scrapingEventFactory.fromStorage(organisation.id);
     if (!event || event.kind !== SCRAPING_EVENT_KIND.ORGANISATION_CREATED) return undefined;
     return new OrganisationPresentation(organisation, event);
+  }
+
+  @bind()
+  async totalSupply(root: OrganisationPresentation): Promise<TokenPresentation> {
+    const organisationAddress = await this.ethereum.canonicalAddress(root.address);
+    return this.organisationService.totalSupply(organisationAddress);
   }
 }

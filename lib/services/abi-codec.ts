@@ -4,6 +4,16 @@ import { AbiInput, AbiItem } from "web3-utils";
 export class AbiCodec {
   constructor(private readonly web3: Web3) {}
 
+  decodeString(s: string): string {
+    if (s.startsWith("0x")) {
+      return Buffer.from(s.slice(2), "hex")
+        .toString()
+        .replace(/\0/g, "");
+    } else {
+      return s;
+    }
+  }
+
   decodeParameters(types: any[], hex: string): { [key: string]: any } {
     return this.web3.eth.abi.decodeParameters(types, hex);
   }

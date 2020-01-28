@@ -2,6 +2,7 @@ import { Inject, Service } from "typedi";
 import { RepositoryFactory } from "./repository.factory";
 import { Application } from "./application.row";
 import { UUID } from "./uuid";
+import { APP_ID } from "./app-id";
 
 @Service(ApplicationRepository.name)
 export class ApplicationRepository {
@@ -16,6 +17,28 @@ export class ApplicationRepository {
       return applicationRow.organisationAddress;
     } else {
       return undefined;
+    }
+  }
+
+  async tokenAddress(organisationAddress: string): Promise<string | undefined> {
+    const repository = await this.repositoryFactory.reading(Application);
+    const application = await repository.findOne({
+      organisationAddress: organisationAddress,
+      appId: APP_ID.SHARE
+    });
+    if (application) {
+      return application.address;
+    }
+  }
+
+  async bankAddress(organisationAddress: string): Promise<string | undefined> {
+    const repository = await this.repositoryFactory.reading(Application);
+    const application = await repository.findOne({
+      organisationAddress: organisationAddress,
+      appId: APP_ID.ARAGON_VAULT
+    });
+    if (application) {
+      return application.address;
     }
   }
 

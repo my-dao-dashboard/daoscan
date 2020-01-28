@@ -64,6 +64,10 @@ export class EthereumService {
     return this.web3.eth.getTransactionReceipt(txid);
   }
 
+  balance(address: string): Promise<string> {
+    return this.web3.eth.getBalance(address)
+  }
+
   contract(jsonInterface: AbiItem[] | AbiItem, address?: string, options?: ContractOptions): Contract {
     return new this.web3.eth.Contract(jsonInterface, address, options);
   }
