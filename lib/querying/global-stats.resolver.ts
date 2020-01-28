@@ -6,6 +6,7 @@ import { MembershipRepository } from "../storage/membership.repository";
 interface GlobalStats {
   organisationsCount: number;
   participantsCount: number;
+  membershipsCount: number;
 }
 
 @Service(GlobalStatsResolver.name)
@@ -19,10 +20,11 @@ export class GlobalStatsResolver {
   async globalStats(): Promise<GlobalStats> {
     const organisationsCount = await this.organisationRepository.count();
     const participantsCount = await this.membershipRepository.participantsCount();
-    console.log("pcount", participantsCount);
+    const membershipsCount = await this.membershipRepository.count();
     return {
       organisationsCount: organisationsCount,
-      participantsCount: 0
+      participantsCount: participantsCount,
+      membershipsCount: membershipsCount
     };
   }
 }
