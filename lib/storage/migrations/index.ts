@@ -11,3 +11,4 @@ export * from "./1569249292400-RecreateApplications";
 export * from "./1569249292500-MembershipAccountIsNotUnique";
 export * from "./1569249292600-RenameApplicationsOrganisationId";
 export * from "./1569249292700-RenameMembershipAddresses";
+export * from "./1569249292800-StoreBlockBody";

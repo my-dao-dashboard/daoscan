@@ -1,5 +1,6 @@
 import { BeforeInsert, BeforeUpdate, Column, Entity, PrimaryColumn } from "typeorm";
 import { bigintTransformer } from "./bigint.transformer";
+import { ExtendedBlock } from "../services/ethereum.service";
 
 @Entity("blocks")
 export class Block {
@@ -10,6 +11,10 @@ export class Block {
   @Column()
   // @ts-ignore
   hash: string;
+
+  @Column({ type: "simple-json" })
+  // @ts-ignore
+  body: ExtendedBlock | null;
 
   @BeforeInsert()
   @BeforeUpdate()

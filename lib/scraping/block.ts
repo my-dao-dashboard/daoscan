@@ -43,7 +43,12 @@ export class Block {
 
   @Memoize()
   async extendedBlock(): Promise<ExtendedBlock> {
-    return this.ethereum.extendedBlock(this.id);
+    const fromStorage = await this.repository.byId(this.id);
+    if (fromStorage && fromStorage.body) {
+      return fromStorage.body;
+    } else {
+      return this.ethereum.extendedBlock(this.id);
+    }
   }
 
   async receipts(): Promise<ExtendedTransactionReceipt[]> {
@@ -68,6 +73,7 @@ export class Block {
     const row = new Row();
     row.id = this.id;
     row.hash = this.hash;
+    row.body = await this.extendedBlock();
     await this.repository.save(row);
   }
 }

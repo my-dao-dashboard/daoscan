@@ -6,9 +6,9 @@ axiosRetry(axios, { retries: 10, retryCondition: () => true, retryDelay: (retryC
 
 const ENDPOINT = "https://daoscan.net/block";
 
-const START_BLOCK = 6596692;
+const START_BLOCK = 6606172;
 const END_BLOCK = 7_000_000;
-const PAGE = 10;
+const PAGE = 50;
 
 async function sleep(ms: number): Promise<void> {
   return new Promise(resolve => {
@@ -21,6 +21,7 @@ async function sleep(ms: number): Promise<void> {
 async function main() {
   const pages = _.range(START_BLOCK, END_BLOCK, PAGE);
   for await (let page of pages) {
+    const before = new Date();
     const promises = _.times(PAGE).map(async i => {
       const blockNumber = page + i;
       await axios.post(ENDPOINT, {
@@ -28,7 +29,11 @@ async function main() {
       });
     });
     await Promise.all(promises);
-    console.log(`Done with ${page}`);
+    const after = new Date();
+    const delta = after.valueOf() - before.valueOf();
+    const seconds = Math.floor(delta / 1000);
+    const etaHours = (((END_BLOCK - page) / PAGE * seconds) / 3600).toFixed(1)
+    console.log(`Done with ${page} in ${seconds}s, eta ${etaHours} h`);
   }
 }
 
