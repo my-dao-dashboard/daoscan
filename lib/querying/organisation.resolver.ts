@@ -41,4 +41,10 @@ export class OrganisationResolver {
     const organisationAddress = await this.ethereum.canonicalAddress(root.address);
     return this.organisationService.bank(organisationAddress);
   }
+
+  @bind()
+  async shareValue(root: OrganisationPresentation, args: { symbol: string }): Promise<TokenPresentation> {
+    const organisationAddress = await this.ethereum.canonicalAddress(root.address);
+    return this.organisationService.shareValue(organisationAddress, args.symbol);
+  }
 }
