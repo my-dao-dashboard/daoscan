@@ -4,6 +4,10 @@ import { Container } from "typedi";
 import { BlockController } from "../lib/scraping/block.controller";
 import { CommandController } from "../lib/scraping/command.controller";
 
+import { migrateUp } from "../lib/shared/migrate-up";
+
+migrateUp();
+
 const blockController = Container.get(BlockController);
 const commandController = Container.get(CommandController);
 
