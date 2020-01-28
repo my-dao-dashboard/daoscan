@@ -8,10 +8,11 @@ import { APP_ID } from "./app-id";
 export class ApplicationRepository {
   constructor(@Inject(RepositoryFactory.name) private readonly repositoryFactory: RepositoryFactory) {}
 
-  async organisationAddressByApplicationAddress(address: string): Promise<string | undefined> {
+  async organisationAddressByApplicationAddress(address: string, appId: APP_ID): Promise<string | undefined> {
     const repository = await this.repositoryFactory.reading(Application);
     const applicationRow = await repository.findOne({
-      address: address
+      address: address,
+      appId: appId
     });
     if (applicationRow) {
       return applicationRow.organisationAddress;

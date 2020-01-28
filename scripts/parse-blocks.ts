@@ -4,9 +4,11 @@ import _ from "lodash";
 
 axiosRetry(axios, { retries: 10, retryCondition: () => true, retryDelay: (retryCount, error) => retryCount * 1000 });
 
-const START_BLOCK = 8405046; // 8403326;
-const END_BLOCK = 8420626;
-const PAGE = 20;
+const ENDPOINT = "https://daoscan.net/block";
+
+const START_BLOCK = 6596692;
+const END_BLOCK = 7_000_000;
+const PAGE = 10;
 
 async function sleep(ms: number): Promise<void> {
   return new Promise(resolve => {
@@ -21,10 +23,9 @@ async function main() {
   for await (let page of pages) {
     const promises = _.times(PAGE).map(async i => {
       const blockNumber = page + i;
-      await axios.post("https://alpha.daoscan.net/block", {
+      await axios.post(ENDPOINT, {
         id: blockNumber
       });
-      await sleep(500);
     });
     await Promise.all(promises);
     console.log(`Done with ${page}`);
