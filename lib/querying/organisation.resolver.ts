@@ -35,4 +35,10 @@ export class OrganisationResolver {
     const organisationAddress = await this.ethereum.canonicalAddress(root.address);
     return this.organisationService.totalSupply(organisationAddress);
   }
+
+  @bind()
+  async bank(root: OrganisationPresentation) {
+    const organisationAddress = await this.ethereum.canonicalAddress(root.address);
+    return this.organisationService.bank(organisationAddress);
+  }
 }
