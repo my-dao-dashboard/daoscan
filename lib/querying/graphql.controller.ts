@@ -7,7 +7,7 @@ import { makeExecutableSchema } from "graphql-tools";
 import { AccountPresentation } from "./account.presentation";
 import { AccountResolver } from "./account.resolver";
 import { OrganisationResolver } from "./organisation.resolver";
-import {GlobalStatsResolver} from "./global-stats.resolver";
+import { GlobalStatsResolver } from "./global-stats.resolver";
 
 @Service(GraphqlController.name)
 export class GraphqlController {
@@ -32,7 +32,12 @@ export class GraphqlController {
       }),
       playground: true
     });
-    this.handler = server.createHandler();
+    this.handler = server.createHandler({
+      cors: {
+        origin: "*",
+        credentials: true
+      }
+    });
   }
 
   private schema() {

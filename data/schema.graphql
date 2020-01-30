@@ -30,6 +30,7 @@ type Account {
 }
 
 type GlobalStats {
+  lastBlock: Int
   organisationsCount: Int
   participantsCount: Int
   membershipsCount: Int

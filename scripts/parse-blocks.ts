@@ -6,9 +6,9 @@ axiosRetry(axios, { retries: 10, retryCondition: () => true, retryDelay: (retryC
 
 const ENDPOINT = "https://daoscan.net/block";
 
-const START_BLOCK = 6676322;
-const END_BLOCK = 7_000_000;
-const PAGE = 50;
+const START_BLOCK = 7_000_000;
+const END_BLOCK = 8_000_000;
+const PAGE = 30;
 
 async function sleep(ms: number): Promise<void> {
   return new Promise(resolve => {

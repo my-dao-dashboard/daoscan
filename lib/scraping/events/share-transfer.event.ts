@@ -138,7 +138,7 @@ export class ShareTransferEvent implements IScrapingEvent {
     fromRow.id = new UUID();
     fromRow.accountAddress = this.from;
     fromRow.organisationAddress = this.organisationAddress;
-    fromRow.balanceDelta = BigInt(this.amount);
+    fromRow.balanceDelta = BigInt(this.amount) * BigInt(-1);
     fromRow.kind = MEMBERSHIP_KIND.PARTICIPANT;
     return fromRow;
   }
