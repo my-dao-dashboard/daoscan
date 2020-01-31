@@ -1,5 +1,5 @@
-service: daoscan
 app: daoscan
+service: daoscan
 org: ukstv
 
 custom:
@@ -7,7 +7,7 @@ custom:
   domains:
     alpha: "alpha.daoscan.net"
     beta: "beta.daoscan.net"
-    prod: "daoscan.net"
+    prod: "api.daoscan.net"
   customDomain:
     domainName: ${self:custom.domains.${self:custom.stage}}
     stage: ${self:custom.stage}

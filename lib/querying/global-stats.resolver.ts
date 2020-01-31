@@ -23,7 +23,7 @@ export class GlobalStatsResolver {
   async globalStats(): Promise<GlobalStats> {
     const organisationsCount = await this.organisationRepository.count();
     const participantsCount = await this.membershipRepository.participantsCount();
-    const membershipsCount = await this.membershipRepository.count();
+    const membershipsCount = await this.membershipRepository.membershipsCount();
     const lastBlock = await this.blockRepository.latest();
     return {
       organisationsCount: organisationsCount,

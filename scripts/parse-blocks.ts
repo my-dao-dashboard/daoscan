@@ -4,9 +4,9 @@ import _ from "lodash";
 
 axiosRetry(axios, { retries: 10, retryCondition: () => true, retryDelay: (retryCount, error) => retryCount * 1000 });
 
-const ENDPOINT = "https://daoscan.net/block";
+const ENDPOINT = "https://api.daoscan.net/block";
 
-const START_BLOCK = 7_000_000;
+const START_BLOCK = 7305010;
 const END_BLOCK = 8_000_000;
 const PAGE = 30;
 
@@ -32,7 +32,7 @@ async function main() {
     const after = new Date();
     const delta = after.valueOf() - before.valueOf();
     const seconds = Math.floor(delta / 1000);
-    const etaHours = (((END_BLOCK - page) / PAGE * seconds) / 3600).toFixed(1)
+    const etaHours = ((((END_BLOCK - page) / PAGE) * seconds) / 3600).toFixed(1);
     console.log(`Done with ${page} in ${seconds}s, eta ${etaHours} h`);
   }
 }
