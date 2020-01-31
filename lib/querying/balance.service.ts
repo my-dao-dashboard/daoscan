@@ -23,7 +23,7 @@ export class BalanceService {
     const contractAddress = contract.options.address;
     const knownItem = KNOWN_TOKENS.find(k => k.address.toLowerCase() === contractAddress.toLowerCase());
     const name = knownItem ? knownItem.name : this.ethereum.codec.decodeString(await contract.methods.name().call());
-    const symbol = this.ethereum.codec.decodeString(await contract.methods.symbol().call());
+    const symbol = knownItem ? knownItem.name : this.ethereum.codec.decodeString(await contract.methods.symbol().call());
     const amount = await contract.methods.balanceOf(address).call();
     const decimals = await contract.methods.decimals().call();
     return new TokenPresentation(name, symbol, amount, Number(decimals));
