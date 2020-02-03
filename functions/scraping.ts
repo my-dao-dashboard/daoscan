@@ -13,5 +13,6 @@ const commandController = Container.get(CommandController);
 
 export const blockTick = blockController.tick;
 export const blockAdd = blockController.add;
+export const blockMassAdd = blockController.massAdd;
 
 export const commandHandle = commandController.handle;

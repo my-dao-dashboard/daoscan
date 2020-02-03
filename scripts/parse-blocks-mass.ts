@@ -4,11 +4,11 @@ import _ from "lodash";
 
 axiosRetry(axios, { retries: 10, retryCondition: () => true, retryDelay: (retryCount, error) => retryCount * 1000 });
 
-const ENDPOINT = "https://api.daoscan.net/block";
+const ENDPOINT = "https://api.daoscan.net/block/mass";
 
-const START_BLOCK = 7617849;
-const END_BLOCK = 8_000_000;
-const PAGE = 30;
+const START_BLOCK = 8_200_000;
+const END_BLOCK = 8_300_000;
+const PAGE = 1000;
 
 async function sleep(ms: number): Promise<void> {
   return new Promise(resolve => {
@@ -22,13 +22,10 @@ async function main() {
   const pages = _.range(START_BLOCK, END_BLOCK, PAGE);
   for await (let page of pages) {
     const before = new Date();
-    const promises = _.times(PAGE).map(async i => {
-      const blockNumber = page + i;
-      await axios.post(ENDPOINT, {
-        id: blockNumber
-      });
-    });
-    await Promise.all(promises);
+    await axios.post(ENDPOINT, {
+      start: page,
+      finish: page + PAGE
+    })
     const after = new Date();
     const delta = after.valueOf() - before.valueOf();
     const seconds = Math.floor(delta / 1000);

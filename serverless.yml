@@ -71,6 +71,14 @@ functions:
             Fn::GetAtt:
               - BlocksQueue
               - Arn
+  scraping-block-massAdd:
+    handler: functions/scraping.blockMassAdd
+    timeout: 300
+    concurrency: 1
+    events:
+      - http:
+          path: block/mass
+          method: post
   scraping-command-handle:
     handler: functions/scraping.commandHandle
     events:
