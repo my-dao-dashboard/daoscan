@@ -6,8 +6,8 @@ axiosRetry(axios, { retries: 10, retryCondition: () => true, retryDelay: (retryC
 
 const ENDPOINT = "https://api.daoscan.net/block/mass";
 
-const START_BLOCK = 8_200_000;
-const END_BLOCK = 8_300_000;
+const START_BLOCK = 8000000;
+const END_BLOCK = 9_000_000;
 const PAGE = 1000;
 
 async function sleep(ms: number): Promise<void> {

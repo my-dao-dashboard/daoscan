@@ -2,8 +2,6 @@ import { Inject, Service } from "typedi";
 import { RepositoryFactory } from "./repository.factory";
 import { Block } from "./block.row";
 
-const TODO_TEMP_BLOCK_HINGE = 8403326;
-
 @Service(BlockRepository.name)
 export class BlockRepository {
   constructor(@Inject(RepositoryFactory.name) private readonly repositoryFactory: RepositoryFactory) {}
@@ -13,7 +11,6 @@ export class BlockRepository {
     const raw = await repository
       .createQueryBuilder("block")
       .select(`MAX(id)`, "max")
-      .where(`block.id < :hinge`, { hinge: TODO_TEMP_BLOCK_HINGE })
       .getRawOne();
     return Number(raw.max);
   }
