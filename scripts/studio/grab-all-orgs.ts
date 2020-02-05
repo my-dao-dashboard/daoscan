@@ -37,7 +37,7 @@ async function parseOrg(address: string) {
 }
 
 async function main() {
-  for (let index = 0; index < addresses.length; index++) {
+  for (let index = 389; index < addresses.length; index++) {
     const before = new Date();
     const address = addresses[index];
     await parseOrg(address);

@@ -17,83 +17,6 @@ const web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io
 
 axiosRetry(axios, { retries: 10, retryCondition: () => true, retryDelay: (retryCount, error) => retryCount * 1000 });
 
-const kernelABI: AbiItem[] = [
-  {
-    constant: true,
-    inputs: [],
-    name: "proxyType",
-    outputs: [{ name: "proxyTypeId", type: "uint256" }],
-    payable: false,
-    stateMutability: "pure",
-    type: "function"
-  },
-  {
-    constant: true,
-    inputs: [
-      { name: "", type: "bytes32" },
-      { name: "", type: "bytes32" }
-    ],
-    name: "apps",
-    outputs: [{ name: "", type: "address" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function"
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: "isDepositable",
-    outputs: [{ name: "", type: "bool" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function"
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: "implementation",
-    outputs: [{ name: "", type: "address" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function"
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: "recoveryVaultAppId",
-    outputs: [{ name: "", type: "bytes32" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function"
-  },
-  {
-    inputs: [{ name: "_kernelImpl", type: "address" }],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "constructor"
-  },
-  { payable: true, stateMutability: "payable", type: "fallback" },
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: false, name: "sender", type: "address" },
-      { indexed: false, name: "value", type: "uint256" }
-    ],
-    name: "ProxyDeposit",
-    type: "event"
-  },
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: true, name: "namespace", type: "bytes32" },
-      { indexed: true, name: "appId", type: "bytes32" },
-      { indexed: false, name: "app", type: "address" }
-    ],
-    name: "SetApp",
-    type: "event"
-  }
-];
-
 async function main() {
   const organisationRepository = Container.get(OrganisationRepository);
   const organisations = await organisationRepository.all();
@@ -102,7 +25,7 @@ async function main() {
     const address = addresses[index];
     const applicationRepository = Container.get(ApplicationRepository);
     const shareTokenAddress = await applicationRepository.tokenAddress(address);
-    if (shareTokenAddress) {
+    if (shareTokenAddress && shareTokenAddress !== '0x0000000000000000000000000000000000000000') {
       const shareToken = new web3.eth.Contract(ERC20_TOKEN_ABI as AbiItem[], shareTokenAddress);
       const events = await shareToken.getPastEvents("allEvents", {
         fromBlock: 0,
