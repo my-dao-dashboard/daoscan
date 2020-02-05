@@ -1,0 +1,1 @@
+select count(distinct("address")) as distinct, count(*) from organisations;
