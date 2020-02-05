@@ -16,10 +16,12 @@ export class BlockAddScenario implements Scenario<BlockAddEvent, Command[]> {
     await this.queue.sendBatch(commands);
   }
 
-  async execute(blockAddEvent: BlockAddEvent): Promise<Command[]> {
+  async execute(blockAddEvent: BlockAddEvent, fanout: boolean = true): Promise<Command[]> {
     const block = await this.blockFactory.fromEthereum(blockAddEvent.id);
     const commands = await block.commands();
-    await this.fanout(commands);
+    if (fanout) {
+      await this.fanout(commands);
+    }
     await block.save();
     return commands;
   }

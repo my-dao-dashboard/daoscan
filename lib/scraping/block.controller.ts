@@ -24,16 +24,17 @@ export class BlockController {
   async add(event: APIGatewayEvent | SQSEvent) {
     if (isHttp(event)) {
       const blockAddEvent = this.eventFactory.fromString(event.body);
-      const commands = await this.addScenario.execute(blockAddEvent);
+
       const inplace = event.queryStringParameters?.inplace;
       if (inplace) {
-        await Promise.all(
-          commands.map(async command => {
-            await command.execute();
-          })
-        );
+        const commands = await this.addScenario.execute(blockAddEvent, false);
+        for (let command of commands) {
+          await command.execute();
+        }
+      } else {
+        const commandsResult = await this.addScenario.execute(blockAddEvent);
+        return ok({ commands: commandsResult });
       }
-      return ok({ commands });
     } else {
       await Promise.all(
         event.Records.map(async record => {
@@ -51,7 +52,7 @@ export class BlockController {
       const body = JSON.parse(raw);
       const start = Number(body.start);
       const finish = Number(body.finish) + 1;
-      const naiveRange = _.range(start, finish)
+      const naiveRange = _.range(start, finish);
       const range = naiveRange.map(n => BigInt(n));
       const blocks = await Promise.all(range.map(n => this.blockFactory.fromEthereum(n)));
       const events = blocks.map<BlockAddEvent>(block => this.eventFactory.fromBlock(block));

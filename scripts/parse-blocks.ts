@@ -10,14 +10,6 @@ const START_BLOCK = 8_000_000;
 const END_BLOCK = 8_100_000;
 const PAGE = 30;
 
-async function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve();
-    }, ms);
-  });
-}
-
 async function main() {
   const pages = _.range(START_BLOCK, END_BLOCK, PAGE);
   for await (let page of pages) {
