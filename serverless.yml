@@ -22,7 +22,7 @@ provider:
   runtime: nodejs12.x
   region: "us-east-1"
   environment:
-    ETHEREUM_RPC: "https://mainnet.infura.io/v3/e201ebd046304d9d89a598b6c73baa8c"
+    ETHEREUM_RPC: "http://mainnet.eth.daoscan.net"
     SCRAPING_SQS_URL:
       Ref: ScrapingQueue
     BLOCKS_SQS_URL:
@@ -52,7 +52,7 @@ plugins:
 functions:
   scraping-block-tick:
     handler: functions/scraping.blockTick
-    concurrency: 0
+    concurrency: 1
     events:
       - schedule: rate(1 minute)
       - http:
