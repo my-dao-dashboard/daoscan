@@ -386,7 +386,10 @@ export class OrganisationCreatedEventFactory {
 
   isSuitableReceipt(receipt: ExtendedTransactionReceipt): boolean {
     const destination = receipt.to?.toLowerCase();
-    return Boolean(destination) && KIT_ADDRESSES.has(destination) && KIT_SIGNATURES.has(receipt.input.slice(0, 10));
+    const status = receipt.status;
+    return (
+      status && Boolean(destination) && KIT_ADDRESSES.has(destination) && KIT_SIGNATURES.has(receipt.input.slice(0, 10))
+    );
   }
 
   async fromReceipt(block: Block, receipt: ExtendedTransactionReceipt): Promise<OrganisationCreatedEvent> {

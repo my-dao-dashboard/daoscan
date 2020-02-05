@@ -12,9 +12,10 @@ export function logEvents<A extends Indexed<string>>(
 ): (A & { txid: string; blockNumber: number; address: string; logIndex: number })[] {
   return block.logs
     .filter(log => {
+      const isRemoved = (log as any).removed;
       const isKnown = log.topics[0] === event.signature;
       const isFiltered = filter ? filter(log) : true;
-      return isKnown && isFiltered;
+      return !isRemoved && isKnown && isFiltered;
     })
     .map(log => {
       return {
