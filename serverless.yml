@@ -95,6 +95,7 @@ functions:
           method: post
   querying-graphql:
     handler: functions/querying.graphql
+    timeout: 900
     events:
       - http:
           path: graphql
