@@ -7,3 +7,4 @@ jspm_packages/
 .build/
 coverage/
 resources/*.env.yaml
+scripts/studio/orgs.json

@@ -24,7 +24,7 @@ export class ApplicationRepository {
   async tokenAddress(organisationAddress: string): Promise<string | undefined> {
     const repository = await this.repositoryFactory.reading(Application);
     const application = await repository.findOne({
-      organisationAddress: organisationAddress,
+      organisationAddress: organisationAddress.toLowerCase(),
       appId: APP_ID.SHARE
     });
     if (application) {
