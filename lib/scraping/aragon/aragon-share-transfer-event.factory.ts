@@ -29,8 +29,8 @@ export const TRANSFER_EVENT: BlockchainEvent<TransferParams> = {
   ]
 };
 
-@Service(ShareTransferEventFactory.name)
-export class ShareTransferEventFactory {
+@Service(AragonShareTransferEventFactory.name)
+export class AragonShareTransferEventFactory {
   constructor(
     @Inject(EthereumService.name) private readonly ethereum: EthereumService,
     @Inject(ApplicationRepository.name) private readonly applicationRepository: ApplicationRepository,

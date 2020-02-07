@@ -375,8 +375,8 @@ export const DEPLOY_INSTANCE_EVENT: BlockchainEvent<DeployInstanceParams> = {
   abi: [{ indexed: false, name: "dao", type: "address" }]
 };
 
-@Service(OrganisationCreatedEventFactory.name)
-export class OrganisationCreatedEventFactory {
+@Service(AragonOrganisationCreatedEventFactory.name)
+export class AragonOrganisationCreatedEventFactory {
   constructor(
     @Inject(EthereumService.name) private readonly ethereum: EthereumService,
     @Inject(ConnectionFactory.name) private readonly connectionFactory: ConnectionFactory,

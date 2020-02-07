@@ -37,8 +37,8 @@ export const NEW_APP_PROXY_EVENT: BlockchainEvent<NewAppProxyParams> = {
   ]
 };
 
-@Service(AppInstalledEventFactory.name)
-export class AppInstalledEventFactory {
+@Service(AragonAppInstalledEventFactory.name)
+export class AragonAppInstalledEventFactory {
   constructor(
     @Inject(EthereumService.name) private readonly ethereum: EthereumService,
     @Inject(EventRepository.name) private readonly eventRepository: EventRepository,

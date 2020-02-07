@@ -1,16 +1,16 @@
 import { Inject, Service } from "typedi";
 import { Block } from "../block";
 import { ScrapingEvent } from "../events/scraping-event";
-import { OrganisationCreatedEventFactory } from "./organisation-created-event.factory";
-import { AppInstalledEventFactory } from "./app-installed-event.factory";
-import { ShareTransferEventFactory } from "./share-transfer-event.factory";
+import { AragonOrganisationCreatedEventFactory } from "./aragon-organisation-created-event.factory";
+import { AragonAppInstalledEventFactory } from "./aragon-app-installed-event.factory";
+import { AragonShareTransferEventFactory } from "./aragon-share-transfer-event.factory";
 
 @Service(AragonEventFactory.name)
 export class AragonEventFactory {
   constructor(
-    @Inject(OrganisationCreatedEventFactory.name) private readonly organisationCreated: OrganisationCreatedEventFactory,
-    @Inject(AppInstalledEventFactory.name) private readonly appInstalled: AppInstalledEventFactory,
-    @Inject(ShareTransferEventFactory.name) private readonly shareTransfer: ShareTransferEventFactory
+    @Inject(AragonOrganisationCreatedEventFactory.name) private readonly organisationCreated: AragonOrganisationCreatedEventFactory,
+    @Inject(AragonAppInstalledEventFactory.name) private readonly appInstalled: AragonAppInstalledEventFactory,
+    @Inject(AragonShareTransferEventFactory.name) private readonly shareTransfer: AragonShareTransferEventFactory
   ) {}
 
   async fromBlock(block: Block): Promise<ScrapingEvent[]> {
