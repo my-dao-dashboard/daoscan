@@ -12,6 +12,7 @@ import { OrganisationRepository } from "../../storage/organisation.repository";
 import { AppInstalledEvent, AppInstalledEventProps } from "../events/app-installed.event";
 import { APP_ID } from "../../storage/app-id";
 import { ApplicationRepository } from "../../storage/application.repository";
+import { MOLOCH_1_ABI } from "./moloch-1.abi";
 
 @Service(Moloch1EventFactory.name)
 export class Moloch1EventFactory {
@@ -31,7 +32,32 @@ export class Moloch1EventFactory {
   }
 
   async appInstalledEvents(organisationCreatedEvents: OrganisationCreatedEvent[]): Promise<AppInstalledEvent[]> {
-    const shares = organisationCreatedEvents.map(event => {
+    const shares = await this.sharesInstalled(organisationCreatedEvents);
+    const banks = await this.guildBankInstalled(organisationCreatedEvents);
+    return shares.concat(banks);
+  }
+
+  async guildBankInstalled(organisationCreatedEvents: OrganisationCreatedEvent[]): Promise<AppInstalledEvent[]> {
+    const banksPromised = organisationCreatedEvents.map(async event => {
+      const molochContract = this.ethereum.contract(MOLOCH_1_ABI, event.address);
+      const guildBankAddress = await molochContract.methods.guildBank().call();
+      const props: AppInstalledEventProps = {
+        platform: PLATFORM.MOLOCH_1,
+        organisationAddress: event.address.toLowerCase(),
+        proxyAddress: guildBankAddress,
+        appId: APP_ID.MOLOCH_1_BANK,
+        txid: event.txid,
+        blockNumber: Number(event.blockNumber),
+        blockHash: event.blockHash,
+        timestamp: event.timestamp
+      };
+      return new AppInstalledEvent(props, this.eventRepository, this.applicationRepository, this.connectionFactory);
+    });
+    return Promise.all(banksPromised);
+  }
+
+  async sharesInstalled(organisationCreatedEvents: OrganisationCreatedEvent[]): Promise<AppInstalledEvent[]> {
+    return organisationCreatedEvents.map(event => {
       const props: AppInstalledEventProps = {
         platform: PLATFORM.MOLOCH_1,
         organisationAddress: event.address.toLowerCase(),
@@ -44,7 +70,6 @@ export class Moloch1EventFactory {
       };
       return new AppInstalledEvent(props, this.eventRepository, this.applicationRepository, this.connectionFactory);
     });
-    return shares;
   }
 
   async organisationCreatedFromBlock(block: Block): Promise<OrganisationCreatedEvent[]> {
