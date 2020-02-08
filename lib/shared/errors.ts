@@ -35,3 +35,7 @@ export class NotFoundError extends KnownError {
     super(HTTP_STATUS_CODE.NOT_FOUND, description);
   }
 }
+
+export class InvalidCaseError extends InternalServerError {}
+
+export class NotImplementedError extends InternalServerError {}

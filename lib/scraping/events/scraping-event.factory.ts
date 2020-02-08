@@ -9,13 +9,16 @@ import { AragonOrganisationCreatedEventFactory } from "../aragon/aragon-organisa
 import { AragonAppInstalledEventFactory } from "../aragon/aragon-app-installed-event.factory";
 import { AragonShareTransferEventFactory } from "../aragon/aragon-share-transfer-event.factory";
 import { UUID } from "../../storage/uuid";
+import { MolochEventFactory } from "../moloch/moloch-event.factory";
 
 @Service(ScrapingEventFactory.name)
 export class ScrapingEventFactory {
   constructor(
     @Inject(AragonEventFactory.name) private readonly aragon: AragonEventFactory,
+    @Inject(MolochEventFactory.name) private readonly moloch: MolochEventFactory,
     @Inject(EventRepository.name) private readonly eventRepository: EventRepository,
-    @Inject(AragonOrganisationCreatedEventFactory.name) private readonly organisationCreated: AragonOrganisationCreatedEventFactory,
+    @Inject(AragonOrganisationCreatedEventFactory.name)
+    private readonly organisationCreated: AragonOrganisationCreatedEventFactory,
     @Inject(AragonAppInstalledEventFactory.name) private readonly appInstalled: AragonAppInstalledEventFactory,
     @Inject(AragonShareTransferEventFactory.name) private readonly shareTransfer: AragonShareTransferEventFactory
   ) {}
@@ -45,6 +48,7 @@ export class ScrapingEventFactory {
 
   async fromBlock(block: Block): Promise<ScrapingEvent[]> {
     const aragonEvents = await this.aragon.fromBlock(block);
-    return aragonEvents;
+    const molochEvents = await this.moloch.fromBlock(block);
+    return aragonEvents.concat(molochEvents);
   }
 }

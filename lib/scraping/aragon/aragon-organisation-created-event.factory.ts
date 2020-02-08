@@ -10,7 +10,7 @@ import { OrganisationCreatedEvent, OrganisationCreatedEventProps } from "../even
 import { EventRepository } from "../../storage/event.repository";
 import { OrganisationRepository } from "../../storage/organisation.repository";
 
-export const KIT_ADDRESSES = new Set(
+const KIT_ADDRESSES = new Set(
   [
     "0x705Cd9a00b87Bb019a87beEB9a50334219aC4444", // Democracy 1 (0.6)
     "0x41bbaf498226b68415f1C78ED541c45A18fd7696", // Multisig 1 (0.6)
@@ -24,7 +24,7 @@ export const KIT_ADDRESSES = new Set(
   ].map(a => a.toLowerCase())
 );
 
-export const KIT_SIGNATURES = new Map<string, AbiInput[]>([
+const KIT_SIGNATURES = new Map<string, AbiInput[]>([
   // Democracy (0.6-0.7)
   [
     "0xf1868e8b",
@@ -366,11 +366,11 @@ export const KIT_SIGNATURES = new Map<string, AbiInput[]>([
   ]
 ]);
 
-export interface DeployInstanceParams {
+interface DeployInstanceParams {
   dao: string;
 }
 
-export const DEPLOY_INSTANCE_EVENT: BlockchainEvent<DeployInstanceParams> = {
+const DEPLOY_INSTANCE_EVENT: BlockchainEvent<DeployInstanceParams> = {
   signature: "0x8f42a14c9fe9e09f4fe8eeee69ae878731c838b6497425d4c30e1d09336cf34b",
   abi: [{ indexed: false, name: "dao", type: "address" }]
 };

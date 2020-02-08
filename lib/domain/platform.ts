@@ -1,5 +1,8 @@
+import { InvalidCaseError } from "../shared/errors";
+
 export enum PLATFORM {
-  ARAGON = "ARAGON"
+  ARAGON = "ARAGON",
+  MOLOCH_1 = "MOLOCH_1"
 }
 
 export namespace PLATFORM {
@@ -7,8 +10,10 @@ export namespace PLATFORM {
     switch (platform) {
       case PLATFORM.ARAGON:
         return PLATFORM.ARAGON;
+      case PLATFORM.MOLOCH_1:
+        return PLATFORM.MOLOCH_1;
       default:
-        throw new Error(`Can not parse unknown platform ${platform}`);
+        throw new InvalidCaseError(`Can not parse unknown platform ${platform}`);
     }
   }
 }
