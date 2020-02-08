@@ -10,6 +10,7 @@ import { ApplicationRepository } from "../../lib/storage/application.repository"
 import ERC20_TOKEN_ABI from "../../lib/querying/erc20-token.abi.json";
 import { OrganisationRepository } from "../../lib/storage/organisation.repository";
 import { sleep } from "../../lib/shared/sleep";
+import { PLATFORM } from "../../lib/domain/platform";
 
 dotenv.config({ path: path.resolve(__dirname, ".env") });
 
@@ -19,13 +20,13 @@ axiosRetry(axios, { retries: 10, retryCondition: () => true, retryDelay: (retryC
 
 async function main() {
   const organisationRepository = Container.get(OrganisationRepository);
-  const organisations = await organisationRepository.all();
+  const organisations = await organisationRepository.all(PLATFORM.ARAGON);
   const addresses = organisations.map(org => org.address.toLowerCase());
   for (let index = 0; index < addresses.length; index++) {
     const address = addresses[index];
     const applicationRepository = Container.get(ApplicationRepository);
     const shareTokenAddress = await applicationRepository.tokenAddress(address);
-    if (shareTokenAddress && shareTokenAddress !== '0x0000000000000000000000000000000000000000') {
+    if (shareTokenAddress && shareTokenAddress !== "0x0000000000000000000000000000000000000000") {
       const shareToken = new web3.eth.Contract(ERC20_TOKEN_ABI as AbiItem[], shareTokenAddress);
       const events = await shareToken.getPastEvents("allEvents", {
         fromBlock: 0,

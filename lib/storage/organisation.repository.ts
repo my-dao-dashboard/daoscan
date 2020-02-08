@@ -2,6 +2,7 @@ import { Inject, Service } from "typedi";
 import { RepositoryFactory } from "./repository.factory";
 import { Organisation } from "./organisation.row";
 import { UUID } from "./uuid";
+import { PLATFORM } from "../domain/platform";
 
 @Service(OrganisationRepository.name)
 export class OrganisationRepository {
@@ -33,9 +34,9 @@ export class OrganisationRepository {
     await repository.save(row);
   }
 
-  async all(): Promise<Organisation[]> {
+  async all(platform: PLATFORM): Promise<Organisation[]> {
     const repository = await this.repositoryFactory.reading(Organisation);
-    return repository.find();
+    return repository.find({ platform });
   }
 
   async byId(id: UUID): Promise<Organisation | undefined> {
