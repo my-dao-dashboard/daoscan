@@ -1,8 +1,8 @@
-import { Indexed } from "./indexed";
-import { ExtendedBlock } from "../../services/ethereum.service";
+import { Indexed } from "../shared/indexed";
+import { ExtendedBlock } from "../services/ethereum.service";
 import { BlockchainEvent } from "./blockchain-event";
 import { Log } from "web3-core";
-import { AbiCodec } from "../../services/abi-codec";
+import { AbiCodec } from "../services/abi-codec";
 
 export function logEvents<A extends Indexed<string>>(
   codec: AbiCodec,
