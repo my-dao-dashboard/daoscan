@@ -25,16 +25,14 @@ export class BlockController {
     if (isHttp(event)) {
       const blockAddEvent = this.eventFactory.fromString(event.body);
 
-      const inplace = event.queryStringParameters?.inplace;
+      const inplace = Boolean(event.queryStringParameters?.inplace);
+      const commands = await this.addScenario.execute(blockAddEvent, false);
       if (inplace) {
-        const commands = await this.addScenario.execute(blockAddEvent, false);
         for (let command of commands) {
           await command.execute();
         }
-      } else {
-        const commandsResult = await this.addScenario.execute(blockAddEvent);
-        return ok({ commands: commandsResult });
       }
+      return ok({ commands: commands });
     } else {
       await Promise.all(
         event.Records.map(async record => {
