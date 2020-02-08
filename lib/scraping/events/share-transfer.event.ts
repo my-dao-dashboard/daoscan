@@ -11,7 +11,7 @@ import { ConnectionFactory } from "../../storage/connection.factory";
 import { ZERO_ADDRESS } from "../../shared/zero-address";
 
 export interface ShareTransferEventProps {
-  platform: PLATFORM.ARAGON;
+  platform: PLATFORM;
   organisationAddress: string;
   blockHash: string;
   blockNumber: number;

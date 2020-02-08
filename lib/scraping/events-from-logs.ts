@@ -21,9 +21,9 @@ export function logEvents<A extends Indexed<string>>(
       return {
         ...(codec.decodeLog(event.abi, log.data, log.topics.slice(1)) as A),
         address: log.address,
-        txid: log.transactionHash,
+        txid: log.transactionHash.toLowerCase(),
         logIndex: log.logIndex,
-        blockNumber: block.number
+        blockNumber: Number(block.number)
       };
     });
 }

@@ -13,6 +13,9 @@ import { AppInstalledEvent, AppInstalledEventProps } from "../events/app-install
 import { APP_ID } from "../../storage/app-id";
 import { ApplicationRepository } from "../../storage/application.repository";
 import { MOLOCH_1_ABI } from "./moloch-1.abi";
+import { ShareTransferEvent, ShareTransferEventProps } from "../events/share-transfer.event";
+import { ZERO_ADDRESS } from "../../shared/zero-address";
+import { MembershipRepository } from "../../storage/membership.repository";
 
 @Service(Moloch1EventFactory.name)
 export class Moloch1EventFactory {
@@ -21,14 +24,38 @@ export class Moloch1EventFactory {
     @Inject(ConnectionFactory.name) private readonly connectionFactory: ConnectionFactory,
     @Inject(EventRepository.name) private readonly eventRepository: EventRepository,
     @Inject(OrganisationRepository.name) private readonly organisationRepository: OrganisationRepository,
-    @Inject(ApplicationRepository.name) private readonly applicationRepository: ApplicationRepository
+    @Inject(ApplicationRepository.name) private readonly applicationRepository: ApplicationRepository,
+    @Inject(MembershipRepository.name) private readonly membershipRepository: MembershipRepository
   ) {}
 
   async fromBlock(block: Block): Promise<ScrapingEvent[]> {
-    const organisationCreatedEvents = await this.organisationCreatedFromBlock(block);
+    const organisationCreatedEvents = await this.organisationCreatedAsSummonComplete(block);
     const appInstalledEvents = await this.appInstalledEvents(organisationCreatedEvents);
+    const summonerShareTransfer = await this.summonerShareTransfer(block);
     let result = new Array<ScrapingEvent>();
-    return result.concat(organisationCreatedEvents).concat(appInstalledEvents);
+    return result
+      .concat(organisationCreatedEvents)
+      .concat(appInstalledEvents)
+      .concat(summonerShareTransfer);
+  }
+
+  async summonerShareTransfer(block: Block): Promise<ShareTransferEvent[]> {
+    const extendedBlock = await block.extendedBlock();
+    return logEvents(this.ethereum.codec, extendedBlock, SUMMON_COMPLETE_BLOCKCHAIN_EVENT).map(e => {
+      const props: ShareTransferEventProps = {
+        platform: PLATFORM.MOLOCH_1,
+        organisationAddress: e.address,
+        blockHash: block.hash,
+        blockNumber: e.blockNumber,
+        txid: e.txid,
+        logIndex: e.logIndex,
+        shareAddress: e.address,
+        from: ZERO_ADDRESS,
+        to: e.summoner,
+        amount: "1"
+      };
+      return new ShareTransferEvent(props, this.eventRepository, this.membershipRepository, this.connectionFactory);
+    });
   }
 
   async appInstalledEvents(organisationCreatedEvents: OrganisationCreatedEvent[]): Promise<AppInstalledEvent[]> {
@@ -72,7 +99,7 @@ export class Moloch1EventFactory {
     });
   }
 
-  async organisationCreatedFromBlock(block: Block): Promise<OrganisationCreatedEvent[]> {
+  async organisationCreatedAsSummonComplete(block: Block): Promise<OrganisationCreatedEvent[]> {
     const extendedBlock = await block.extendedBlock();
     const timestamp = await block.timestamp();
     return logEvents(this.ethereum.codec, extendedBlock, SUMMON_COMPLETE_BLOCKCHAIN_EVENT).map(e => {
