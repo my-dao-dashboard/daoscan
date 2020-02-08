@@ -9,13 +9,13 @@ import { AragonOrganisationCreatedEventFactory } from "../aragon/aragon-organisa
 import { AragonAppInstalledEventFactory } from "../aragon/aragon-app-installed-event.factory";
 import { AragonShareTransferEventFactory } from "../aragon/aragon-share-transfer-event.factory";
 import { UUID } from "../../storage/uuid";
-import { MolochEventFactory } from "../moloch/moloch-event.factory";
+import { Moloch1EventFactory } from "../moloch-1/moloch-1-event.factory";
 
 @Service(ScrapingEventFactory.name)
 export class ScrapingEventFactory {
   constructor(
     @Inject(AragonEventFactory.name) private readonly aragon: AragonEventFactory,
-    @Inject(MolochEventFactory.name) private readonly moloch: MolochEventFactory,
+    @Inject(Moloch1EventFactory.name) private readonly moloch: Moloch1EventFactory,
     @Inject(EventRepository.name) private readonly eventRepository: EventRepository,
     @Inject(AragonOrganisationCreatedEventFactory.name)
     private readonly organisationCreated: AragonOrganisationCreatedEventFactory,

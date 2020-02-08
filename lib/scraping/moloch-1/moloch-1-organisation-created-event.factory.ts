@@ -22,8 +22,8 @@ const SUMMON_COMPLETE_EVENT: BlockchainEvent<SummonCompleteParams> = {
   ]
 };
 
-@Service(MolochOrganisationCreatedEventFactory.name)
-export class MolochOrganisationCreatedEventFactory {
+@Service(Moloch1OrganisationCreatedEventFactory.name)
+export class Moloch1OrganisationCreatedEventFactory {
   constructor(
     @Inject(EthereumService.name) private readonly ethereum: EthereumService,
     @Inject(ConnectionFactory.name) private readonly connectionFactory: ConnectionFactory,

@@ -1,6 +1,6 @@
 import { AbiItem } from "web3-utils";
 
-export const MOLOCH_V1_ABI: AbiItem[] = [
+export const MOLOCH_1_ABI: AbiItem[] = [
   {
     constant: true,
     inputs: [],

@@ -1,13 +1,13 @@
 import { Inject, Service } from "typedi";
 import { Block } from "../block";
 import { ScrapingEvent } from "../events/scraping-event";
-import { MolochOrganisationCreatedEventFactory } from "./moloch-organisation-created-event.factory";
+import { Moloch1OrganisationCreatedEventFactory } from "./moloch-1-organisation-created-event.factory";
 
-@Service(MolochEventFactory.name)
-export class MolochEventFactory {
+@Service(Moloch1EventFactory.name)
+export class Moloch1EventFactory {
   constructor(
-    @Inject(MolochOrganisationCreatedEventFactory.name)
-    private readonly organisationCreated: MolochOrganisationCreatedEventFactory
+    @Inject(Moloch1OrganisationCreatedEventFactory.name)
+    private readonly organisationCreated: Moloch1OrganisationCreatedEventFactory
   ) {}
 
   async fromBlock(block: Block): Promise<ScrapingEvent[]> {
