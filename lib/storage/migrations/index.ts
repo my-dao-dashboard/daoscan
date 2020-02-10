@@ -13,4 +13,3 @@ export * from "./1569249292600-RenameApplicationsOrganisationId";
 export * from "./1569249292700-RenameMembershipAddresses";
 export * from "./1569249292800-StoreBlockBody";
 export * from "./1569249292900-AddDelegate";
-export * from "./1569249293000-AddProposals";
