@@ -125,12 +125,13 @@ export class Moloch1EventFactory {
   async organisationCreatedAsSummonComplete(block: Block): Promise<OrganisationCreatedEvent[]> {
     const timestamp = await block.timestamp();
     const events = await this.summonCompleteBlockchainEvents(block);
-    return events.map(e => {
-      const organisationAddress = e.address;
+    const promised = events.map(async e => {
+      const organisationAddress = e.address.toLowerCase();
+      const name = await this.organisationName(organisationAddress);
       const props = {
         platform: PLATFORM.MOLOCH_1,
-        name: this.organisationName(organisationAddress.toLowerCase()),
-        address: organisationAddress.toLowerCase(),
+        name: name,
+        address: organisationAddress,
         txid: e.txid,
         blockNumber: Number(e.blockNumber),
         blockHash: block.hash,
@@ -143,14 +144,32 @@ export class Moloch1EventFactory {
         this.connectionFactory
       );
     });
+    return Promise.all(promised);
   }
 
   private async summonCompleteBlockchainEvents(block: Block): Promise<LogEvent<SummonCompleteParams>[]> {
     const extendedBlock = await block.extendedBlock();
-    return logEvents<SummonCompleteParams>(this.ethereum.codec, extendedBlock, SUMMON_COMPLETE_BLOCKCHAIN_EVENT);
+    const events = logEvents(this.ethereum.codec, extendedBlock, SUMMON_COMPLETE_BLOCKCHAIN_EVENT);
+    const filtered = await Promise.all(
+      events.map(async e => {
+        const address = e.address;
+        const molochContract = this.ethereum.contract(MOLOCH_1_ABI, address);
+        try {
+          // Check if really Moloch contract
+          await molochContract.methods.periodDuration.call();
+          await molochContract.methods.votingPeriodLength.call();
+          await molochContract.methods.gracePeriodLength.call();
+          await molochContract.methods.summoningTime.call();
+          return true;
+        } catch (e) {
+          return false;
+        }
+      })
+    );
+    return events.filter((e, i) => filtered[i]);
   }
 
-  private organisationName(address: string) {
+  private async organisationName(address: string): Promise<string> {
     const found = MOLOCH_NAMES.get(address);
     if (found) {
       return found;
