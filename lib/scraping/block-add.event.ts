@@ -25,9 +25,13 @@ export class BlockAddEventFactory {
     if (payload) {
       const parsed = JSON.parse(payload);
       if (parsed.id) {
-        return new BlockAddEvent(BigInt(parsed.id));
+        return this.fromId(parsed.id);
       }
     }
     throw new BadRequestError(`Expect BlockAddEvent in payload`);
+  }
+
+  fromId(blockId: number | bigint) {
+    return new BlockAddEvent(BigInt(blockId));
   }
 }

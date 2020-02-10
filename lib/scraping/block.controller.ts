@@ -27,7 +27,8 @@ export class BlockController {
         const blockAddEvent = this.eventFactory.fromString(event.body);
 
         const inplace = Boolean(event.queryStringParameters?.inplace);
-        const commands = await this.addScenario.execute(blockAddEvent, false);
+        const fanout = !inplace;
+        const commands = await this.addScenario.execute(blockAddEvent, fanout);
         if (inplace) {
           for (let command of commands) {
             await command.execute();
