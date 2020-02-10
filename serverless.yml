@@ -79,6 +79,14 @@ functions:
       - http:
           path: block/mass
           method: post
+  scraping-block-range:
+    handler: functions/scraping.blockRange
+    timeout: 300
+    concurrency: 1
+    events:
+      - http:
+          path: block/range
+          method: post
   scraping-command-handle:
     handler: functions/scraping.commandHandle
     events:
