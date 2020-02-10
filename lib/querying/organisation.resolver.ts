@@ -58,18 +58,5 @@ export class OrganisationResolver {
   @bind()
   async participants(root: Organisation): Promise<Participant[]> {
     return root.participants();
-    // const shares = await root.shares();
-    // const token = shares?.token;
-    // const participants = await this.membershipRepository.allByOrganisationAddress(root.address);
-    // console.log('found raw participants', participants)
-    // if (token) {
-    //   const promised = participants.map(async p => {
-    //     const shares = await this.balance.balanceOf(p.accountAddress, token);
-    //     return new ParticipantPresentation(p.accountAddress, shares);
-    //   });
-    //   return await Promise.all(promised);
-    // } else {
-    //   return [];
-    // }
   }
 }
