@@ -3,6 +3,7 @@ import { Organisation as OrganisationRow } from "../storage/organisation.row";
 import { Shares } from "./shares";
 import { IToken } from "./token.interface";
 import { OrganisationService } from "./organisation.service";
+import { Participant } from "./participant";
 
 export class Organisation {
   readonly address = this.row.address;
@@ -24,5 +25,9 @@ export class Organisation {
 
   async bank(): Promise<IToken[]> {
     return this.service.bank(this.platform, this.address);
+  }
+
+  async participants(): Promise<Participant[]> {
+    return this.service.participants(this);
   }
 }

@@ -20,6 +20,15 @@ import { AddDelegateEvent, AddDelegateEventProps } from "../events/add-delegate.
 import { DelegateRepository } from "../../storage/delegate.repository";
 import { MOLOCH_NAMES } from "./moloch-names";
 
+async function organisationName(address: string): Promise<string> {
+  const found = MOLOCH_NAMES.get(address);
+  if (found) {
+    return found;
+  } else {
+    return address;
+  }
+}
+
 @Service(Moloch1EventFactory.name)
 export class Moloch1EventFactory {
   constructor(
@@ -50,9 +59,9 @@ export class Moloch1EventFactory {
     return events.map(e => {
       const props: AddDelegateEventProps = {
         platform: PLATFORM.MOLOCH_1,
-        address: e.summoner,
-        delegateFor: e.summoner,
-        organisationAddress: e.address,
+        address: e.summoner.toLowerCase(),
+        delegateFor: e.summoner.toLowerCase(),
+        organisationAddress: e.address.toLowerCase(),
         blockHash: block.hash,
         blockNumber: e.blockNumber,
         txid: e.txid,
@@ -67,14 +76,14 @@ export class Moloch1EventFactory {
     return events.map(e => {
       const props: ShareTransferEventProps = {
         platform: PLATFORM.MOLOCH_1,
-        organisationAddress: e.address,
+        organisationAddress: e.address.toLowerCase(),
         blockHash: block.hash,
         blockNumber: e.blockNumber,
-        txid: e.txid,
+        txid: e.txid.toLowerCase(),
         logIndex: e.logIndex,
-        shareAddress: e.address,
+        shareAddress: e.address.toLowerCase(),
         from: ZERO_ADDRESS,
-        to: e.summoner,
+        to: e.summoner.toLowerCase(),
         amount: "1"
       };
       return new ShareTransferEvent(props, this.eventRepository, this.membershipRepository, this.connectionFactory);
@@ -94,7 +103,7 @@ export class Moloch1EventFactory {
       const props: AppInstalledEventProps = {
         platform: PLATFORM.MOLOCH_1,
         organisationAddress: event.address.toLowerCase(),
-        proxyAddress: guildBankAddress,
+        proxyAddress: guildBankAddress.toLowerCase(),
         appId: APP_ID.MOLOCH_1_BANK,
         txid: event.txid,
         blockNumber: Number(event.blockNumber),
@@ -127,11 +136,11 @@ export class Moloch1EventFactory {
     const events = await this.summonCompleteBlockchainEvents(block);
     const promised = events.map(async e => {
       const organisationAddress = e.address.toLowerCase();
-      const name = await this.organisationName(organisationAddress);
+      const name = await organisationName(organisationAddress);
       const props = {
         platform: PLATFORM.MOLOCH_1,
         name: name,
-        address: organisationAddress,
+        address: organisationAddress.toLowerCase(),
         txid: e.txid,
         blockNumber: Number(e.blockNumber),
         blockHash: block.hash,
@@ -167,14 +176,5 @@ export class Moloch1EventFactory {
       })
     );
     return events.filter((e, i) => filtered[i]);
-  }
-
-  private async organisationName(address: string): Promise<string> {
-    const found = MOLOCH_NAMES.get(address);
-    if (found) {
-      return found;
-    } else {
-      return address;
-    }
   }
 }

@@ -7,13 +7,17 @@ import { UnreachableCaseError } from "../shared/unreachable-case-error";
 import { IToken } from "./token.interface";
 import { BalanceService } from "../querying/balance.service";
 import { Shares } from "./shares";
+import { MembershipRepository } from "../storage/membership.repository";
+import { Participant } from "./participant";
+import { Organisation } from "./organisation";
 
 @Service(OrganisationService.name)
 export class OrganisationService {
   constructor(
     @Inject(SharesFactory.name) private readonly sharesFactory: SharesFactory,
     @Inject(ApplicationRepository.name) private readonly applicationRepository: ApplicationRepository,
-    @Inject(BalanceService.name) private readonly balance: BalanceService
+    @Inject(BalanceService.name) private readonly balance: BalanceService,
+    @Inject(MembershipRepository.name) private readonly membershipRepository: MembershipRepository
   ) {}
 
   async shares(platform: PLATFORM, organisationAddress: string, name: string): Promise<Shares | undefined> {
@@ -42,5 +46,10 @@ export class OrganisationService {
     } else {
       return [];
     }
+  }
+
+  async participants(organisation: Organisation) {
+    const raw = await this.membershipRepository.allByOrganisationAddress(organisation.address);
+    return raw.map(r => new Participant(r.accountAddress, organisation));
   }
 }

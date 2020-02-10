@@ -36,7 +36,7 @@ export class SharesFactory {
       const amount = await token.methods.totalShares().call();
       const symbol = name;
       const decimals = 0;
-      return new Shares(decimals, amount, symbol, name, token, bank, this.messari);
+      return new Shares(decimals, amount, symbol, name, token, PLATFORM.MOLOCH_1, bank, this.messari);
     }
   }
 
@@ -48,7 +48,7 @@ export class SharesFactory {
       const amount = await token.methods.totalSupply().call();
       const symbol = await token.methods.symbol().call();
       const name = await token.methods.name().call();
-      return new Shares(Number(decimalsRaw), amount, symbol, name, token, bank, this.messari);
+      return new Shares(Number(decimalsRaw), amount, symbol, name, token, PLATFORM.ARAGON, bank, this.messari);
     }
   }
 }

@@ -2,6 +2,8 @@ import { IToken } from "./token.interface";
 import BigNumber from "bignumber.js";
 import { MessariService } from "../querying/messari.service";
 import { Contract } from "web3-eth-contract";
+import { PLATFORM } from "./platform";
+import { UnreachableCaseError } from "../shared/unreachable-case-error";
 
 export class Shares implements IToken {
   constructor(
@@ -10,9 +12,29 @@ export class Shares implements IToken {
     readonly symbol: string,
     readonly name: string,
     readonly token: Contract,
+    readonly platform: PLATFORM,
     private readonly bank: IToken[],
     private readonly messari: MessariService
   ) {}
+
+  async balanceOf(participantAddress: string) {
+    switch (this.platform) {
+      case PLATFORM.MOLOCH_1:
+        const member = await this.token.methods.members(participantAddress).call();
+        return {
+          ...this,
+          amount: member.shares
+        };
+      case PLATFORM.ARAGON:
+        const balance = await this.token.methods.balanceOf(participantAddress).call();
+        return {
+          ...this,
+          amount: balance
+        };
+      default:
+        throw new UnreachableCaseError(this.platform);
+    }
+  }
 
   async usdValue(): Promise<number> {
     const perTokenPromised = this.bank.map(async token => {
