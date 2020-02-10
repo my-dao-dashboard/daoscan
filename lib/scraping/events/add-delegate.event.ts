@@ -19,7 +19,7 @@ export interface AddDelegateEventProps {
   logIndex: number;
 }
 
-export class AddDelegateEvent implements IScrapingEvent {
+export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
   readonly kind = SCRAPING_EVENT_KIND.ADD_DELEGATE;
 
   constructor(
@@ -28,6 +28,14 @@ export class AddDelegateEvent implements IScrapingEvent {
     private readonly eventRepository: EventRepository,
     private readonly delegateRepository: DelegateRepository
   ) {}
+
+  get logIndex() {
+    return this.props.logIndex;
+  }
+
+  get txid() {
+    return this.props.txid;
+  }
 
   get platform() {
     return this.props.platform;
@@ -99,8 +107,6 @@ export class AddDelegateEvent implements IScrapingEvent {
     } else {
       console.log("Can not find event", this);
     }
-    console.log("found", found);
-    throw new Error("yankee");
   }
 
   toJSON(): any {

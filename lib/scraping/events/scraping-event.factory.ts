@@ -5,14 +5,17 @@ import { AragonEventFactory } from "../aragon/aragon-event.factory";
 import { SCRAPING_EVENT_KIND } from "./scraping-event.kind";
 import { UnreachableCaseError } from "../../shared/unreachable-case-error";
 import { EventRepository } from "../../storage/event.repository";
-import { AragonOrganisationCreatedEventFactory } from "../aragon/aragon-organisation-created-event.factory";
-import { AragonAppInstalledEventFactory } from "../aragon/aragon-app-installed-event.factory";
-import { AragonShareTransferEventFactory } from "../aragon/aragon-share-transfer-event.factory";
 import { UUID } from "../../storage/uuid";
 import { Moloch1EventFactory } from "../moloch-1/moloch-1-event.factory";
-import { NotImplementedError } from "../../shared/errors";
-import {AppInstalledEvent} from "./app-installed.event";
-import {ApplicationRepository} from "../../storage/application.repository";
+import { AppInstalledEvent } from "./app-installed.event";
+import { ApplicationRepository } from "../../storage/application.repository";
+import { ConnectionFactory } from "../../storage/connection.factory";
+import { OrganisationCreatedEvent } from "./organisation-created.event";
+import { OrganisationRepository } from "../../storage/organisation.repository";
+import { ShareTransferEvent } from "./share-transfer.event";
+import { MembershipRepository } from "../../storage/membership.repository";
+import { AddDelegateEvent } from "./add-delegate.event";
+import { DelegateRepository } from "../../storage/delegate.repository";
 
 @Service(ScrapingEventFactory.name)
 export class ScrapingEventFactory {
@@ -20,10 +23,11 @@ export class ScrapingEventFactory {
     @Inject(AragonEventFactory.name) private readonly aragon: AragonEventFactory,
     @Inject(Moloch1EventFactory.name) private readonly moloch: Moloch1EventFactory,
     @Inject(EventRepository.name) private readonly eventRepository: EventRepository,
-    @Inject(AragonOrganisationCreatedEventFactory.name)
-    private readonly organisationCreated: AragonOrganisationCreatedEventFactory,
-    @Inject(AragonAppInstalledEventFactory.name) private readonly appInstalled: AragonAppInstalledEventFactory,
-    @Inject(AragonShareTransferEventFactory.name) private readonly shareTransfer: AragonShareTransferEventFactory
+    @Inject(ApplicationRepository.name) private readonly applicationRepository: ApplicationRepository,
+    @Inject(OrganisationRepository.name) private readonly organisationRepository: OrganisationRepository,
+    @Inject(MembershipRepository.name) private readonly membershipRepository: MembershipRepository,
+    @Inject(DelegateRepository.name) private readonly delegateRepository: DelegateRepository,
+    @Inject(ConnectionFactory.name) private readonly connectionFactory: ConnectionFactory
   ) {}
 
   async fromStorage(eventId: UUID): Promise<ScrapingEvent | undefined> {
@@ -39,13 +43,18 @@ export class ScrapingEventFactory {
   fromJSON(json: ScrapingEvent): ScrapingEvent {
     switch (json.kind) {
       case SCRAPING_EVENT_KIND.APP_INSTALLED:
-        return this.appInstalled.fromJSON(json);
+        return new AppInstalledEvent(json, this.eventRepository, this.applicationRepository, this.connectionFactory);
       case SCRAPING_EVENT_KIND.ORGANISATION_CREATED:
-        return this.organisationCreated.fromJSON(json);
+        return new OrganisationCreatedEvent(
+          json,
+          this.eventRepository,
+          this.organisationRepository,
+          this.connectionFactory
+        );
       case SCRAPING_EVENT_KIND.SHARE_TRANSFER:
-        return this.shareTransfer.fromJSON(json);
+        return new ShareTransferEvent(json, this.eventRepository, this.membershipRepository, this.connectionFactory);
       case SCRAPING_EVENT_KIND.ADD_DELEGATE:
-        throw new NotImplementedError(`SCRAPING_EVENT_KIND.ADD_DELEGATE`);
+        return new AddDelegateEvent(json, this.connectionFactory, this.eventRepository, this.delegateRepository);
       default:
         throw new UnreachableCaseError(json);
     }
