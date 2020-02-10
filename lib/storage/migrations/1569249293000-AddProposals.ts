@@ -11,25 +11,37 @@ export class AddProposals1569249293000 implements MigrationInterface {
         columns: [
           new TableColumn({
             name: "eventId",
-            type: "varchar(400)",
+            type: "VARCHAR(400)",
             isNullable: false,
             isUnique: true
           }),
           new TableColumn({
             name: "id",
-            type: "integer",
-            isNullable: false,
-            isUnique: false
-          }),
-          new TableColumn({
-            name: "delegateFor",
-            type: "VARCHAR(42)",
+            type: "INTEGER",
             isNullable: false,
             isUnique: false
           }),
           new TableColumn({
             name: "organisationAddress",
             type: "VARCHAR(42)",
+            isNullable: false,
+            isUnique: false
+          }),
+          new TableColumn({
+            name: "applicant",
+            type: "VARCHAR(42)",
+            isNullable: false,
+            isUnique: false
+          }),
+          new TableColumn({
+            name: "kind",
+            type: "VARCHAR(256)",
+            isNullable: false,
+            isUnique: false
+          }),
+          new TableColumn({
+            name: "payload",
+            type: "HSTORE",
             isNullable: false,
             isUnique: false
           })
