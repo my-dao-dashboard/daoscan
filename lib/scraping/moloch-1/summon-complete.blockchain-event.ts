@@ -1,6 +1,7 @@
 import { BlockchainEvent } from "../blockchain-event";
+import { Indexed } from "../../shared/indexed";
 
-export interface SummonCompleteParams {
+export interface SummonCompleteParams extends Indexed<string> {
   summoner: string;
   shares: string;
 }

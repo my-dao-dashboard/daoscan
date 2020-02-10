@@ -90,11 +90,13 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
     eventRow.payload = this;
     const found = await this.eventRepository.findSame(eventRow);
     if (found) {
-      const organisationRows = await this.organisationRepository.byId(found.id);
+      const organisationRow = await this.organisationRepository.byId(found.id);
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {
-        await entityManager.delete(Organisation, organisationRows);
-        console.log("Deleted organisation", organisationRows);
+        if (organisationRow) {
+          await entityManager.delete(Organisation, organisationRow);
+          console.log("Deleted organisation", organisationRow);
+        }
         await entityManager.delete(Event, { id: found.id });
         console.log("Deleted event", found);
       });

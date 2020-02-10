@@ -1,8 +1,8 @@
 import { Inject, Service } from "typedi";
 import { Block } from "../block";
 import { ScrapingEvent } from "../events/scraping-event";
-import { logEvents } from "../events-from-logs";
-import { SUMMON_COMPLETE_BLOCKCHAIN_EVENT } from "./summon-complete.blockchain-event";
+import { LogEvent, logEvents } from "../events-from-logs";
+import { SUMMON_COMPLETE_BLOCKCHAIN_EVENT, SummonCompleteParams } from "./summon-complete.blockchain-event";
 import { PLATFORM } from "../../domain/platform";
 import { EthereumService } from "../../services/ethereum.service";
 import { OrganisationCreatedEvent } from "../events/organisation-created.event";
@@ -18,6 +18,7 @@ import { ZERO_ADDRESS } from "../../shared/zero-address";
 import { MembershipRepository } from "../../storage/membership.repository";
 import { AddDelegateEvent, AddDelegateEventProps } from "../events/add-delegate.event";
 import { DelegateRepository } from "../../storage/delegate.repository";
+import { MOLOCH_NAMES } from "./moloch-names";
 
 @Service(Moloch1EventFactory.name)
 export class Moloch1EventFactory {
@@ -45,8 +46,8 @@ export class Moloch1EventFactory {
   }
 
   async summonerDelegate(block: Block): Promise<AddDelegateEvent[]> {
-    const extendedBlock = await block.extendedBlock();
-    return logEvents(this.ethereum.codec, extendedBlock, SUMMON_COMPLETE_BLOCKCHAIN_EVENT).map(e => {
+    const events = await this.summonCompleteBlockchainEvents(block);
+    return events.map(e => {
       const props: AddDelegateEventProps = {
         platform: PLATFORM.MOLOCH_1,
         address: e.summoner,
@@ -62,8 +63,8 @@ export class Moloch1EventFactory {
   }
 
   async summonerShareTransfer(block: Block): Promise<ShareTransferEvent[]> {
-    const extendedBlock = await block.extendedBlock();
-    return logEvents(this.ethereum.codec, extendedBlock, SUMMON_COMPLETE_BLOCKCHAIN_EVENT).map(e => {
+    const events = await this.summonCompleteBlockchainEvents(block);
+    return events.map(e => {
       const props: ShareTransferEventProps = {
         platform: PLATFORM.MOLOCH_1,
         organisationAddress: e.address,
@@ -122,13 +123,13 @@ export class Moloch1EventFactory {
   }
 
   async organisationCreatedAsSummonComplete(block: Block): Promise<OrganisationCreatedEvent[]> {
-    const extendedBlock = await block.extendedBlock();
     const timestamp = await block.timestamp();
-    return logEvents(this.ethereum.codec, extendedBlock, SUMMON_COMPLETE_BLOCKCHAIN_EVENT).map(e => {
+    const events = await this.summonCompleteBlockchainEvents(block);
+    return events.map(e => {
       const organisationAddress = e.address;
       const props = {
         platform: PLATFORM.MOLOCH_1,
-        name: organisationAddress.toLowerCase(),
+        name: this.organisationName(organisationAddress.toLowerCase()),
         address: organisationAddress.toLowerCase(),
         txid: e.txid,
         blockNumber: Number(e.blockNumber),
@@ -142,5 +143,19 @@ export class Moloch1EventFactory {
         this.connectionFactory
       );
     });
+  }
+
+  private async summonCompleteBlockchainEvents(block: Block): Promise<LogEvent<SummonCompleteParams>[]> {
+    const extendedBlock = await block.extendedBlock();
+    return logEvents<SummonCompleteParams>(this.ethereum.codec, extendedBlock, SUMMON_COMPLETE_BLOCKCHAIN_EVENT);
+  }
+
+  private organisationName(address: string) {
+    const found = MOLOCH_NAMES.get(address);
+    if (found) {
+      return found;
+    } else {
+      return address;
+    }
   }
 }

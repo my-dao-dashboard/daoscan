@@ -4,12 +4,14 @@ import { BlockchainEvent } from "./blockchain-event";
 import { Log } from "web3-core";
 import { AbiCodec } from "../services/abi-codec";
 
+export type LogEvent<A> = A & { txid: string; blockNumber: number; address: string; logIndex: number };
+
 export function logEvents<A extends Indexed<string>>(
   codec: AbiCodec,
   block: ExtendedBlock,
   event: BlockchainEvent<A>,
   filter?: (log: Log) => boolean
-): (A & { txid: string; blockNumber: number; address: string; logIndex: number })[] {
+): LogEvent<A>[] {
   return block.logs
     .filter(log => {
       const isRemoved = (log as any).removed;
