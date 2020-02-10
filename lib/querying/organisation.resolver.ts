@@ -1,71 +1,52 @@
 import { Inject, Service } from "typedi";
 import { bind } from "decko";
 import { EthereumService } from "../services/ethereum.service";
-import { OrganisationPresentation } from "./organisation.presentation";
-import { OrganisationRepository } from "../storage/organisation.repository";
-import { EventRepository } from "../storage/event.repository";
-import { ScrapingEventFactory } from "../scraping/events/scraping-event.factory";
-import { SCRAPING_EVENT_KIND } from "../scraping/events/scraping-event.kind";
-import { TokenPresentation } from "./token.presentation";
-import { OrganisationService } from "./organisation.service";
 import { ParticipantPresentation } from "./participant.presentation";
 import { MembershipRepository } from "../storage/membership.repository";
 import { BalanceService } from "./balance.service";
+import { Organisation } from "../domain/organisation";
+import { OrganisationFactory } from "../domain/organisation.factory";
+import { IToken } from "../domain/token.interface";
 
 @Service(OrganisationResolver.name)
 export class OrganisationResolver {
   constructor(
     @Inject(EthereumService.name) private readonly ethereum: EthereumService,
-    @Inject(OrganisationRepository.name) private readonly organisationRepository: OrganisationRepository,
-    @Inject(EventRepository.name) private readonly eventRepository: EventRepository,
-    @Inject(ScrapingEventFactory.name) private readonly scrapingEventFactory: ScrapingEventFactory,
-    @Inject(OrganisationService.name) private readonly organisationService: OrganisationService,
     @Inject(MembershipRepository.name) private readonly membershipRepository: MembershipRepository,
-    @Inject(BalanceService.name) private readonly balance: BalanceService
+    @Inject(BalanceService.name) private readonly balance: BalanceService,
+    @Inject(OrganisationFactory.name) private readonly organisationFactory: OrganisationFactory
   ) {}
 
   @bind()
-  async organisation(address: string): Promise<OrganisationPresentation | undefined> {
-    const organisationAddress = await this.ethereum.canonicalAddress(address);
-    if (!organisationAddress) return undefined;
-    const organisation = await this.organisationRepository.byAddress(organisationAddress);
-    if (!organisation) return undefined;
-    const event = await this.scrapingEventFactory.fromStorage(organisation.id);
-    if (!event || event.kind !== SCRAPING_EVENT_KIND.ORGANISATION_CREATED) return undefined;
-    return new OrganisationPresentation(organisation, event);
+  async organisation(address: string): Promise<Organisation | undefined> {
+    return this.organisationFactory.byAddress(address);
   }
 
   @bind()
-  async totalSupply(root: OrganisationPresentation): Promise<TokenPresentation> {
-    const organisationAddress = await this.ethereum.canonicalAddress(root.address);
-    return this.organisationService.totalSupply(organisationAddress);
+  async totalSupply(root: Organisation) {
+    return root.shares();
   }
 
   @bind()
-  async bank(root: OrganisationPresentation) {
-    const organisationAddress = await this.ethereum.canonicalAddress(root.address);
-    return this.organisationService.bank(organisationAddress);
+  async bank(root: Organisation) {
+    return root.bank();
   }
 
   @bind()
-  async shareValue(root: OrganisationPresentation, args: { symbol: string }): Promise<TokenPresentation> {
-    const organisationAddress = await this.ethereum.canonicalAddress(root.address);
-    return this.organisationService.shareValue(organisationAddress, args.symbol);
+  async shareValue(root: Organisation, args: { symbol: string }): Promise<IToken | undefined> {
+    const shares = await root.shares();
+    if (shares) {
+      return shares.value(args.symbol);
+    }
   }
 
   @bind()
-  async participant(
-    root: OrganisationPresentation,
-    args: { address: string }
-  ): Promise<ParticipantPresentation | null> {
-    const organisationAddress = await this.ethereum.canonicalAddress(root.address);
+  async participant(root: Organisation, args: { address: string }): Promise<ParticipantPresentation | null> {
     const participantAddress = await this.ethereum.canonicalAddress(args.address);
-    const token = await this.organisationService.tokenContract(organisationAddress);
-    const participant = await this.membershipRepository.byAddressInOrganisation(
-      organisationAddress,
-      participantAddress
-    );
-    if (participant) {
+    const shares = await root.shares();
+    const token = shares?.token;
+    const participant = await this.membershipRepository.byAddressInOrganisation(root.address, participantAddress);
+    if (participant && token) {
       const shares = await this.balance.balanceOf(participantAddress, token);
       return new ParticipantPresentation(participantAddress, shares);
     } else {
@@ -74,14 +55,18 @@ export class OrganisationResolver {
   }
 
   @bind()
-  async participants(root: OrganisationPresentation): Promise<ParticipantPresentation[]> {
-    const organisationAddress = await this.ethereum.canonicalAddress(root.address);
-    const token = await this.organisationService.tokenContract(organisationAddress);
-    const participants = await this.membershipRepository.allByOrganisationAddress(organisationAddress);
-    const promised = participants.map(async p => {
-      const shares = await this.balance.balanceOf(p.accountAddress, token);
-      return new ParticipantPresentation(p.accountAddress, shares);
-    });
-    return await Promise.all(promised);
+  async participants(root: Organisation): Promise<ParticipantPresentation[]> {
+    const shares = await root.shares();
+    const token = shares?.token;
+    const participants = await this.membershipRepository.allByOrganisationAddress(root.address);
+    if (token) {
+      const promised = participants.map(async p => {
+        const shares = await this.balance.balanceOf(p.accountAddress, token);
+        return new ParticipantPresentation(p.accountAddress, shares);
+      });
+      return await Promise.all(promised);
+    } else {
+      return [];
+    }
   }
 }

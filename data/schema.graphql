@@ -5,9 +5,9 @@ type Participant {
 
 type Token {
   name: String
-  symbol: String!
+  symbol: String
   amount: String!
-  decimals: Int
+  decimals: Int!
 }
 
 type Organisation {
@@ -17,7 +17,7 @@ type Organisation {
   txid: String!
   timestamp: Int
   blockNumber: Int
-  totalSupply: Token!
+  totalSupply: Token
   shareValue(symbol: String!): Token!
   bank: [Token]
   participants: [Participant]

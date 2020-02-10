@@ -32,6 +32,17 @@ export class ApplicationRepository {
     }
   }
 
+  async byOrganisationAndAppId(organisationAddress: string, appId: APP_ID): Promise<string | undefined> {
+    const repository = await this.repositoryFactory.reading(Application);
+    const application = await repository.findOne({
+      organisationAddress: organisationAddress,
+      appId: appId
+    });
+    if (application) {
+      return application.address;
+    }
+  }
+
   async bankAddress(organisationAddress: string): Promise<string | undefined> {
     const repository = await this.repositoryFactory.reading(Application);
     const application = await repository.findOne({

@@ -2,10 +2,10 @@ import { Inject, Service } from "typedi";
 import { AccountPresentation } from "./account.presentation";
 import { bind } from "decko";
 import { EthereumService } from "../services/ethereum.service";
-import { OrganisationPresentation } from "./organisation.presentation";
 import { MembershipRepository } from "../storage/membership.repository";
 import { OrganisationResolver } from "./organisation.resolver";
 import _ from "lodash";
+import { Organisation } from "../domain/organisation";
 
 @Service(AccountResolver.name)
 export class AccountResolver {
@@ -16,7 +16,7 @@ export class AccountResolver {
   ) {}
 
   @bind()
-  async organisations(root: AccountPresentation): Promise<Partial<OrganisationPresentation>[]> {
+  async organisations(root: AccountPresentation): Promise<Partial<Organisation>[]> {
     const participantAddress = await this.ethereum.canonicalAddress(root.address);
     const organisationAddresses = await this.membershipRepository.allOrganisationAddresses(participantAddress);
     const promised = organisationAddresses.map(async address => {
