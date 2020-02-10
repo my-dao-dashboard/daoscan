@@ -10,6 +10,9 @@ import { AragonAppInstalledEventFactory } from "../aragon/aragon-app-installed-e
 import { AragonShareTransferEventFactory } from "../aragon/aragon-share-transfer-event.factory";
 import { UUID } from "../../storage/uuid";
 import { Moloch1EventFactory } from "../moloch-1/moloch-1-event.factory";
+import { NotImplementedError } from "../../shared/errors";
+import {AppInstalledEvent} from "./app-installed.event";
+import {ApplicationRepository} from "../../storage/application.repository";
 
 @Service(ScrapingEventFactory.name)
 export class ScrapingEventFactory {
@@ -41,6 +44,8 @@ export class ScrapingEventFactory {
         return this.organisationCreated.fromJSON(json);
       case SCRAPING_EVENT_KIND.SHARE_TRANSFER:
         return this.shareTransfer.fromJSON(json);
+      case SCRAPING_EVENT_KIND.ADD_DELEGATE:
+        throw new NotImplementedError(`SCRAPING_EVENT_KIND.ADD_DELEGATE`);
       default:
         throw new UnreachableCaseError(json);
     }

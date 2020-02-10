@@ -16,6 +16,8 @@ import { MOLOCH_1_ABI } from "./moloch-1.abi";
 import { ShareTransferEvent, ShareTransferEventProps } from "../events/share-transfer.event";
 import { ZERO_ADDRESS } from "../../shared/zero-address";
 import { MembershipRepository } from "../../storage/membership.repository";
+import { AddDelegateEvent, AddDelegateEventProps } from "../events/add-delegate.event";
+import { DelegateRepository } from "../../storage/delegate.repository";
 
 @Service(Moloch1EventFactory.name)
 export class Moloch1EventFactory {
@@ -25,18 +27,38 @@ export class Moloch1EventFactory {
     @Inject(EventRepository.name) private readonly eventRepository: EventRepository,
     @Inject(OrganisationRepository.name) private readonly organisationRepository: OrganisationRepository,
     @Inject(ApplicationRepository.name) private readonly applicationRepository: ApplicationRepository,
-    @Inject(MembershipRepository.name) private readonly membershipRepository: MembershipRepository
+    @Inject(MembershipRepository.name) private readonly membershipRepository: MembershipRepository,
+    @Inject(DelegateRepository.name) private readonly delegateRepository: DelegateRepository
   ) {}
 
   async fromBlock(block: Block): Promise<ScrapingEvent[]> {
     const organisationCreatedEvents = await this.organisationCreatedAsSummonComplete(block);
     const appInstalledEvents = await this.appInstalledEvents(organisationCreatedEvents);
     const summonerShareTransfer = await this.summonerShareTransfer(block);
+    const summonerDelegate = await this.summonerDelegate(block);
     let result = new Array<ScrapingEvent>();
     return result
       .concat(organisationCreatedEvents)
       .concat(appInstalledEvents)
-      .concat(summonerShareTransfer);
+      .concat(summonerShareTransfer)
+      .concat(summonerDelegate);
+  }
+
+  async summonerDelegate(block: Block): Promise<AddDelegateEvent[]> {
+    const extendedBlock = await block.extendedBlock();
+    return logEvents(this.ethereum.codec, extendedBlock, SUMMON_COMPLETE_BLOCKCHAIN_EVENT).map(e => {
+      const props: AddDelegateEventProps = {
+        platform: PLATFORM.MOLOCH_1,
+        address: e.summoner,
+        delegateFor: e.summoner,
+        organisationAddress: e.address,
+        blockHash: block.hash,
+        blockNumber: e.blockNumber,
+        txid: e.txid,
+        logIndex: e.logIndex
+      };
+      return new AddDelegateEvent(props, this.connectionFactory, this.eventRepository, this.delegateRepository);
+    });
   }
 
   async summonerShareTransfer(block: Block): Promise<ShareTransferEvent[]> {

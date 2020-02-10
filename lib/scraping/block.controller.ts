@@ -22,24 +22,29 @@ export class BlockController {
 
   @bind()
   async add(event: APIGatewayEvent | SQSEvent) {
-    if (isHttp(event)) {
-      const blockAddEvent = this.eventFactory.fromString(event.body);
+    try {
+      if (isHttp(event)) {
+        const blockAddEvent = this.eventFactory.fromString(event.body);
 
-      const inplace = Boolean(event.queryStringParameters?.inplace);
-      const commands = await this.addScenario.execute(blockAddEvent, false);
-      if (inplace) {
-        for (let command of commands) {
-          await command.execute();
+        const inplace = Boolean(event.queryStringParameters?.inplace);
+        const commands = await this.addScenario.execute(blockAddEvent, false);
+        if (inplace) {
+          for (let command of commands) {
+            await command.execute();
+          }
         }
+        return ok({ commands: commands });
+      } else {
+        await Promise.all(
+          event.Records.map(async record => {
+            const blockAddEvent = this.eventFactory.fromString(record.body);
+            await this.addScenario.execute(blockAddEvent);
+          })
+        );
       }
-      return ok({ commands: commands });
-    } else {
-      await Promise.all(
-        event.Records.map(async record => {
-          const blockAddEvent = this.eventFactory.fromString(record.body);
-          await this.addScenario.execute(blockAddEvent);
-        })
-      );
+    } catch (e) {
+      console.error(e);
+      return error(e);
     }
   }
 
