@@ -17,6 +17,7 @@ export interface AddDelegateEventProps {
   blockNumber: number;
   txid: string;
   logIndex: number;
+  timestamp: Date;
 }
 
 export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
@@ -61,6 +62,10 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
     return this.props.organisationAddress;
   }
 
+  get timestamp() {
+    return this.props.timestamp;
+  }
+
   async commit(): Promise<void> {
     const eventRow = new Event();
     eventRow.id = new UUID();
@@ -68,6 +73,7 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
     eventRow.blockHash = this.blockHash;
     eventRow.blockId = BigInt(this.blockNumber);
     eventRow.payload = this;
+    eventRow.timestamp = this.timestamp;
 
     const delegateRow = new Delegate();
     delegateRow.address = this.address;
@@ -91,6 +97,8 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
     eventRow.blockHash = this.blockHash;
     eventRow.blockId = BigInt(this.blockNumber);
     eventRow.payload = this;
+    eventRow.timestamp = this.timestamp;
+
     const found = await this.eventRepository.findSame(eventRow);
     if (found) {
       const rows = await this.delegateRepository.byEventId(found.id);

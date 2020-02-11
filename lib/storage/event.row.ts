@@ -30,4 +30,8 @@ export class Event {
   @Column({ type: "simple-json" })
   // @ts-ignore
   payload: ScrapingEvent;
+
+  @Column()
+  // @ts-ignore
+  timestamp: Date;
 }

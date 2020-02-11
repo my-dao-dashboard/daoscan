@@ -38,6 +38,7 @@ export class Block {
       commands = commands.concat(revertCommands);
     }
     const commitCommands = await this.commandFactory.commitBlock(this);
+    console.log("commitCommands", commitCommands);
     return commands.concat(commitCommands);
   }
 
@@ -59,6 +60,11 @@ export class Block {
   async timestamp(): Promise<number> {
     const extendedBlock = await this.extendedBlock();
     return Number(extendedBlock.timestamp);
+  }
+
+  async timestampDate(): Promise<Date> {
+    const timestamp = await this.timestamp();
+    return new Date(timestamp * 1000);
   }
 
   equals(other: Block): boolean {

@@ -87,8 +87,8 @@ export class AppInstalledEvent implements IScrapingEvent {
     const [eventRow, found] = await this.findRow();
     if (found) {
       const applicationRow = await this.applicationRepository.byId(found.id);
+      const writing = await this.connectionFactory.writing();
       if (applicationRow) {
-        const writing = await this.connectionFactory.writing();
         await writing.transaction(async entityManager => {
           await entityManager.delete(Application, applicationRow);
           console.log("Deleted application", applicationRow);
@@ -97,6 +97,10 @@ export class AppInstalledEvent implements IScrapingEvent {
         });
       } else {
         console.log("Can not find application", this.toJSON());
+        await writing.transaction(async entityManager => {
+          await entityManager.delete(Event, found);
+          console.log("Deleted event", found);
+        });
       }
     } else {
       console.log("Can not find event", this);

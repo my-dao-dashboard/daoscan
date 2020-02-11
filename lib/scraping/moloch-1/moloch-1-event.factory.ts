@@ -56,6 +56,7 @@ export class Moloch1EventFactory {
 
   async summonerDelegate(block: Block): Promise<AddDelegateEvent[]> {
     const events = await this.summonCompleteBlockchainEvents(block);
+    const timestamp = await block.timestampDate();
     return events.map(e => {
       const props: AddDelegateEventProps = {
         platform: PLATFORM.MOLOCH_1,
@@ -65,7 +66,8 @@ export class Moloch1EventFactory {
         blockHash: block.hash,
         blockNumber: e.blockNumber,
         txid: e.txid,
-        logIndex: e.logIndex
+        logIndex: e.logIndex,
+        timestamp: timestamp
       };
       return new AddDelegateEvent(props, this.connectionFactory, this.eventRepository, this.delegateRepository);
     });
