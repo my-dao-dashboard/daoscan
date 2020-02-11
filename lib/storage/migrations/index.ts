@@ -15,3 +15,4 @@ export * from "./1569249292800-StoreBlockBody";
 export * from "./1569249292900-AddDelegate";
 export * from "./1569249293000-AddTimestampToEvent";
 export * from "./1569249293100-DropDefaultValueFromEvents";
+export * from "./1569249293200-AddOrganisationAddressToEvent";
