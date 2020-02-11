@@ -21,9 +21,10 @@ export interface ShareTransferEventProps {
   from: string;
   to: string;
   amount: string;
+  timestamp: number;
 }
 
-export class ShareTransferEvent implements IScrapingEvent {
+export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventProps {
   readonly kind = SCRAPING_EVENT_KIND.SHARE_TRANSFER;
   constructor(
     private readonly props: ShareTransferEventProps,
@@ -72,6 +73,10 @@ export class ShareTransferEvent implements IScrapingEvent {
     return this.props.amount;
   }
 
+  get timestamp() {
+    return this.props.timestamp;
+  }
+
   async commit(): Promise<void> {
     const eventRow = new Event();
     eventRow.id = new UUID();
@@ -79,6 +84,8 @@ export class ShareTransferEvent implements IScrapingEvent {
     eventRow.blockHash = this.blockHash;
     eventRow.blockId = BigInt(this.blockNumber);
     eventRow.payload = this;
+    eventRow.timestamp = new Date(this.timestamp * 1000);
+
     const fromRow = await this.fromRow();
     const toRow = await this.toRow();
     const writing = await this.connectionFactory.writing();
@@ -105,6 +112,8 @@ export class ShareTransferEvent implements IScrapingEvent {
     eventRow.blockHash = this.blockHash;
     eventRow.blockId = BigInt(this.blockNumber);
     eventRow.payload = this;
+    eventRow.timestamp = new Date(this.timestamp * 1000);
+
     const found = await this.eventRepository.findSame(eventRow);
     if (found) {
       const rows = await this.membershipRepository.byEventId(found.id);

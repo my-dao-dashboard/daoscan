@@ -74,6 +74,7 @@ export class Moloch1EventFactory {
   }
 
   async summonerShareTransfer(block: Block): Promise<ShareTransferEvent[]> {
+    const timestamp = await block.timestamp();
     const events = await this.summonCompleteBlockchainEvents(block);
     return events.map(e => {
       const props: ShareTransferEventProps = {
@@ -86,7 +87,8 @@ export class Moloch1EventFactory {
         shareAddress: e.address.toLowerCase(),
         from: ZERO_ADDRESS,
         to: e.summoner.toLowerCase(),
-        amount: "1"
+        amount: "1",
+        timestamp: timestamp
       };
       return new ShareTransferEvent(props, this.eventRepository, this.membershipRepository, this.connectionFactory);
     });

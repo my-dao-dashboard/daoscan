@@ -66,6 +66,8 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
     eventRow.blockHash = this.blockHash;
     eventRow.blockId = BigInt(this.blockNumber);
     eventRow.payload = this;
+    eventRow.timestamp = new Date(this.timestamp * 1000);
+
     const organisationRow = new Organisation();
     organisationRow.id = eventRow.id;
     organisationRow.name = this.name;
@@ -88,6 +90,8 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
     eventRow.blockHash = this.blockHash;
     eventRow.blockId = BigInt(this.blockNumber);
     eventRow.payload = this;
+    eventRow.timestamp = new Date(this.timestamp * 1000);
+
     const found = await this.eventRepository.findSame(eventRow);
     if (found) {
       const organisationRow = await this.organisationRepository.byId(found.id);

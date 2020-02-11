@@ -1,18 +1,18 @@
-import {Inject, Service} from "typedi";
-import {ShareTransferEvent, ShareTransferEventProps} from "../events/share-transfer.event";
-import {Block} from "../block";
-import {Log} from "web3-core";
-import {logEvents} from "../events-from-logs";
-import {EthereumService} from "../../services/ethereum.service";
-import {BlockchainEvent} from "../blockchain-event";
-import {ApplicationRepository} from "../../storage/application.repository";
-import {AppInstalledEvent} from "../events/app-installed.event";
-import {PLATFORM} from "../../domain/platform";
+import { Inject, Service } from "typedi";
+import { ShareTransferEvent, ShareTransferEventProps } from "../events/share-transfer.event";
+import { Block } from "../block";
+import { Log } from "web3-core";
+import { logEvents } from "../events-from-logs";
+import { EthereumService } from "../../services/ethereum.service";
+import { BlockchainEvent } from "../blockchain-event";
+import { ApplicationRepository } from "../../storage/application.repository";
+import { AppInstalledEvent } from "../events/app-installed.event";
+import { PLATFORM } from "../../domain/platform";
 import _ from "lodash";
-import {EventRepository} from "../../storage/event.repository";
-import {MembershipRepository} from "../../storage/membership.repository";
-import {ConnectionFactory} from "../../storage/connection.factory";
-import {APP_ID} from "../../storage/app-id";
+import { EventRepository } from "../../storage/event.repository";
+import { MembershipRepository } from "../../storage/membership.repository";
+import { ConnectionFactory } from "../../storage/connection.factory";
+import { APP_ID } from "../../storage/app-id";
 
 export interface TransferParams {
   _from: string;
@@ -48,7 +48,10 @@ export class AragonShareTransferEventFactory {
     const promises = logEvents(this.ethereum.codec, extendedBlock, TRANSFER_EVENT, filter).map<
       Promise<ShareTransferEvent | undefined>
     >(async e => {
-      let organisationAddress = await this.applicationRepository.organisationAddressByApplicationAddress(e.address, APP_ID.SHARE);
+      let organisationAddress = await this.applicationRepository.organisationAddressByApplicationAddress(
+        e.address,
+        APP_ID.SHARE
+      );
       if (!organisationAddress) {
         const foundEvent = appInstalled.find(
           a => a.proxyAddress.toLowerCase() === e.address.toLowerCase() && a.appId === APP_ID.SHARE
@@ -69,7 +72,8 @@ export class AragonShareTransferEventFactory {
           shareAddress: e.address.toLowerCase(),
           from: e._from.toLowerCase(),
           to: e._to.toLowerCase(),
-          amount: e._amount
+          amount: e._amount,
+          timestamp: Number(extendedBlock.timestamp)
         });
       } else {
         return undefined;
