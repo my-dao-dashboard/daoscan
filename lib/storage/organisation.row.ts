@@ -7,7 +7,7 @@ import { PLATFORM } from "../domain/platform";
 export class Organisation {
   @PrimaryColumn("varchar", { transformer: uuidTransformer })
   // @ts-ignore
-  id: UUID; // event id
+  eventId: UUID; // event id
 
   @Column()
   // @ts-ignore

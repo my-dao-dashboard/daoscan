@@ -20,7 +20,7 @@ export class OrganisationFactory {
     if (!organisationAddress) return undefined;
     const row = await this.organisationRepository.byAddress(organisationAddress);
     if (!row) return undefined;
-    const event = await this.scrapingEventFactory.fromStorage(row.id);
+    const event = await this.scrapingEventFactory.fromStorage(row.eventId);
     if (!event || event.kind !== SCRAPING_EVENT_KIND.ORGANISATION_CREATED) return undefined;
     return new Organisation(row, event, this.organisationService);
   }

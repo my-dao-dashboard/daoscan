@@ -63,7 +63,7 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
     const eventRow = this.buildEventRow();
 
     const organisationRow = new Organisation();
-    organisationRow.id = eventRow.id;
+    organisationRow.eventId = eventRow.id;
     organisationRow.name = this.name;
     organisationRow.platform = this.platform;
     organisationRow.address = this.address;
@@ -85,7 +85,7 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {
         if (organisationRow) {
-          await entityManager.delete(Organisation, { id: organisationRow.id });
+          await entityManager.delete(Organisation, { id: organisationRow.eventId });
           console.log("Deleted organisation", organisationRow);
         }
         await entityManager.delete(Event, { id: found.id });
