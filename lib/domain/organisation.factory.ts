@@ -18,10 +18,10 @@ export class OrganisationFactory {
   async byAddress(address: string) {
     const organisationAddress = await this.ethereum.canonicalAddress(address);
     if (!organisationAddress) return undefined;
-    const row = await this.organisationRepository.byAddress(organisationAddress);
-    if (!row) return undefined;
-    const event = await this.scrapingEventFactory.fromStorage(row.eventId);
+    const organisationRow = await this.organisationRepository.byAddress(organisationAddress);
+    if (!organisationRow) return undefined;
+    const event = await this.scrapingEventFactory.fromStorage(organisationRow.eventId);
     if (!event || event.kind !== SCRAPING_EVENT_KIND.ORGANISATION_CREATED) return undefined;
-    return new Organisation(row, event, this.organisationService);
+    return new Organisation(organisationRow, event, this.organisationService);
   }
 }

@@ -71,7 +71,13 @@ export class Moloch1EventFactory {
         logIndex: e.logIndex,
         timestamp: timestamp
       };
-      return new AddDelegateEvent(props, this.connectionFactory, this.eventRepository, this.delegateRepository);
+      return new AddDelegateEvent(
+        props,
+        this.connectionFactory,
+        this.eventRepository,
+        this.delegateRepository,
+        this.historyRepository
+      );
     });
   }
 

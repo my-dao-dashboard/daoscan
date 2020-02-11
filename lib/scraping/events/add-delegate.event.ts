@@ -7,6 +7,9 @@ import { ConnectionFactory } from "../../storage/connection.factory";
 import { Delegate } from "../../storage/delegate.row";
 import { EventRepository } from "../../storage/event.repository";
 import { DelegateRepository } from "../../storage/delegate.repository";
+import { History } from "../../storage/history.row";
+import { RESOURCE_KIND } from "../../storage/resource.kind";
+import { HistoryRepository } from "../../storage/history.repository";
 
 export interface AddDelegateEventProps {
   platform: PLATFORM;
@@ -27,7 +30,8 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
     private readonly props: AddDelegateEventProps,
     private readonly connectionFactory: ConnectionFactory,
     private readonly eventRepository: EventRepository,
-    private readonly delegateRepository: DelegateRepository
+    private readonly delegateRepository: DelegateRepository,
+    private readonly historyRepository: HistoryRepository
   ) {}
 
   get logIndex() {
@@ -75,20 +79,28 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
     delegateRow.organisationAddress = this.organisationAddress;
     delegateRow.eventId = eventRow.id;
 
+    const historyRow = new History();
+    historyRow.resourceKind = RESOURCE_KIND.DELEGATE;
+
     const writing = await this.connectionFactory.writing();
     await writing.transaction(async entityManager => {
       const savedEvent = await entityManager.save(eventRow);
       console.log("Saved event", savedEvent);
       const savedDelegate = await entityManager.save(delegateRow);
       console.log("Saved delegate", savedDelegate);
+      historyRow.eventId = savedEvent.serialId;
+      historyRow.resourceId = savedDelegate.id;
+      const savedHistory = await entityManager.save(historyRow);
+      console.log("Saved history", savedHistory);
     });
   }
 
   async revert(): Promise<void> {
     const eventRow = this.buildEventRow();
-    const found = await this.eventRepository.findSame(eventRow);
-    if (found) {
-      const rows = await this.delegateRepository.byEventId(found.id);
+    const foundEvent = await this.eventRepository.findSame(eventRow);
+    if (foundEvent) {
+      const rows = await this.delegateRepository.byEventId(foundEvent.id);
+      const historyRows = await this.historyRepository.byEventId(foundEvent.serialId);
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {
         await Promise.all(
@@ -97,7 +109,13 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
             await entityManager.delete(Delegate, { id: row.eventId });
           })
         );
-        await entityManager.delete(Event, { id: found.id });
+        await entityManager.delete(Event, foundEvent);
+        console.log("Deleted event", foundEvent);
+        if (historyRows.length > 0) {
+          const historyIds = historyRows.map(h => h.id.toString());
+          const deleteResult = await entityManager.delete(History, historyIds);
+          console.log(`Deleted ${deleteResult.affected} history entries`);
+        }
       });
     } else {
       console.log("Can not find event", this);

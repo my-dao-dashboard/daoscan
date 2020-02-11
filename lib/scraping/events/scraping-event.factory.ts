@@ -57,7 +57,13 @@ export class ScrapingEventFactory {
       case SCRAPING_EVENT_KIND.SHARE_TRANSFER:
         return new ShareTransferEvent(json, this.eventRepository, this.membershipRepository, this.connectionFactory);
       case SCRAPING_EVENT_KIND.ADD_DELEGATE:
-        return new AddDelegateEvent(json, this.connectionFactory, this.eventRepository, this.delegateRepository);
+        return new AddDelegateEvent(
+          json,
+          this.connectionFactory,
+          this.eventRepository,
+          this.delegateRepository,
+          this.historyRepository
+        );
       default:
         throw new UnreachableCaseError(json);
     }
