@@ -94,7 +94,7 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {
         if (organisationRow) {
-          await entityManager.delete(Organisation, organisationRow);
+          await entityManager.delete(Organisation, { id: organisationRow.id });
           console.log("Deleted organisation", organisationRow);
         }
         await entityManager.delete(Event, { id: found.id });

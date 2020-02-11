@@ -113,10 +113,10 @@ export class ShareTransferEvent implements IScrapingEvent {
         await Promise.all(
           rows.map(async row => {
             console.log("Deleting membership", row);
-            await entityManager.delete(Membership, row);
+            await entityManager.delete(Membership, { id: row.id });
           })
         );
-        await entityManager.delete(Event, found);
+        await entityManager.delete(Event, { id: found.id });
       });
     } else {
       console.log("Can not find event", this);

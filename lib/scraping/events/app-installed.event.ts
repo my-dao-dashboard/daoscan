@@ -90,15 +90,15 @@ export class AppInstalledEvent implements IScrapingEvent {
       const writing = await this.connectionFactory.writing();
       if (applicationRow) {
         await writing.transaction(async entityManager => {
-          await entityManager.delete(Application, applicationRow);
+          await entityManager.delete(Application, { id: applicationRow.id });
           console.log("Deleted application", applicationRow);
-          await entityManager.delete(Event, found);
+          await entityManager.delete(Event, { id: found.id });
           console.log("Deleted event", found);
         });
       } else {
         console.log("Can not find application", this.toJSON());
         await writing.transaction(async entityManager => {
-          await entityManager.delete(Event, found);
+          await entityManager.delete(Event, { id: found.id });
           console.log("Deleted event", found);
         });
       }

@@ -107,10 +107,10 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
         await Promise.all(
           rows.map(async row => {
             console.log("Deleting delegate", row);
-            await entityManager.delete(Delegate, row);
+            await entityManager.delete(Delegate, { id: row.eventId });
           })
         );
-        await entityManager.delete(Event, found);
+        await entityManager.delete(Event, { id: found.id });
       });
     } else {
       console.log("Can not find event", this);
