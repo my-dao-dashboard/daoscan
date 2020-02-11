@@ -9,7 +9,7 @@ export class AddTimestampToEvent1569249293000 implements MigrationInterface {
       "events",
       new TableColumn({
         name: "timestamp",
-        type: "TIMESTAMP" ,
+        type: "TIMESTAMP",
         isNullable: false,
         isUnique: false,
         default: "'1970-01-01'"

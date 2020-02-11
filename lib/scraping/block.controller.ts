@@ -70,8 +70,8 @@ export class BlockController {
         }
         return ok({ commands: commands });
       } catch (e) {
-        console.error(e)
-        return error(e)
+        console.error(e);
+        return error(e);
       }
     } else {
       error(new BadRequestError(`No payload specified`));

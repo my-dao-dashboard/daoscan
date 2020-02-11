@@ -38,7 +38,7 @@ export class EventRepository {
     const repository = await this.repositoryFactory.reading(Event);
     return repository.find({
       where: {
-        kind: 'NONE'
+        kind: "NONE"
       },
       take: 300
     });

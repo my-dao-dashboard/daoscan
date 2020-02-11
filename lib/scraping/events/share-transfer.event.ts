@@ -9,6 +9,9 @@ import { MEMBERSHIP_KIND } from "../../storage/membership.kind";
 import { MembershipRepository } from "../../storage/membership.repository";
 import { ConnectionFactory } from "../../storage/connection.factory";
 import { ZERO_ADDRESS } from "../../shared/zero-address";
+import { HistoryRepository } from "../../storage/history.repository";
+import { History } from "../../storage/history.row";
+import { RESOURCE_KIND } from "../../storage/resource.kind";
 
 export interface ShareTransferEventProps {
   platform: PLATFORM;
@@ -30,6 +33,7 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
     private readonly props: ShareTransferEventProps,
     private readonly eventRepository: EventRepository,
     private readonly membershipRepository: MembershipRepository,
+    private readonly historyRepository: HistoryRepository,
     private readonly connectionFactory: ConnectionFactory
   ) {}
 
@@ -81,6 +85,10 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
     const eventRow = this.buildEventRow();
     const fromRow = await this.fromRow();
     const toRow = await this.toRow();
+    const fromHistory = new History();
+    fromHistory.resourceKind = RESOURCE_KIND.MEMBERSHIP;
+    const toHistory = new History();
+    toHistory.resourceKind = RESOURCE_KIND.MEMBERSHIP;
     const writing = await this.connectionFactory.writing();
     await writing.transaction(async entityManager => {
       const savedEvent = await entityManager.save(eventRow);
@@ -89,11 +97,19 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
         fromRow.eventId = savedEvent.id;
         const savedFromRow = await entityManager.save(fromRow);
         console.log("Saved from", savedFromRow);
+        fromHistory.resourceId = savedFromRow.id;
+        fromHistory.eventId = savedEvent.serialId;
+        const savedFromHistory = await entityManager.save(fromHistory);
+        console.log("Saved history entry", savedFromHistory);
       }
       if (toRow.accountAddress !== ZERO_ADDRESS) {
         toRow.eventId = savedEvent.id;
         const savedToRow = await entityManager.save(toRow);
         console.log("Saved to", savedToRow);
+        toHistory.resourceId = toRow.id;
+        toHistory.eventId = savedEvent.serialId;
+        const savedToHistory = await entityManager.save(toHistory);
+        console.log("Saved history entry", savedToHistory);
       }
     });
   }
@@ -104,6 +120,7 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
     const found = await this.eventRepository.findSame(eventRow);
     if (found) {
       const rows = await this.membershipRepository.byEventId(found.id);
+      const historyRows = await this.historyRepository.byEventId(found.serialId);
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {
         await Promise.all(
@@ -113,6 +130,11 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
           })
         );
         await entityManager.delete(Event, { id: found.id });
+        if (historyRows.length > 0) {
+          const historyIds = historyRows.map(h => h.id.toString());
+          const deleteResult = await entityManager.delete(History, historyIds);
+          console.log(`Deleted ${deleteResult.affected} history entries`);
+        }
       });
     } else {
       console.log("Can not find event", this);

@@ -6,7 +6,7 @@ import { bigintTransformer } from "./bigint.transformer";
 
 @Entity("memberships")
 export class Membership {
-  @PrimaryColumn("bigint", { transformer: bigintTransformer })
+  @PrimaryColumn("bigint", { transformer: bigintTransformer, generated: true })
   // @ts-ignore
   id: bigint;
 

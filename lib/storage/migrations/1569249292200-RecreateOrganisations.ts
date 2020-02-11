@@ -15,12 +15,16 @@ export class RecreateOrganisations1569249292200 implements MigrationInterface {
         isNullable: false
       })
     );
-    await queryRunner.changeColumn('organisations', 'eventId', new TableColumn({
-      name: 'id',
-      type: 'varchar(400)',
-      isNullable: false,
-      isUnique: true
-    }))
+    await queryRunner.changeColumn(
+      "organisations",
+      "eventId",
+      new TableColumn({
+        name: "id",
+        type: "varchar(400)",
+        isNullable: false,
+        isUnique: true
+      })
+    );
   }
 
   async down(queryRunner: QueryRunner): Promise<any> {
@@ -34,11 +38,15 @@ export class RecreateOrganisations1569249292200 implements MigrationInterface {
         isNullable: false
       })
     );
-    await queryRunner.changeColumn('organisations', 'id', new TableColumn({
-      name: 'eventId',
-      type: 'varchar(400)',
-      isNullable: false,
-      isUnique: false
-    }))
+    await queryRunner.changeColumn(
+      "organisations",
+      "id",
+      new TableColumn({
+        name: "eventId",
+        type: "varchar(400)",
+        isNullable: false,
+        isUnique: false
+      })
+    );
   }
 }

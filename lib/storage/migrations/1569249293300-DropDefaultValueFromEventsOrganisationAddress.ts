@@ -9,6 +9,8 @@ export class DropDefaultValueFromEventsOrganisationAddress1569249293300 implemen
   }
 
   async down(queryRunner: QueryRunner): Promise<any> {
-    await queryRunner.query(`ALTER TABLE "events" ALTER COLUMN "organisationAddress" SET DEFAULT '0x0000000000000000000000000000000000000000'`);
+    await queryRunner.query(
+      `ALTER TABLE "events" ALTER COLUMN "organisationAddress" SET DEFAULT '0x0000000000000000000000000000000000000000'`
+    );
   }
 }

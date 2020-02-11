@@ -98,7 +98,13 @@ export class Moloch1EventFactory {
         amount: "1",
         timestamp: timestamp
       };
-      return new ShareTransferEvent(props, this.eventRepository, this.membershipRepository, this.connectionFactory);
+      return new ShareTransferEvent(
+        props,
+        this.eventRepository,
+        this.membershipRepository,
+        this.historyRepository,
+        this.connectionFactory
+      );
     });
   }
 

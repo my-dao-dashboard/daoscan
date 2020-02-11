@@ -61,7 +61,13 @@ export class ScrapingEventFactory {
           this.connectionFactory
         );
       case SCRAPING_EVENT_KIND.SHARE_TRANSFER:
-        return new ShareTransferEvent(json, this.eventRepository, this.membershipRepository, this.connectionFactory);
+        return new ShareTransferEvent(
+          json,
+          this.eventRepository,
+          this.membershipRepository,
+          this.historyRepository,
+          this.connectionFactory
+        );
       case SCRAPING_EVENT_KIND.ADD_DELEGATE:
         return new AddDelegateEvent(
           json,

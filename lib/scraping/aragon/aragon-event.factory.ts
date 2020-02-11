@@ -8,7 +8,8 @@ import { AragonShareTransferEventFactory } from "./aragon-share-transfer-event.f
 @Service(AragonEventFactory.name)
 export class AragonEventFactory {
   constructor(
-    @Inject(AragonOrganisationCreatedEventFactory.name) private readonly organisationCreated: AragonOrganisationCreatedEventFactory,
+    @Inject(AragonOrganisationCreatedEventFactory.name)
+    private readonly organisationCreated: AragonOrganisationCreatedEventFactory,
     @Inject(AragonAppInstalledEventFactory.name) private readonly appInstalled: AragonAppInstalledEventFactory,
     @Inject(AragonShareTransferEventFactory.name) private readonly shareTransfer: AragonShareTransferEventFactory
   ) {}
