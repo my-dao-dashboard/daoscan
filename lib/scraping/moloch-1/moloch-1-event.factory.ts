@@ -122,7 +122,13 @@ export class Moloch1EventFactory {
         blockHash: event.blockHash,
         timestamp: event.timestamp
       };
-      return new AppInstalledEvent(props, this.eventRepository, this.applicationRepository, this.connectionFactory);
+      return new AppInstalledEvent(
+        props,
+        this.eventRepository,
+        this.applicationRepository,
+        this.historyRepository,
+        this.connectionFactory
+      );
     });
     return Promise.all(banksPromised);
   }
@@ -139,7 +145,13 @@ export class Moloch1EventFactory {
         blockHash: event.blockHash,
         timestamp: event.timestamp
       };
-      return new AppInstalledEvent(props, this.eventRepository, this.applicationRepository, this.connectionFactory);
+      return new AppInstalledEvent(
+        props,
+        this.eventRepository,
+        this.applicationRepository,
+        this.historyRepository,
+        this.connectionFactory
+      );
     });
   }
 

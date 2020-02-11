@@ -45,7 +45,13 @@ export class ScrapingEventFactory {
   fromJSON(json: ScrapingEvent): ScrapingEvent {
     switch (json.kind) {
       case SCRAPING_EVENT_KIND.APP_INSTALLED:
-        return new AppInstalledEvent(json, this.eventRepository, this.applicationRepository, this.connectionFactory);
+        return new AppInstalledEvent(
+          json,
+          this.eventRepository,
+          this.applicationRepository,
+          this.historyRepository,
+          this.connectionFactory
+        );
       case SCRAPING_EVENT_KIND.ORGANISATION_CREATED:
         return new OrganisationCreatedEvent(
           json,
