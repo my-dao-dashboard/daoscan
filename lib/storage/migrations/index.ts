@@ -22,3 +22,4 @@ export * from "./1569249293500-DropDefaultValueFromEventsKind";
 export * from "./1569249293600-ApplicationIdIsEventId";
 export * from "./1569249293700-OrganisationIdIsEventId";
 export * from "./1569249293800-AddSerialIdToEvents";
+export * from "./1569249293900-AddIdToDelegates";
