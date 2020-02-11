@@ -3,7 +3,7 @@ import { PLATFORM } from "../domain/platform";
 import { ScrapingEvent } from "../scraping/events/scraping-event";
 import { bigintTransformer } from "./bigint.transformer";
 import { UUID } from "./uuid";
-import {SCRAPING_EVENT_KIND} from "../scraping/events/scraping-event.kind";
+import { SCRAPING_EVENT_KIND } from "../scraping/events/scraping-event.kind";
 
 export const uuidTransformer: ValueTransformer = {
   to: (entityValue: UUID) => entityValue.toString(),
@@ -12,9 +12,13 @@ export const uuidTransformer: ValueTransformer = {
 
 @Entity("events")
 export class Event {
-  @PrimaryColumn("varchar", { transformer: uuidTransformer })
+  @Column("varchar", { transformer: uuidTransformer })
   // @ts-ignore
   id: UUID;
+
+  @PrimaryColumn("bigint", { transformer: bigintTransformer, generated: true })
+  // @ts-ignore
+  serialId: bigint;
 
   @Column("bigint", { transformer: bigintTransformer })
   // @ts-ignore
@@ -41,6 +45,6 @@ export class Event {
   organisationAddress: string;
 
   @Column({ type: "enum", enum: SCRAPING_EVENT_KIND })
-    // @ts-ignore
+  // @ts-ignore
   kind: SCRAPING_EVENT_KIND;
 }

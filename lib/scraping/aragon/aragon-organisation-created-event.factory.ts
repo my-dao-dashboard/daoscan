@@ -9,6 +9,7 @@ import { BlockchainEvent } from "../blockchain-event";
 import { OrganisationCreatedEvent, OrganisationCreatedEventProps } from "../events/organisation-created.event";
 import { EventRepository } from "../../storage/event.repository";
 import { OrganisationRepository } from "../../storage/organisation.repository";
+import { HistoryRepository } from "../../storage/history.repository";
 
 const KIT_ADDRESSES = new Set(
   [
@@ -381,7 +382,8 @@ export class AragonOrganisationCreatedEventFactory {
     @Inject(EthereumService.name) private readonly ethereum: EthereumService,
     @Inject(ConnectionFactory.name) private readonly connectionFactory: ConnectionFactory,
     @Inject(EventRepository.name) private readonly eventRepository: EventRepository,
-    @Inject(OrganisationRepository.name) private readonly organisationRepository: OrganisationRepository
+    @Inject(OrganisationRepository.name) private readonly organisationRepository: OrganisationRepository,
+    @Inject(HistoryRepository.name) private readonly historyRepository: HistoryRepository
   ) {}
 
   isSuitableReceipt(receipt: ExtendedTransactionReceipt): boolean {
@@ -442,6 +444,7 @@ export class AragonOrganisationCreatedEventFactory {
       json,
       this.eventRepository,
       this.organisationRepository,
+      this.historyRepository,
       this.connectionFactory
     );
   }

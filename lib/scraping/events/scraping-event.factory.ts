@@ -16,6 +16,7 @@ import { ShareTransferEvent } from "./share-transfer.event";
 import { MembershipRepository } from "../../storage/membership.repository";
 import { AddDelegateEvent } from "./add-delegate.event";
 import { DelegateRepository } from "../../storage/delegate.repository";
+import { HistoryRepository } from "../../storage/history.repository";
 
 @Service(ScrapingEventFactory.name)
 export class ScrapingEventFactory {
@@ -27,7 +28,8 @@ export class ScrapingEventFactory {
     @Inject(OrganisationRepository.name) private readonly organisationRepository: OrganisationRepository,
     @Inject(MembershipRepository.name) private readonly membershipRepository: MembershipRepository,
     @Inject(DelegateRepository.name) private readonly delegateRepository: DelegateRepository,
-    @Inject(ConnectionFactory.name) private readonly connectionFactory: ConnectionFactory
+    @Inject(ConnectionFactory.name) private readonly connectionFactory: ConnectionFactory,
+    @Inject(HistoryRepository.name) private readonly historyRepository: HistoryRepository
   ) {}
 
   async fromStorage(eventId: UUID): Promise<ScrapingEvent | undefined> {
@@ -49,6 +51,7 @@ export class ScrapingEventFactory {
           json,
           this.eventRepository,
           this.organisationRepository,
+          this.historyRepository,
           this.connectionFactory
         );
       case SCRAPING_EVENT_KIND.SHARE_TRANSFER:
@@ -65,6 +68,6 @@ export class ScrapingEventFactory {
     // TODO Moloch
     // const molochEvents = await this.moloch.fromBlock(block);
     // return aragonEvents.concat(molochEvents);
-    return aragonEvents
+    return aragonEvents;
   }
 }
