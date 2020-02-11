@@ -26,3 +26,4 @@ export * from "./1569249293900-AddIdToDelegates";
 export * from "./1569249294000-AddIdToMemberships";
 export * from "./1569249294100-AddIdToOrganisations";
 export * from "./1569249294200-AddIdToApplications";
+export * from "./1569249294300-AddHistory";
