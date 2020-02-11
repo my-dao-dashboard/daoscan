@@ -17,3 +17,5 @@ export * from "./1569249293000-AddTimestampToEvent";
 export * from "./1569249293100-DropDefaultValueFromEvents";
 export * from "./1569249293200-AddOrganisationAddressToEvent";
 export * from "./1569249293300-DropDefaultValueFromEventsOrganisationAddress";
+export * from "./1569249293400-AddKindToEvents";
+export * from "./1569249293500-DropDefaultValueFromEventsKind";

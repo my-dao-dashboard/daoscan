@@ -105,6 +105,7 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
     eventRow.payload = this;
     eventRow.timestamp = new Date(this.timestamp * 1000);
     eventRow.organisationAddress = this.address;
+    eventRow.kind = this.kind;
     return eventRow;
   }
 

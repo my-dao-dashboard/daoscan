@@ -3,6 +3,7 @@ import { PLATFORM } from "../domain/platform";
 import { ScrapingEvent } from "../scraping/events/scraping-event";
 import { bigintTransformer } from "./bigint.transformer";
 import { UUID } from "./uuid";
+import {SCRAPING_EVENT_KIND} from "../scraping/events/scraping-event.kind";
 
 export const uuidTransformer: ValueTransformer = {
   to: (entityValue: UUID) => entityValue.toString(),
@@ -38,4 +39,8 @@ export class Event {
   @Column()
   // @ts-ignore
   organisationAddress: string;
+
+  @Column({ type: "enum", enum: SCRAPING_EVENT_KIND })
+    // @ts-ignore
+  kind: SCRAPING_EVENT_KIND;
 }

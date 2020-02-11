@@ -113,7 +113,8 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
     eventRow.payload = this;
     eventRow.timestamp = this.timestamp;
     eventRow.organisationAddress = this.organisationAddress;
-    return eventRow
+    eventRow.kind = this.kind;
+    return eventRow;
   }
 
   toJSON(): any {

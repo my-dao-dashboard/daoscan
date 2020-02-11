@@ -50,26 +50,8 @@ export class MigrationController {
       rawEvents.map(async e => {
         const event = await this.eventFactory.fromStorage(e.id);
         if (event) {
-          switch (event.kind) {
-            case SCRAPING_EVENT_KIND.ADD_DELEGATE:
-              e.organisationAddress = event.organisationAddress;
-              await this.events.save(e);
-              break;
-            case SCRAPING_EVENT_KIND.APP_INSTALLED:
-              e.organisationAddress = event.organisationAddress;
-              await this.events.save(e);
-              break;
-            case SCRAPING_EVENT_KIND.ORGANISATION_CREATED:
-              e.organisationAddress = event.address;
-              await this.events.save(e);
-              break;
-            case SCRAPING_EVENT_KIND.SHARE_TRANSFER:
-              e.organisationAddress = event.organisationAddress;
-              await this.events.save(e);
-              break;
-            default:
-              throw new Error(event);
-          }
+          e.kind = event.kind;
+          await this.events.save(e);
         }
         n = n + 1;
       })
