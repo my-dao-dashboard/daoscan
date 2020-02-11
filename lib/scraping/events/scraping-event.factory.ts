@@ -62,7 +62,9 @@ export class ScrapingEventFactory {
 
   async fromBlock(block: Block): Promise<ScrapingEvent[]> {
     const aragonEvents = await this.aragon.fromBlock(block);
-    const molochEvents = await this.moloch.fromBlock(block);
-    return aragonEvents.concat(molochEvents);
+    // TODO Moloch
+    // const molochEvents = await this.moloch.fromBlock(block);
+    // return aragonEvents.concat(molochEvents);
+    return aragonEvents
   }
 }
