@@ -53,21 +53,26 @@ export class BlockController {
   async range(event: APIGatewayEvent) {
     const raw = event.body;
     if (raw) {
-      const body = JSON.parse(raw);
-      const ids = body.ids as number[];
+      try {
+        const body = JSON.parse(raw);
+        const ids = body.ids as number[];
 
-      const inplace = Boolean(event.queryStringParameters?.inplace);
-      const fanout = !inplace;
-      const events = ids.map(n => this.eventFactory.fromId(n));
-      const commandsPerBlock = await Promise.all(events.map(e => this.addScenario.execute(e, fanout)));
-      const commands = _.flatten(commandsPerBlock);
+        const inplace = Boolean(event.queryStringParameters?.inplace);
+        const fanout = !inplace;
+        const events = ids.map(n => this.eventFactory.fromId(n));
+        const commandsPerBlock = await Promise.all(events.map(e => this.addScenario.execute(e, fanout)));
+        const commands = _.flatten(commandsPerBlock);
 
-      if (inplace) {
-        for (let command of commands) {
-          await command.execute();
+        if (inplace) {
+          for (let command of commands) {
+            await command.execute();
+          }
         }
+        return ok({ commands: commands });
+      } catch (e) {
+        console.error(e)
+        return error(e)
       }
-      return ok({ commands: commands });
     } else {
       error(new BadRequestError(`No payload specified`));
     }
