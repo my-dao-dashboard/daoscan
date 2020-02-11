@@ -3,6 +3,7 @@ import { RepositoryFactory } from "./repository.factory";
 import { Event } from "./event.row";
 import { UUID } from "./uuid";
 import { LessThan } from "typeorm";
+import { ZERO_ADDRESS } from "../shared/zero-address";
 
 @Service(EventRepository.name)
 export class EventRepository {
@@ -35,10 +36,9 @@ export class EventRepository {
 
   async oldOnes() {
     const repository = await this.repositoryFactory.reading(Event);
-    const hinge = new Date(Date.parse("1980-01-01"));
     return repository.find({
       where: {
-        timestamp: LessThan(hinge)
+        organisationAddress: ZERO_ADDRESS
       },
       take: 300
     });

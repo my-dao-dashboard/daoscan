@@ -7,6 +7,8 @@ import { MigrationUpScenario } from "./migration-up.scenario";
 import { EventRepository } from "../storage/event.repository";
 import { ScrapingEventFactory } from "../scraping/events/scraping-event.factory";
 import { BlockFactory } from "../scraping/block.factory";
+import { SCRAPING_EVENT_KIND } from "../scraping/events/scraping-event.kind";
+import { UnreachableCaseError } from "../shared/unreachable-case-error";
 
 @Service(MigrationController.name)
 export class MigrationController {
@@ -46,10 +48,29 @@ export class MigrationController {
     let n = 0;
     await Promise.all(
       rawEvents.map(async e => {
-        const block = await this.blockFactory.fromEthereum(e.blockId);
-        const timestampDate = await block.timestampDate();
-        e.timestamp = timestampDate;
-        await this.events.save(e);
+        const event = await this.eventFactory.fromStorage(e.id);
+        if (event) {
+          switch (event.kind) {
+            case SCRAPING_EVENT_KIND.ADD_DELEGATE:
+              e.organisationAddress = event.organisationAddress;
+              await this.events.save(e);
+              break;
+            case SCRAPING_EVENT_KIND.APP_INSTALLED:
+              e.organisationAddress = event.organisationAddress;
+              await this.events.save(e);
+              break;
+            case SCRAPING_EVENT_KIND.ORGANISATION_CREATED:
+              e.organisationAddress = event.address;
+              await this.events.save(e);
+              break;
+            case SCRAPING_EVENT_KIND.SHARE_TRANSFER:
+              e.organisationAddress = event.organisationAddress;
+              await this.events.save(e);
+              break;
+            default:
+              throw new Error(event);
+          }
+        }
         n = n + 1;
       })
     );
