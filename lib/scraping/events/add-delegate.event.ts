@@ -67,13 +67,7 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
   }
 
   async commit(): Promise<void> {
-    const eventRow = new Event();
-    eventRow.id = new UUID();
-    eventRow.platform = this.platform;
-    eventRow.blockHash = this.blockHash;
-    eventRow.blockId = BigInt(this.blockNumber);
-    eventRow.payload = this;
-    eventRow.timestamp = this.timestamp;
+    const eventRow = this.buildEventRow();
 
     const delegateRow = new Delegate();
     delegateRow.address = this.address;
@@ -91,14 +85,7 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
   }
 
   async revert(): Promise<void> {
-    const eventRow = new Event();
-    eventRow.id = new UUID();
-    eventRow.platform = this.platform;
-    eventRow.blockHash = this.blockHash;
-    eventRow.blockId = BigInt(this.blockNumber);
-    eventRow.payload = this;
-    eventRow.timestamp = this.timestamp;
-
+    const eventRow = this.buildEventRow();
     const found = await this.eventRepository.findSame(eventRow);
     if (found) {
       const rows = await this.delegateRepository.byEventId(found.id);
@@ -115,6 +102,18 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
     } else {
       console.log("Can not find event", this);
     }
+  }
+
+  buildEventRow() {
+    const eventRow = new Event();
+    eventRow.id = new UUID();
+    eventRow.platform = this.platform;
+    eventRow.blockHash = this.blockHash;
+    eventRow.blockId = BigInt(this.blockNumber);
+    eventRow.payload = this;
+    eventRow.timestamp = this.timestamp;
+    eventRow.organisationAddress = this.organisationAddress;
+    return eventRow
   }
 
   toJSON(): any {

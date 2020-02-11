@@ -78,14 +78,7 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
   }
 
   async commit(): Promise<void> {
-    const eventRow = new Event();
-    eventRow.id = new UUID();
-    eventRow.platform = this.platform;
-    eventRow.blockHash = this.blockHash;
-    eventRow.blockId = BigInt(this.blockNumber);
-    eventRow.payload = this;
-    eventRow.timestamp = new Date(this.timestamp * 1000);
-
+    const eventRow = this.buildEventRow();
     const fromRow = await this.fromRow();
     const toRow = await this.toRow();
     const writing = await this.connectionFactory.writing();
@@ -106,13 +99,7 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
   }
 
   async revert(): Promise<void> {
-    const eventRow = new Event();
-    eventRow.id = new UUID();
-    eventRow.platform = this.platform;
-    eventRow.blockHash = this.blockHash;
-    eventRow.blockId = BigInt(this.blockNumber);
-    eventRow.payload = this;
-    eventRow.timestamp = new Date(this.timestamp * 1000);
+    const eventRow = this.buildEventRow();
 
     const found = await this.eventRepository.findSame(eventRow);
     if (found) {
@@ -130,6 +117,18 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
     } else {
       console.log("Can not find event", this);
     }
+  }
+
+  buildEventRow() {
+    const eventRow = new Event();
+    eventRow.id = new UUID();
+    eventRow.platform = this.platform;
+    eventRow.blockHash = this.blockHash;
+    eventRow.blockId = BigInt(this.blockNumber);
+    eventRow.payload = this;
+    eventRow.timestamp = new Date(this.timestamp * 1000);
+    eventRow.organisationAddress = this.organisationAddress;
+    return eventRow;
   }
 
   async toRow() {

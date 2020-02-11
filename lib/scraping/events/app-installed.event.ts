@@ -115,6 +115,7 @@ export class AppInstalledEvent implements IScrapingEvent {
     eventRow.blockId = BigInt(this.blockNumber);
     eventRow.payload = this;
     eventRow.timestamp = new Date(this.timestamp * 1000);
+    eventRow.organisationAddress = this.organisationAddress;
 
     const found = await this.eventRepository.findSame(eventRow);
     return [eventRow, found];

@@ -34,4 +34,8 @@ export class Event {
   @Column()
   // @ts-ignore
   timestamp: Date;
+
+  @Column()
+  // @ts-ignore
+  organisationAddress: string;
 }

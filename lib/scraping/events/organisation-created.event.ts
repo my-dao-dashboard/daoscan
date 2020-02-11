@@ -60,13 +60,7 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
   }
 
   async commit(): Promise<void> {
-    const eventRow = new Event();
-    eventRow.id = new UUID();
-    eventRow.platform = this.platform;
-    eventRow.blockHash = this.blockHash;
-    eventRow.blockId = BigInt(this.blockNumber);
-    eventRow.payload = this;
-    eventRow.timestamp = new Date(this.timestamp * 1000);
+    const eventRow = this.buildEventRow();
 
     const organisationRow = new Organisation();
     organisationRow.id = eventRow.id;
@@ -84,14 +78,7 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
   }
 
   async revert(): Promise<void> {
-    const eventRow = new Event();
-    eventRow.id = new UUID();
-    eventRow.platform = this.platform;
-    eventRow.blockHash = this.blockHash;
-    eventRow.blockId = BigInt(this.blockNumber);
-    eventRow.payload = this;
-    eventRow.timestamp = new Date(this.timestamp * 1000);
-
+    const eventRow = this.buildEventRow();
     const found = await this.eventRepository.findSame(eventRow);
     if (found) {
       const organisationRow = await this.organisationRepository.byId(found.id);
@@ -107,6 +94,18 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
     } else {
       console.log("Can not find event", this);
     }
+  }
+
+  buildEventRow() {
+    const eventRow = new Event();
+    eventRow.id = new UUID();
+    eventRow.platform = this.platform;
+    eventRow.blockHash = this.blockHash;
+    eventRow.blockId = BigInt(this.blockNumber);
+    eventRow.payload = this;
+    eventRow.timestamp = new Date(this.timestamp * 1000);
+    eventRow.organisationAddress = this.address;
+    return eventRow;
   }
 
   toJSON() {
