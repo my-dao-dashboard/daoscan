@@ -134,7 +134,6 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
 
   async toRow() {
     const toRow = new Membership();
-    toRow.id = new UUID();
     toRow.accountAddress = this.to;
     toRow.organisationAddress = this.organisationAddress;
     toRow.balanceDelta = BigInt(this.amount);
@@ -144,7 +143,6 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
 
   async fromRow() {
     const fromRow = new Membership();
-    fromRow.id = new UUID();
     fromRow.accountAddress = this.from;
     fromRow.organisationAddress = this.organisationAddress;
     fromRow.balanceDelta = BigInt(this.amount) * BigInt(-1);

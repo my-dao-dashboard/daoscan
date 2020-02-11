@@ -6,9 +6,9 @@ import { bigintTransformer } from "./bigint.transformer";
 
 @Entity("memberships")
 export class Membership {
-  @PrimaryColumn("varchar", { transformer: uuidTransformer })
+  @PrimaryColumn("bigint", { transformer: bigintTransformer })
   // @ts-ignore
-  id: UUID;
+  id: bigint;
 
   @Column()
   // @ts-ignore
