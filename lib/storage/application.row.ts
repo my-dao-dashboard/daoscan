@@ -11,7 +11,7 @@ export const addressTransformer: ValueTransformer = {
 export class Application {
   @PrimaryColumn("varchar", { transformer: uuidTransformer })
   // @ts-ignore
-  id: UUID;
+  eventId: UUID;
 
   @Column()
   // @ts-ignore

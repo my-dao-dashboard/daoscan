@@ -19,3 +19,4 @@ export * from "./1569249293200-AddOrganisationAddressToEvent";
 export * from "./1569249293300-DropDefaultValueFromEventsOrganisationAddress";
 export * from "./1569249293400-AddKindToEvents";
 export * from "./1569249293500-DropDefaultValueFromEventsKind";
+export * from "./1569249293600-ApplicationIdIsEventId";

@@ -61,6 +61,6 @@ export class ApplicationRepository {
 
   async byId(id: UUID): Promise<Application | undefined> {
     const repository = await this.repositoryFactory.reading(Application);
-    return repository.findOne({ id });
+    return repository.findOne({ eventId: id });
   }
 }

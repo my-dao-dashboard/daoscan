@@ -68,7 +68,7 @@ export class AppInstalledEvent implements IScrapingEvent {
     console.log("Committing event", this.toJSON());
     const [eventRow, found] = await this.findRow();
     const applicationRow = new Application();
-    applicationRow.id = eventRow.id;
+    applicationRow.eventId = eventRow.id;
     applicationRow.address = this.proxyAddress;
     applicationRow.appId = this.appId;
     applicationRow.organisationAddress = this.organisationAddress;
@@ -90,7 +90,7 @@ export class AppInstalledEvent implements IScrapingEvent {
       const writing = await this.connectionFactory.writing();
       if (applicationRow) {
         await writing.transaction(async entityManager => {
-          await entityManager.delete(Application, { id: applicationRow.id });
+          await entityManager.delete(Application, { id: applicationRow.eventId });
           console.log("Deleted application", applicationRow);
           await entityManager.delete(Event, { id: found.id });
           console.log("Deleted event", found);
