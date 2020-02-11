@@ -101,6 +101,12 @@ functions:
       - http:
           path: util/migration/up
           method: post
+  util-events-timestamps:
+    handler: functions/util.timestamps
+    events:
+      - http:
+          path: util/events/timestamps
+          method: post
   querying-graphql:
     handler: functions/querying.graphql
     timeout: 900

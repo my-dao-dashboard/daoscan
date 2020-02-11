@@ -4,6 +4,9 @@ import { ENV, EnvService } from "../services/env.service";
 import { APIGatewayEvent } from "aws-lambda";
 import { ForbiddenError } from "../shared/errors";
 import { MigrationUpScenario } from "./migration-up.scenario";
+import { EventRepository } from "../storage/event.repository";
+import { ScrapingEventFactory } from "../scraping/events/scraping-event.factory";
+import { BlockFactory } from "../scraping/block.factory";
 
 @Service(MigrationController.name)
 export class MigrationController {
@@ -11,7 +14,10 @@ export class MigrationController {
 
   constructor(
     @Inject(MigrationUpScenario.name) private readonly upScenario: MigrationUpScenario,
-    @Inject(EnvService.name) private readonly env: EnvService
+    @Inject(EnvService.name) private readonly env: EnvService,
+    @Inject(EventRepository.name) private readonly events: EventRepository,
+    @Inject(ScrapingEventFactory.name) private readonly eventFactory: ScrapingEventFactory,
+    @Inject(BlockFactory.name) private readonly blockFactory: BlockFactory
   ) {
     this.token = env.readString(ENV.UTIL_SECRET);
   }
@@ -30,6 +36,26 @@ export class MigrationController {
     const migrationNames = await this.upScenario.execute();
     return {
       migrations: migrationNames
+    };
+  }
+
+  @bind()
+  async timestamps(event: APIGatewayEvent): Promise<{ amount: number }> {
+    this.ensureAuthorization(event);
+    const rawEvents = await this.events.oldOnes();
+    let n = 0;
+    await Promise.all(
+      rawEvents.map(async e => {
+        const block = await this.blockFactory.fromEthereum(e.blockId);
+        const timestampDate = await block.timestampDate();
+        e.timestamp = timestampDate;
+        await this.events.save(e);
+        n = n + 1;
+      })
+    );
+
+    return {
+      amount: n
     };
   }
 }

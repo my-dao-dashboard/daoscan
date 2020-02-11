@@ -2,6 +2,7 @@ import { Inject, Service } from "typedi";
 import { RepositoryFactory } from "./repository.factory";
 import { Event } from "./event.row";
 import { UUID } from "./uuid";
+import { LessThan } from "typeorm";
 
 @Service(EventRepository.name)
 export class EventRepository {
@@ -10,6 +11,11 @@ export class EventRepository {
   async byId(id: UUID): Promise<Event | undefined> {
     const repository = await this.repositoryFactory.reading(Event);
     return repository.findOne({ id });
+  }
+
+  async save(event: Event) {
+    const repository = await this.repositoryFactory.writing(Event);
+    return repository.save(event);
   }
 
   async findSame(event: Event): Promise<Event | undefined> {
@@ -25,5 +31,16 @@ export class EventRepository {
   async allForBlock(blockId: bigint, blockHash: string): Promise<Event[]> {
     const repository = await this.repositoryFactory.reading(Event);
     return repository.find({ blockId, blockHash });
+  }
+
+  async oldOnes() {
+    const repository = await this.repositoryFactory.reading(Event);
+    const hinge = new Date(Date.parse("1980-01-01"));
+    return repository.find({
+      where: {
+        timestamp: LessThan(hinge)
+      },
+      take: 300
+    });
   }
 }

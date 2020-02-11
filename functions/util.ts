@@ -5,3 +5,4 @@ import { MigrationController } from "../lib/util/migration.controller";
 const controller = Container.get(MigrationController);
 
 export const upMigration = httpHandler(controller.up);
+export const timestamps = httpHandler(controller.timestamps);
