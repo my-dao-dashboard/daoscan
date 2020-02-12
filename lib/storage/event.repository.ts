@@ -2,8 +2,6 @@ import { Inject, Service } from "typedi";
 import { RepositoryFactory } from "./repository.factory";
 import { Event } from "./event.row";
 import { UUID } from "./uuid";
-import { LessThan } from "typeorm";
-import { ZERO_ADDRESS } from "../shared/zero-address";
 
 @Service(EventRepository.name)
 export class EventRepository {
@@ -34,13 +32,13 @@ export class EventRepository {
     return repository.find({ blockId, blockHash });
   }
 
-  async oldOnes() {
-    const repository = await this.repositoryFactory.reading(Event);
-    return repository.find({
-      where: {
-        kind: "NONE"
-      },
-      take: 300
-    });
+  async oldOnes(limit: number) {
+    const eventRepository = await this.repositoryFactory.reading(Event);
+    return eventRepository
+      .createQueryBuilder("event")
+      .where('event.serialId NOT IN (SELECT "eventId" from history)')
+      .limit(limit)
+      .addOrderBy('"blockId"', "ASC")
+      .getMany();
   }
 }

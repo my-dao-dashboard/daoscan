@@ -7,8 +7,6 @@ import { MigrationUpScenario } from "./migration-up.scenario";
 import { EventRepository } from "../storage/event.repository";
 import { ScrapingEventFactory } from "../scraping/events/scraping-event.factory";
 import { BlockFactory } from "../scraping/block.factory";
-import { SCRAPING_EVENT_KIND } from "../scraping/events/scraping-event.kind";
-import { UnreachableCaseError } from "../shared/unreachable-case-error";
 
 @Service(MigrationController.name)
 export class MigrationController {
@@ -44,18 +42,17 @@ export class MigrationController {
   @bind()
   async timestamps(event: APIGatewayEvent): Promise<{ amount: number }> {
     this.ensureAuthorization(event);
-    const rawEvents = await this.events.oldOnes();
+    const limit = Number(event.queryStringParameters?.limit) || 100;
+    const rawEvents = await this.events.oldOnes(limit);
     let n = 0;
-    await Promise.all(
-      rawEvents.map(async e => {
-        const event = await this.eventFactory.fromStorage(e.id);
-        if (event) {
-          e.kind = event.kind;
-          await this.events.save(e);
+    for (let e of rawEvents) {
+      const dsEvent = await this.eventFactory.fromStorage(e.id);
+        if (dsEvent) {
+          await dsEvent.revert();
+          await dsEvent.commit();
+          n = n + 1;
         }
-        n = n + 1;
-      })
-    );
+    }
 
     return {
       amount: n
