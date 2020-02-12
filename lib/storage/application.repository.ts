@@ -3,6 +3,7 @@ import { RepositoryFactory } from "./repository.factory";
 import { Application } from "./application.row";
 import { UUID } from "./uuid";
 import { APP_ID } from "./app-id";
+import { In } from "typeorm";
 
 @Service(ApplicationRepository.name)
 export class ApplicationRepository {
@@ -59,8 +60,16 @@ export class ApplicationRepository {
     return repository.findOne({ address });
   }
 
-  async byId(id: UUID): Promise<Application | undefined> {
-    const repository = await this.repositoryFactory.reading(Application);
-    return repository.findOne({ eventId: id });
+  async allByIds(ids: bigint[]) {
+    if (ids.length > 0) {
+      const repository = await this.repositoryFactory.reading(Application);
+      return repository.find({
+        where: {
+          id: In(ids.map(id => id.toString()))
+        }
+      });
+    } else {
+      return [];
+    }
   }
 }

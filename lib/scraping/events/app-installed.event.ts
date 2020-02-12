@@ -72,7 +72,6 @@ export class AppInstalledEvent implements IScrapingEvent {
     console.log("Committing event", this.toJSON());
     const [eventRow, found] = await this.findRow();
     const applicationRow = new Application();
-    applicationRow.eventId = eventRow.id;
     applicationRow.address = this.proxyAddress;
     applicationRow.appId = this.appId;
     applicationRow.organisationAddress = this.organisationAddress;
@@ -97,33 +96,17 @@ export class AppInstalledEvent implements IScrapingEvent {
     console.log("AppInstalledEvent.revert", this.toJSON());
     const [eventRow, found] = await this.findRow();
     if (found) {
-      const applicationRow = await this.applicationRepository.byId(found.id);
       const historyRows = await this.historyRepository.byEventId(found.serialId);
+      const resourceIds = historyRows.map(h => h.resourceId.toString());
       const writing = await this.connectionFactory.writing();
-      if (applicationRow) {
-        await writing.transaction(async entityManager => {
-          await entityManager.delete(Application, applicationRow);
-          console.log("Deleted application", applicationRow);
-          await entityManager.delete(Event, found);
-          console.log("Deleted event", found);
-          if (historyRows.length > 0) {
-            const historyIds = historyRows.map(h => h.id.toString());
-            const deleteResult = await entityManager.delete(History, historyIds);
-            console.log(`Deleted ${deleteResult.affected} history entries`);
-          }
-        });
-      } else {
-        console.log("Can not find application", this.toJSON());
-        await writing.transaction(async entityManager => {
-          await entityManager.delete(Event, found);
-          console.log("Deleted event", found);
-          if (historyRows.length > 0) {
-            const historyIds = historyRows.map(h => h.id.toString());
-            const deleteResult = await entityManager.delete(History, historyIds);
-            console.log(`Deleted ${deleteResult.affected} history entries`);
-          }
-        });
-      }
+      await writing.transaction(async entityManager => {
+        await entityManager.delete(Application, resourceIds);
+        console.log("Deleted applications", resourceIds);
+        await entityManager.delete(History, { eventId: found.serialId.toString() });
+        console.log("Deleted history entries", found.serialId);
+        await entityManager.delete(Event, found);
+        console.log("Deleted event", found);
+      });
     } else {
       console.log("Can not find event", this);
     }

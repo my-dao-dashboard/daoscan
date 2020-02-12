@@ -27,3 +27,4 @@ export * from "./1569249294000-AddIdToMemberships";
 export * from "./1569249294100-AddIdToOrganisations";
 export * from "./1569249294200-AddIdToApplications";
 export * from "./1569249294300-AddHistory";
+export * from "./1569249294400-DropEventIdFromApplications";
