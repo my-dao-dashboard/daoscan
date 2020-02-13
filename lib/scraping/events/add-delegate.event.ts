@@ -77,7 +77,6 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
     delegateRow.address = this.address;
     delegateRow.delegateFor = this.delegateFor;
     delegateRow.organisationAddress = this.organisationAddress;
-    delegateRow.eventId = eventRow.id;
 
     const historyRow = new History();
     historyRow.resourceKind = RESOURCE_KIND.DELEGATE;
@@ -99,16 +98,14 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
     const eventRow = this.buildEventRow();
     const foundEvent = await this.eventRepository.findSame(eventRow);
     if (foundEvent) {
-      const rows = await this.delegateRepository.byEventId(foundEvent.id);
       const historyRows = await this.historyRepository.allByEventId(foundEvent.serialId, RESOURCE_KIND.DELEGATE);
+      const resourceIds = historyRows.map(h => h.resourceId.toString());
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {
-        await Promise.all(
-          rows.map(async row => {
-            console.log("Deleting delegate", row);
-            await entityManager.delete(Delegate, { id: row.eventId });
-          })
-        );
+        if (resourceIds.length > 0) {
+          await entityManager.delete(Delegate, resourceIds);
+          console.log("Deleting delegates", resourceIds);
+        }
         await entityManager.delete(Event, foundEvent);
         console.log("Deleted event", foundEvent);
         if (historyRows.length > 0) {
