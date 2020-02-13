@@ -2,7 +2,6 @@ import { IScrapingEvent } from "./scraping-event.interface";
 import { SCRAPING_EVENT_KIND } from "./scraping-event.kind";
 import { PLATFORM } from "../../domain/platform";
 import { Event } from "../../storage/event.row";
-import { UUID } from "../../storage/uuid";
 import { ConnectionFactory } from "../../storage/connection.factory";
 import { Delegate } from "../../storage/delegate.row";
 import { EventRepository } from "../../storage/event.repository";
@@ -121,7 +120,6 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
 
   buildEventRow() {
     const eventRow = new Event();
-    eventRow.id = new UUID();
     eventRow.platform = this.platform;
     eventRow.blockHash = this.blockHash;
     eventRow.blockId = BigInt(this.blockNumber);

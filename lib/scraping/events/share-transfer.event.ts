@@ -4,7 +4,6 @@ import { PLATFORM } from "../../domain/platform";
 import { Event } from "../../storage/event.row";
 import { EventRepository } from "../../storage/event.repository";
 import { Membership } from "../../storage/membership.row";
-import { UUID } from "../../storage/uuid";
 import { MEMBERSHIP_KIND } from "../../storage/membership.kind";
 import { MembershipRepository } from "../../storage/membership.repository";
 import { ConnectionFactory } from "../../storage/connection.factory";
@@ -137,7 +136,6 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
 
   buildEventRow() {
     const eventRow = new Event();
-    eventRow.id = new UUID();
     eventRow.platform = this.platform;
     eventRow.blockHash = this.blockHash;
     eventRow.blockId = BigInt(this.blockNumber);

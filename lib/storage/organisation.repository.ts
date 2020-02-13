@@ -1,7 +1,6 @@
 import { Inject, Service } from "typedi";
 import { RepositoryFactory } from "./repository.factory";
 import { Organisation } from "./organisation.row";
-import { UUID } from "./uuid";
 import { PLATFORM } from "../domain/platform";
 
 @Service(OrganisationRepository.name)

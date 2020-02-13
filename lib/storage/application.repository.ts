@@ -1,7 +1,6 @@
 import { Inject, Service } from "typedi";
 import { RepositoryFactory } from "./repository.factory";
 import { Application } from "./application.row";
-import { UUID } from "./uuid";
 import { APP_ID } from "./app-id";
 import { In } from "typeorm";
 

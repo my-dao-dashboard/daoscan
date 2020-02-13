@@ -2,7 +2,6 @@ import { SCRAPING_EVENT_KIND } from "./scraping-event.kind";
 import { PLATFORM } from "../../domain/platform";
 import { IScrapingEvent } from "./scraping-event.interface";
 import { Event } from "../../storage/event.row";
-import { UUID } from "../../storage/uuid";
 import { EventRepository } from "../../storage/event.repository";
 import { Application } from "../../storage/application.row";
 import { ConnectionFactory } from "../../storage/connection.factory";
@@ -114,7 +113,6 @@ export class AppInstalledEvent implements IScrapingEvent {
 
   async findRow(): Promise<[Event, Event | undefined]> {
     const eventRow = new Event();
-    eventRow.id = new UUID();
     eventRow.platform = this.platform;
     eventRow.blockHash = this.blockHash;
     eventRow.blockId = BigInt(this.blockNumber);

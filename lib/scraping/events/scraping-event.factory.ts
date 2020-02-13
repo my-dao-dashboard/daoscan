@@ -5,7 +5,6 @@ import { AragonEventFactory } from "../aragon/aragon-event.factory";
 import { SCRAPING_EVENT_KIND } from "./scraping-event.kind";
 import { UnreachableCaseError } from "../../shared/unreachable-case-error";
 import { EventRepository } from "../../storage/event.repository";
-import { UUID } from "../../storage/uuid";
 import { Moloch1EventFactory } from "../moloch-1/moloch-1-event.factory";
 import { AppInstalledEvent } from "./app-installed.event";
 import { ApplicationRepository } from "../../storage/application.repository";
@@ -32,7 +31,7 @@ export class ScrapingEventFactory {
     @Inject(HistoryRepository.name) private readonly historyRepository: HistoryRepository
   ) {}
 
-  async fromStorage(eventId: UUID): Promise<ScrapingEvent | undefined> {
+  async fromStorage(eventId: bigint): Promise<ScrapingEvent | undefined> {
     const row = await this.eventRepository.byId(eventId);
     if (row) {
       const payload = row.payload;
