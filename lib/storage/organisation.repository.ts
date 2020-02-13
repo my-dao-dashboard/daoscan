@@ -39,8 +39,8 @@ export class OrganisationRepository {
     return repository.find({ platform });
   }
 
-  async byId(id: UUID): Promise<Organisation | undefined> {
+  async byId(id: bigint) {
     const repository = await this.repositoryFactory.reading(Organisation);
-    return repository.findOne({ eventId: id });
+    return repository.findOne({ id: id });
   }
 }

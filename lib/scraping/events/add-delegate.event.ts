@@ -100,7 +100,7 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
     const foundEvent = await this.eventRepository.findSame(eventRow);
     if (foundEvent) {
       const rows = await this.delegateRepository.byEventId(foundEvent.id);
-      const historyRows = await this.historyRepository.byEventId(foundEvent.serialId);
+      const historyRows = await this.historyRepository.allByEventId(foundEvent.serialId, RESOURCE_KIND.DELEGATE);
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {
         await Promise.all(

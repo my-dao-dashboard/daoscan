@@ -96,7 +96,7 @@ export class AppInstalledEvent implements IScrapingEvent {
     console.log("AppInstalledEvent.revert", this.toJSON());
     const [eventRow, found] = await this.findRow();
     if (found) {
-      const historyRows = await this.historyRepository.byEventId(found.serialId);
+      const historyRows = await this.historyRepository.allByEventId(found.serialId, RESOURCE_KIND.APPLICATION);
       const resourceIds = historyRows.map(h => h.resourceId.toString());
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {

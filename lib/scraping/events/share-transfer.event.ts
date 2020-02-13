@@ -120,7 +120,7 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
     const found = await this.eventRepository.findSame(eventRow);
     if (found) {
       const rows = await this.membershipRepository.byEventId(found.id);
-      const historyRows = await this.historyRepository.byEventId(found.serialId);
+      const historyRows = await this.historyRepository.allByEventId(found.serialId, RESOURCE_KIND.MEMBERSHIP);
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {
         await Promise.all(

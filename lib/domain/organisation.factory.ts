@@ -1,5 +1,4 @@
 import { Inject, Service } from "typedi";
-import { SCRAPING_EVENT_KIND } from "../scraping/events/scraping-event.kind";
 import { Organisation } from "./organisation";
 import { EthereumService } from "../services/ethereum.service";
 import { OrganisationRepository } from "../storage/organisation.repository";
@@ -15,13 +14,11 @@ export class OrganisationFactory {
     @Inject(OrganisationService.name) private readonly organisationService: OrganisationService
   ) {}
 
-  async byAddress(address: string) {
+  async byAddress(address: string): Promise<Organisation | undefined> {
     const organisationAddress = await this.ethereum.canonicalAddress(address);
     if (!organisationAddress) return undefined;
     const organisationRow = await this.organisationRepository.byAddress(organisationAddress);
     if (!organisationRow) return undefined;
-    const event = await this.scrapingEventFactory.fromStorage(organisationRow.eventId);
-    if (!event || event.kind !== SCRAPING_EVENT_KIND.ORGANISATION_CREATED) return undefined;
-    return new Organisation(organisationRow, event, this.organisationService);
+    return new Organisation(organisationRow, this.organisationService);
   }
 }

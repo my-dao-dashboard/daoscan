@@ -67,7 +67,6 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
     const eventRow = this.buildEventRow();
 
     const organisationRow = new Organisation();
-    organisationRow.eventId = eventRow.id;
     organisationRow.name = this.name;
     organisationRow.platform = this.platform;
     organisationRow.address = this.address;
@@ -93,21 +92,21 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
     const eventRow = this.buildEventRow();
     const found = await this.eventRepository.findSame(eventRow);
     if (found) {
-      const organisationRow = await this.organisationRepository.byId(found.id);
-      const historyRows = await this.historyRepository.byEventId(found.serialId);
+      const historyRows = await this.historyRepository.allByEventId(found.serialId, RESOURCE_KIND.ORGANISATION);
+      const organisationIds = historyRows.map(h => h.resourceId.toString());
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {
-        if (organisationRow) {
-          await entityManager.delete(Organisation, organisationRow);
-          console.log("Deleted organisation", organisationRow);
+        await entityManager.delete(Event, found);
+        console.log("Deleted event", found);
+        if (organisationIds.length > 0) {
+          await entityManager.delete(Organisation, organisationIds);
+          console.log("Deleted organisation", organisationIds);
         }
         if (historyRows.length > 0) {
           const historyIds = historyRows.map(h => h.id.toString());
           const deleteResult = await entityManager.delete(History, historyIds);
           console.log(`Deleted ${String(deleteResult.affected)} history entries`);
         }
-        await entityManager.delete(Event, found);
-        console.log("Deleted event", found);
       });
     } else {
       console.log("Can not find event", this);
