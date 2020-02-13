@@ -94,7 +94,6 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
       const savedEvent = await entityManager.save(eventRow);
       console.log("Saved event", savedEvent);
       if (fromRow.accountAddress !== ZERO_ADDRESS) {
-        fromRow.eventId = savedEvent.id;
         const savedFromRow = await entityManager.save(fromRow);
         console.log("Saved from", savedFromRow);
         fromHistory.resourceId = savedFromRow.id;
@@ -103,7 +102,6 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
         console.log("Saved history entry", savedFromHistory);
       }
       if (toRow.accountAddress !== ZERO_ADDRESS) {
-        toRow.eventId = savedEvent.id;
         const savedToRow = await entityManager.save(toRow);
         console.log("Saved to", savedToRow);
         toHistory.resourceId = toRow.id;
@@ -119,17 +117,13 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
 
     const found = await this.eventRepository.findSame(eventRow);
     if (found) {
-      const rows = await this.membershipRepository.byEventId(found.id);
       const historyRows = await this.historyRepository.allByEventId(found.serialId, RESOURCE_KIND.MEMBERSHIP);
+      const resourceIds = historyRows.map(h => h.resourceId.toString());
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {
-        await Promise.all(
-          rows.map(async row => {
-            console.log("Deleting membership", row);
-            await entityManager.delete(Membership, { id: row.id });
-          })
-        );
-        await entityManager.delete(Event, { id: found.id });
+        await entityManager.delete(Membership, resourceIds);
+        console.log("Deleted memberships", resourceIds);
+        await entityManager.delete(Event, found);
         if (historyRows.length > 0) {
           const historyIds = historyRows.map(h => h.id.toString());
           const deleteResult = await entityManager.delete(History, historyIds);

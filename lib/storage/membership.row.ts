@@ -1,6 +1,4 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
-import { UUID } from "./uuid";
-import { uuidTransformer } from "./event.row";
 import { MEMBERSHIP_KIND } from "./membership.kind";
 import { bigintTransformer } from "./bigint.transformer";
 
@@ -17,10 +15,6 @@ export class Membership {
   @Column()
   // @ts-ignore
   accountAddress: string; // member address
-
-  @Column("varchar", { transformer: uuidTransformer })
-  // @ts-ignore
-  eventId: UUID; // member address
 
   @Column("numeric", { transformer: bigintTransformer })
   // @ts-ignore
