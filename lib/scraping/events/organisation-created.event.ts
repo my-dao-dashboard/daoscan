@@ -79,7 +79,7 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
       console.log("Saved organisation", savedOrganisation);
       const savedEvent = await entityManager.save(eventRow);
       console.log("Saved event", savedEvent);
-      historyRow.eventId = savedEvent.serialId;
+      historyRow.eventId = savedEvent.id;
       historyRow.resourceId = savedOrganisation.id;
       console.log("historyRow", historyRow);
       const savedHistory = await entityManager.save(historyRow);
@@ -91,7 +91,7 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
     const eventRow = this.buildEventRow();
     const found = await this.eventRepository.findSame(eventRow);
     if (found) {
-      const historyRows = await this.historyRepository.allByEventId(found.serialId, RESOURCE_KIND.ORGANISATION);
+      const historyRows = await this.historyRepository.allByEventId(found.id, RESOURCE_KIND.ORGANISATION);
       const organisationIds = historyRows.map(h => h.resourceId.toString());
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {

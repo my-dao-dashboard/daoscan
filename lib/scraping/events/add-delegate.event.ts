@@ -86,7 +86,7 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
       console.log("Saved event", savedEvent);
       const savedDelegate = await entityManager.save(delegateRow);
       console.log("Saved delegate", savedDelegate);
-      historyRow.eventId = savedEvent.serialId;
+      historyRow.eventId = savedEvent.id;
       historyRow.resourceId = savedDelegate.id;
       const savedHistory = await entityManager.save(historyRow);
       console.log("Saved history", savedHistory);
@@ -97,7 +97,7 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
     const eventRow = this.buildEventRow();
     const foundEvent = await this.eventRepository.findSame(eventRow);
     if (foundEvent) {
-      const historyRows = await this.historyRepository.allByEventId(foundEvent.serialId, RESOURCE_KIND.DELEGATE);
+      const historyRows = await this.historyRepository.allByEventId(foundEvent.id, RESOURCE_KIND.DELEGATE);
       const resourceIds = historyRows.map(h => h.resourceId.toString());
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {

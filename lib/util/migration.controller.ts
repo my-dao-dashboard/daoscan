@@ -46,7 +46,7 @@ export class MigrationController {
     const rawEvents = await this.events.oldOnes(limit);
     let n = 0;
     for (let e of rawEvents) {
-      const dsEvent = await this.eventFactory.fromStorage(e.serialId);
+      const dsEvent = await this.eventFactory.fromStorage(e.id);
       if (dsEvent) {
         await dsEvent.revert();
         await dsEvent.commit();

@@ -84,7 +84,7 @@ export class AppInstalledEvent implements IScrapingEvent {
       console.log("Saved application", savedApplication);
       const savedEvent = await entityManager.save(eventRow);
       console.log("Saved event", savedEvent);
-      historyRow.eventId = savedEvent.serialId;
+      historyRow.eventId = savedEvent.id;
       historyRow.resourceId = savedApplication.id;
       const savedHistory = await entityManager.save(historyRow);
       console.log("Saved history", savedHistory);
@@ -95,14 +95,14 @@ export class AppInstalledEvent implements IScrapingEvent {
     console.log("AppInstalledEvent.revert", this.toJSON());
     const [eventRow, found] = await this.findRow();
     if (found) {
-      const historyRows = await this.historyRepository.allByEventId(found.serialId, RESOURCE_KIND.APPLICATION);
+      const historyRows = await this.historyRepository.allByEventId(found.id, RESOURCE_KIND.APPLICATION);
       const resourceIds = historyRows.map(h => h.resourceId.toString());
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {
         await entityManager.delete(Application, resourceIds);
         console.log("Deleted applications", resourceIds);
-        await entityManager.delete(History, { eventId: found.serialId.toString() });
-        console.log("Deleted history entries", found.serialId);
+        await entityManager.delete(History, { eventId: found.id.toString() });
+        console.log("Deleted history entries", found.id);
         await entityManager.delete(Event, found);
         console.log("Deleted event", found);
       });

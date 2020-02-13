@@ -8,7 +8,7 @@ export class EventRepository {
 
   async byId(id: bigint): Promise<Event | undefined> {
     const repository = await this.repositoryFactory.reading(Event);
-    return repository.findOne({ serialId: id });
+    return repository.findOne({ id: id });
   }
 
   async save(event: Event) {
@@ -35,7 +35,7 @@ export class EventRepository {
     const eventRepository = await this.repositoryFactory.reading(Event);
     return eventRepository
       .createQueryBuilder("event")
-      .where('event.serialId NOT IN (SELECT "eventId" from history)')
+      .where('event.id NOT IN (SELECT "eventId" from history)')
       .limit(limit)
       .addOrderBy('"blockId"', "ASC")
       .getMany();

@@ -96,7 +96,7 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
         const savedFromRow = await entityManager.save(fromRow);
         console.log("Saved from", savedFromRow);
         fromHistory.resourceId = savedFromRow.id;
-        fromHistory.eventId = savedEvent.serialId;
+        fromHistory.eventId = savedEvent.id;
         const savedFromHistory = await entityManager.save(fromHistory);
         console.log("Saved history entry", savedFromHistory);
       }
@@ -104,7 +104,7 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
         const savedToRow = await entityManager.save(toRow);
         console.log("Saved to", savedToRow);
         toHistory.resourceId = toRow.id;
-        toHistory.eventId = savedEvent.serialId;
+        toHistory.eventId = savedEvent.id;
         const savedToHistory = await entityManager.save(toHistory);
         console.log("Saved history entry", savedToHistory);
       }
@@ -116,7 +116,7 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
 
     const found = await this.eventRepository.findSame(eventRow);
     if (found) {
-      const historyRows = await this.historyRepository.allByEventId(found.serialId, RESOURCE_KIND.MEMBERSHIP);
+      const historyRows = await this.historyRepository.allByEventId(found.id, RESOURCE_KIND.MEMBERSHIP);
       const resourceIds = historyRows.map(h => h.resourceId.toString());
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {

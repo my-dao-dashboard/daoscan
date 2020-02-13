@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryColumn, ValueTransformer } from "typeorm";
+import { Column, Entity, PrimaryColumn } from "typeorm";
 import { PLATFORM } from "../domain/platform";
 import { ScrapingEvent } from "../scraping/events/scraping-event";
 import { bigintTransformer } from "./bigint.transformer";
@@ -8,7 +8,7 @@ import { SCRAPING_EVENT_KIND } from "../scraping/events/scraping-event.kind";
 export class Event {
   @PrimaryColumn("bigint", { transformer: bigintTransformer, generated: true })
   // @ts-ignore
-  serialId: bigint;
+  id: bigint;
 
   @Column("bigint", { transformer: bigintTransformer })
   // @ts-ignore

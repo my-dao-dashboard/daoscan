@@ -43,7 +43,7 @@ export class CommandFactory {
   async revertBlock(block: Block): Promise<RevertCommand[]> {
     const rows = await this.eventRepository.allForBlock(block.id, block.hash);
     return rows.map<RevertCommand>(row => {
-      const eventId = row.serialId.toString();
+      const eventId = row.id.toString();
       return new RevertCommand(eventId, this.eventFactory);
     });
   }
