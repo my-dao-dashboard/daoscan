@@ -24,10 +24,12 @@ const applicationRepository = Container.get(ApplicationRepository);
 async function main() {
   const organisations = await organisationRepository.all(PLATFORM.ARAGON);
   const addresses = organisations.map(org => org.address.toLowerCase());
+  console.log("Got organisations", addresses.length);
   for (let index = 0; index < addresses.length; index++) {
     const address = addresses[index];
     const shareTokenAddress = await applicationRepository.tokenAddress(address);
     if (shareTokenAddress && shareTokenAddress !== "0x0000000000000000000000000000000000000000") {
+      console.log("Got share token", shareTokenAddress);
       const shareToken = new web3.eth.Contract(ERC20_TOKEN_ABI as AbiItem[], shareTokenAddress);
       const events = await shareToken.getPastEvents("allEvents", {
         fromBlock: 0,
@@ -35,6 +37,7 @@ async function main() {
         topics: ["0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"]
       });
       const blockNumbers = _.uniq(events.map(event => Number(event.blockNumber)));
+      console.log("Posting block numbers", blockNumbers);
       await Promise.all(
         blockNumbers.map(async n => {
           const response = await axios.post("https://api.daoscan.net/block", {
@@ -43,7 +46,7 @@ async function main() {
           console.log(JSON.stringify(response.data, null, 4));
         })
       );
-      await sleep(1000);
+      await sleep(100);
     }
     console.log(`Done with ${address}: ${index}/${addresses.length}`);
   }
