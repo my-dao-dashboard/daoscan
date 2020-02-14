@@ -24,7 +24,7 @@ async function grabBlocks(address: string) {
   return blockNumbers;
 }
 
-async function parseOrg(address: string) {
+export async function parseOrg(address: string) {
   const blockNumbers = await grabBlocks(address);
   await Promise.all(
     blockNumbers.map(async n => {
@@ -52,11 +52,11 @@ async function main() {
   }
 }
 
-main()
-  .then(() => {
-    // Do Nothing
-  })
-  .catch(error => {
-    console.error(error);
-    process.exit(1);
-  });
+// main()
+//   .then(() => {
+//     // Do Nothing
+//   })
+//   .catch(error => {
+//     console.error(error);
+//     process.exit(1);
+//   });

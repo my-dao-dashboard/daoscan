@@ -13,6 +13,7 @@ import { EventRepository } from "../../storage/event.repository";
 import { MembershipRepository } from "../../storage/membership.repository";
 import { ConnectionFactory } from "../../storage/connection.factory";
 import { APP_ID } from "../../storage/app-id";
+import { HistoryRepository } from "../../storage/history.repository";
 
 export interface TransferParams {
   _from: string;
@@ -36,7 +37,8 @@ export class AragonShareTransferEventFactory {
     @Inject(ApplicationRepository.name) private readonly applicationRepository: ApplicationRepository,
     @Inject(EventRepository.name) private readonly eventRepository: EventRepository,
     @Inject(MembershipRepository.name) private readonly membershipRepository: MembershipRepository,
-    @Inject(ConnectionFactory.name) private readonly connectionFactory: ConnectionFactory
+    @Inject(ConnectionFactory.name) private readonly connectionFactory: ConnectionFactory,
+    @Inject(HistoryRepository.name) private readonly historyRepository: HistoryRepository
   ) {}
 
   async fromBlock(block: Block, appInstalled: AppInstalledEvent[]): Promise<ShareTransferEvent[]> {
@@ -84,6 +86,12 @@ export class AragonShareTransferEventFactory {
   }
 
   fromJSON(json: ShareTransferEventProps): ShareTransferEvent {
-    return new ShareTransferEvent(json, this.eventRepository, this.membershipRepository, this.connectionFactory);
+    return new ShareTransferEvent(
+      json,
+      this.eventRepository,
+      this.membershipRepository,
+      this.connectionFactory,
+      this.historyRepository
+    );
   }
 }

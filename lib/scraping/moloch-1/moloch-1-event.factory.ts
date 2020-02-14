@@ -19,6 +19,7 @@ import { MembershipRepository } from "../../storage/membership.repository";
 import { AddDelegateEvent, AddDelegateEventProps } from "../events/add-delegate.event";
 import { DelegateRepository } from "../../storage/delegate.repository";
 import { MOLOCH_NAMES } from "./moloch-names";
+import { HistoryRepository } from "../../storage/history.repository";
 
 async function organisationName(address: string): Promise<string> {
   const found = MOLOCH_NAMES.get(address);
@@ -38,7 +39,8 @@ export class Moloch1EventFactory {
     @Inject(OrganisationRepository.name) private readonly organisationRepository: OrganisationRepository,
     @Inject(ApplicationRepository.name) private readonly applicationRepository: ApplicationRepository,
     @Inject(MembershipRepository.name) private readonly membershipRepository: MembershipRepository,
-    @Inject(DelegateRepository.name) private readonly delegateRepository: DelegateRepository
+    @Inject(DelegateRepository.name) private readonly delegateRepository: DelegateRepository,
+    @Inject(HistoryRepository.name) private readonly historyRepository: HistoryRepository
   ) {}
 
   async fromBlock(block: Block): Promise<ScrapingEvent[]> {
@@ -69,7 +71,7 @@ export class Moloch1EventFactory {
         logIndex: e.logIndex,
         timestamp: timestamp
       };
-      return new AddDelegateEvent(props, this.connectionFactory, this.eventRepository);
+      return new AddDelegateEvent(props, this.connectionFactory, this.eventRepository, this.historyRepository);
     });
   }
 
@@ -90,7 +92,13 @@ export class Moloch1EventFactory {
         amount: "1",
         timestamp: timestamp
       };
-      return new ShareTransferEvent(props, this.eventRepository, this.membershipRepository, this.connectionFactory);
+      return new ShareTransferEvent(
+        props,
+        this.eventRepository,
+        this.membershipRepository,
+        this.connectionFactory,
+        this.historyRepository
+      );
     });
   }
 
@@ -114,7 +122,13 @@ export class Moloch1EventFactory {
         blockHash: event.blockHash,
         timestamp: event.timestamp
       };
-      return new AppInstalledEvent(props, this.eventRepository, this.applicationRepository, this.connectionFactory);
+      return new AppInstalledEvent(
+        props,
+        this.eventRepository,
+        this.applicationRepository,
+        this.historyRepository,
+        this.connectionFactory
+      );
     });
     return Promise.all(banksPromised);
   }
@@ -131,7 +145,13 @@ export class Moloch1EventFactory {
         blockHash: event.blockHash,
         timestamp: event.timestamp
       };
-      return new AppInstalledEvent(props, this.eventRepository, this.applicationRepository, this.connectionFactory);
+      return new AppInstalledEvent(
+        props,
+        this.eventRepository,
+        this.applicationRepository,
+        this.historyRepository,
+        this.connectionFactory
+      );
     });
   }
 
@@ -154,6 +174,7 @@ export class Moloch1EventFactory {
         props,
         this.eventRepository,
         this.organisationRepository,
+        this.historyRepository,
         this.connectionFactory
       );
     });

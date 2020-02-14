@@ -9,6 +9,9 @@ import { MembershipRepository } from "../../storage/membership.repository";
 import { ConnectionFactory } from "../../storage/connection.factory";
 import { ZERO_ADDRESS } from "../../shared/zero-address";
 import { RESOURCE_KIND } from "../../storage/resource.kind";
+import { HistoryRepository } from "../../storage/history.repository";
+import { History } from "../../storage/history.row";
+import { EntityManager } from "typeorm";
 
 export interface ShareTransferEventProps {
   platform: PLATFORM;
@@ -30,7 +33,8 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
     private readonly props: ShareTransferEventProps,
     private readonly eventRepository: EventRepository,
     private readonly membershipRepository: MembershipRepository,
-    private readonly connectionFactory: ConnectionFactory
+    private readonly connectionFactory: ConnectionFactory,
+    private readonly historyRepository: HistoryRepository
   ) {}
 
   get platform() {
@@ -89,13 +93,24 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
         fromRow.eventId = savedEvent.id;
         const savedFromRow = await entityManager.save(fromRow);
         console.log("Saved from", savedFromRow);
+        await this.saveHistory(entityManager, savedEvent, savedFromRow);
       }
       if (toRow.accountAddress !== ZERO_ADDRESS) {
         toRow.eventId = savedEvent.id;
         const savedToRow = await entityManager.save(toRow);
         console.log("Saved to", savedToRow);
+        await this.saveHistory(entityManager, savedEvent, savedToRow);
       }
     });
+  }
+
+  async saveHistory(em: EntityManager, event: Event, row: Membership) {
+    const history = new History();
+    history.resourceKind = RESOURCE_KIND.MEMBERSHIP;
+    history.resourceId = row.id;
+    history.eventId = event.id;
+    const saved = await em.save(History, history);
+    console.log("Saved history", saved);
   }
 
   async revert(): Promise<void> {
@@ -107,8 +122,14 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
       await writing.transaction(async entityManager => {
         await entityManager.delete(Event, found);
         console.log("Deleted event", found);
-        const deleteResult = await entityManager.delete(Membership, { eventId: found.id });
-        console.log("Deleted  memberships", deleteResult);
+        const historyRows = await this.historyRepository.allByEventIdAndKind(found.id, RESOURCE_KIND.MEMBERSHIP);
+        const resourceIds = historyRows.map(h => h.resourceId.toString());
+        if (resourceIds.length > 0) {
+          const deleteMemberships = await entityManager.delete(Membership, resourceIds);
+          console.log("Deleted  memberships", deleteMemberships);
+        }
+        const deleteHistories = await entityManager.delete(History, { eventId: found.id });
+        console.log(`Removed ${deleteHistories.affected} histories`);
       });
     } else {
       console.log("Can not find event", this);

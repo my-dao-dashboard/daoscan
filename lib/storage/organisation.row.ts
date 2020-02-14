@@ -8,10 +8,6 @@ export class Organisation {
   // @ts-ignore
   id: bigint;
 
-  @Column("bigint", { transformer: bigintTransformer })
-  // @ts-ignore
-  eventId: bigint;
-
   @Column()
   // @ts-ignore
   name: string;

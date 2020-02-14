@@ -5,8 +5,9 @@ import { Event } from "../../storage/event.row";
 import { ConnectionFactory } from "../../storage/connection.factory";
 import { Delegate } from "../../storage/delegate.row";
 import { EventRepository } from "../../storage/event.repository";
-import { DelegateRepository } from "../../storage/delegate.repository";
 import { RESOURCE_KIND } from "../../storage/resource.kind";
+import { HistoryRepository } from "../../storage/history.repository";
+import { History } from "../../storage/history.row";
 
 export interface AddDelegateEventProps {
   platform: PLATFORM;
@@ -26,7 +27,8 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
   constructor(
     private readonly props: AddDelegateEventProps,
     private readonly connectionFactory: ConnectionFactory,
-    private readonly eventRepository: EventRepository
+    private readonly eventRepository: EventRepository,
+    private readonly historyRepository: HistoryRepository
   ) {}
 
   get logIndex() {
@@ -73,13 +75,19 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
     delegateRow.delegateFor = this.delegateFor;
     delegateRow.organisationAddress = this.organisationAddress;
 
+    const historyRow = new History();
+    historyRow.resourceKind = RESOURCE_KIND.DELEGATE;
+
     const writing = await this.connectionFactory.writing();
     await writing.transaction(async entityManager => {
       const savedEvent = await entityManager.save(eventRow);
       console.log("Saved event", savedEvent);
-      delegateRow.eventId = savedEvent.id;
       const savedDelegate = await entityManager.save(delegateRow);
       console.log("Saved delegate", savedDelegate);
+      historyRow.resourceId = savedDelegate.id;
+      historyRow.eventId = eventRow.id;
+      const savedHistoryRow = await entityManager.save(History, historyRow);
+      console.log("Saved history", savedHistoryRow);
     });
   }
 
@@ -91,7 +99,9 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
       await writing.transaction(async entityManager => {
         await entityManager.delete(Event, foundEvent);
         console.log("Deleted event", foundEvent);
-        const deleteResult = await entityManager.delete(Delegate, { eventId: foundEvent.id });
+        const historyRows = await this.historyRepository.allByEventIdAndKind(foundEvent.id, RESOURCE_KIND.DELEGATE);
+        const resourceIds = historyRows.map(h => h.resourceId.toString());
+        const deleteResult = await entityManager.delete(Delegate, resourceIds);
         console.log(`Deleted ${deleteResult.affected} delegates`);
       });
     } else {
