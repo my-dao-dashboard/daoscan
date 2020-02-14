@@ -1,9 +1,11 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
 import { bigintTransformer } from "./bigint.transformer";
-import { PLATFORM } from "../domain/platform";
-import { ScrapingEvent } from "../scraping/events/scraping-event";
-import { SCRAPING_EVENT_KIND } from "../scraping/events/scraping-event.kind";
 import { RESOURCE_KIND } from "./resource.kind";
+
+interface Delta {
+  before: any;
+  after: any;
+}
 
 @Entity("history")
 export class History {
@@ -22,4 +24,8 @@ export class History {
   @Column({ type: "enum", enum: RESOURCE_KIND })
   // @ts-ignore
   resourceKind: RESOURCE_KIND;
+
+  @Column({ type: "jsonb" })
+  // @ts-ignore
+  delta: Delta | null;
 }

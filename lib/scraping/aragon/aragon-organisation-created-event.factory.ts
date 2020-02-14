@@ -22,7 +22,6 @@ const KIT_ADDRESSES = new Set(
     "0x67430642C0c3B5E6538049B9E9eE719f2a4BeE7c", // Membership (0.8)
     "0x3a06A6544e48708142508D9042f94DDdA769d04F", // Reputation (0.8)
     "0xc54c5dB63aB0E79FBb9555373B969093dEb17859", // Open Enterprise (0.8.4)
-    "0xd4bc1aFD46e744F1834cad01B2262d095DCB6C9B", // Fundraising (0.8.7)
     "0xbc2A863ef2B96d454aC7790D5A9E8cFfd8EccBa8" // Dandelion
   ].map(a => a.toLowerCase())
 );
@@ -367,36 +366,6 @@ const KIT_SIGNATURES = new Map<string, AbiInput[]>([
       }
     ]
   ],
-  // Fundraising (0.8.7)
-  [
-    "0x350cbe71",
-    [
-      {
-        name: "name",
-        type: "string"
-      },
-      {
-        name: "virtualSupplies",
-        type: "uint256[2]"
-      },
-      {
-        name: "_virtualBalances",
-        type: "uint256[2]"
-      },
-      {
-        name: "_slippages",
-        type: "uint256[2]"
-      },
-      {
-        name: "_rateDAI",
-        type: "uint256"
-      },
-      {
-        name: "_floorDAI",
-        type: "uint256"
-      }
-    ]
-  ],
   // Dandelion: installDandelionApps
   [
     "0xffb94e0e",
@@ -439,13 +408,16 @@ const DEPLOY_INSTANCE_EVENT: BlockchainEvent<DeployInstanceParams> = {
 };
 
 // BareTemplate: 0x772e046Dc341bc197c6Ef1EE083e1a1368d65646
-interface SetupDAOParams {
-  dao: string;
-}
-
-const SETUP_DAO_EVENT: BlockchainEvent<SetupDAOParams> = {
+const SETUP_DAO_EVENT: BlockchainEvent<DeployInstanceParams> = {
   sources: ["0x772e046Dc341bc197c6Ef1EE083e1a1368d65646"],
   signature: "0x17592627a66846ce06d92a1708275bc653b2a3f34aec855584b819872a8ba413",
+  abi: [{ indexed: false, name: "dao", type: "address" }]
+};
+
+// BareTemplate: 0x772e046Dc341bc197c6Ef1EE083e1a1368d65646
+const FUNDRAISING_DEPLOY_DAO_EVENT: BlockchainEvent<DeployInstanceParams> = {
+  sources: ["0xd4bc1afd46e744f1834cad01b2262d095dcb6c9b"],
+  signature: "0x0b13a9ab90735191cd544fd95ba68d1385144561cbdeb8acb8035de9a86432f5",
   abi: [{ indexed: false, name: "dao", type: "address" }]
 };
 
@@ -512,10 +484,13 @@ export class AragonOrganisationCreatedEventFactory {
     });
   }
 
-  async fromDeployInstanceEvent(block: Block): Promise<OrganisationCreatedEvent[]> {
+  async fromDeployInstanceEvent(
+    block: Block,
+    event: BlockchainEvent<DeployInstanceParams>
+  ): Promise<OrganisationCreatedEvent[]> {
     const extendedBlock = await block.extendedBlock();
     const timestamp = await block.timestamp();
-    return logEvents(this.ethereum.codec, extendedBlock, DEPLOY_INSTANCE_EVENT).map(e => {
+    return logEvents(this.ethereum.codec, extendedBlock, event).map(e => {
       const organisationAddress = e.dao;
       return this.fromJSON({
         platform: PLATFORM.ARAGON,
@@ -541,8 +516,12 @@ export class AragonOrganisationCreatedEventFactory {
 
   async fromBlock(block: Block): Promise<OrganisationCreatedEvent[]> {
     const fromTransactions = await this.fromTransactions(block);
-    const fromDeployInstanceEvent = await this.fromDeployInstanceEvent(block);
-    const fromSetupDaoEvent = await this.fromSetupDaoEvent(block);
-    return fromTransactions.concat(fromDeployInstanceEvent).concat(fromSetupDaoEvent);
+    const fromDeployInstanceEvent = await this.fromDeployInstanceEvent(block, DEPLOY_INSTANCE_EVENT);
+    const bareTemplateUsed = await this.fromDeployInstanceEvent(block, SETUP_DAO_EVENT);
+    const fundraisingTemplateUsed = await this.fromDeployInstanceEvent(block, FUNDRAISING_DEPLOY_DAO_EVENT);
+    return fromTransactions
+      .concat(fromDeployInstanceEvent)
+      .concat(bareTemplateUsed)
+      .concat(fundraisingTemplateUsed);
   }
 }

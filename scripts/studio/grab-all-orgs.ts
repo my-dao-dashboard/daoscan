@@ -37,7 +37,7 @@ export async function parseOrg(address: string) {
 }
 
 async function main() {
-  const start = 244;
+  const start = 0;
   const stop = addresses.length;
   console.log(`To Process: ${addresses.length} total, remaining ${start}-${stop}`);
   for (let index = start; index < stop; index++) {
@@ -52,11 +52,11 @@ async function main() {
   }
 }
 
-// main()
-//   .then(() => {
-//     // Do Nothing
-//   })
-//   .catch(error => {
-//     console.error(error);
-//     process.exit(1);
-//   });
+main()
+  .then(() => {
+    // Do Nothing
+  })
+  .catch(error => {
+    console.error(error);
+    process.exit(1);
+  });

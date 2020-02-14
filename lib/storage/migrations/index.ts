@@ -36,3 +36,4 @@ export * from "./1569249294900-RenameEventsSerialIdToId";
 export * from "./1569249295000-AddEventIdsBack";
 export * from "./1569249296000-DropHistoryTable";
 export * from "./1569249296100-RecreateHistoryTable";
+export * from "./1569249296200-AddDeltaToHistory";

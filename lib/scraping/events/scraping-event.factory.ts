@@ -16,6 +16,7 @@ import { MembershipRepository } from "../../storage/membership.repository";
 import { AddDelegateEvent } from "./add-delegate.event";
 import { DelegateRepository } from "../../storage/delegate.repository";
 import { HistoryRepository } from "../../storage/history.repository";
+import { SetOrganisationNameEvent } from "./set-organisation-name.event";
 
 @Service(ScrapingEventFactory.name)
 export class ScrapingEventFactory {
@@ -69,6 +70,14 @@ export class ScrapingEventFactory {
         );
       case SCRAPING_EVENT_KIND.ADD_DELEGATE:
         return new AddDelegateEvent(json, this.connectionFactory, this.eventRepository, this.historyRepository);
+      case SCRAPING_EVENT_KIND.SET_ORGANISATION_NAME:
+        return new SetOrganisationNameEvent(
+          json,
+          this.organisationRepository,
+          this.connectionFactory,
+          this.historyRepository,
+          this.eventRepository
+        );
       default:
         throw new UnreachableCaseError(json);
     }

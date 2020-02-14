@@ -4,7 +4,6 @@ import { Container } from "typedi";
 import { OrganisationRepository } from "../../lib/storage/organisation.repository";
 import { PLATFORM } from "../../lib/domain/platform";
 import dotenv from "dotenv";
-import { parseOrg } from "./grab-all-orgs";
 
 dotenv.config({ path: path.resolve(__dirname, ".env") });
 
@@ -20,10 +19,10 @@ async function main() {
   const organisations = await organisationRepository.all(PLATFORM.ARAGON);
   const orgAddresses = organisations.map(org => org.address.toLowerCase());
   const notHandled = addresses.filter((a: string) => !orgAddresses.includes(a));
-  for (let h of notHandled) {
-    await parseOrg(h);
-  }
   console.log("Not handled", notHandled);
+  // for (let h of notHandled) {
+  //   await parseOrg(h);
+  // }
 }
 
 main()
