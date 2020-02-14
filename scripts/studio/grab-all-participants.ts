@@ -14,7 +14,7 @@ import { PLATFORM } from "../../lib/domain/platform";
 
 dotenv.config({ path: path.resolve(__dirname, ".env") });
 
-const web3 = new Web3(new Web3.providers.HttpProvider("http://mainnet.eth.daoscan.net"));
+const web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/e201ebd046304d9d89a598b6c73baa8c"));
 
 axiosRetry(axios, { retries: 10, retryCondition: () => true, retryDelay: (retryCount, error) => retryCount * 1000 });
 

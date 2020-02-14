@@ -37,7 +37,7 @@ async function parseOrg(address: string) {
 }
 
 async function main() {
-  const start = 0;
+  const start = 244;
   const stop = addresses.length;
   console.log(`To Process: ${addresses.length} total, remaining ${start}-${stop}`);
   for (let index = start; index < stop; index++) {

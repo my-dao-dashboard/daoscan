@@ -437,12 +437,13 @@ const DEPLOY_INSTANCE_EVENT: BlockchainEvent<DeployInstanceParams> = {
   abi: [{ indexed: false, name: "dao", type: "address" }]
 };
 
-interface DeployCompanyDAOParams {
+// BareTemplate: 0x772e046Dc341bc197c6Ef1EE083e1a1368d65646
+interface SetupDAOParams {
   dao: string;
 }
 
-const DEPLOY_DAO_EVENT: BlockchainEvent<DeployCompanyDAOParams> = {
-  signature: "0x8f42a14c9fe9e09f4fe8eeee69ae878731c838b6497425d4c30e1d09336cf34b",
+const SETUP_DAO_EVENT: BlockchainEvent<SetupDAOParams> = {
+  signature: "0x17592627a66846ce06d92a1708275bc653b2a3f34aec855584b819872a8ba413",
   abi: [{ indexed: false, name: "dao", type: "address" }]
 };
 
@@ -491,7 +492,24 @@ export class AragonOrganisationCreatedEventFactory {
     );
   }
 
-  async fromEvents(block: Block): Promise<OrganisationCreatedEvent[]> {
+  async fromSetupDaoEvent(block: Block): Promise<OrganisationCreatedEvent[]> {
+    const extendedBlock = await block.extendedBlock();
+    const timestamp = await block.timestamp();
+    return logEvents(this.ethereum.codec, extendedBlock, SETUP_DAO_EVENT).map(e => {
+      const organisationAddress = e.dao;
+      return this.fromJSON({
+        platform: PLATFORM.ARAGON,
+        name: organisationAddress.toLowerCase(),
+        address: organisationAddress.toLowerCase(),
+        txid: e.txid,
+        blockNumber: Number(e.blockNumber),
+        blockHash: block.hash,
+        timestamp: Number(timestamp)
+      });
+    });
+  }
+
+  async fromDeployInstanceEvent(block: Block): Promise<OrganisationCreatedEvent[]> {
     const extendedBlock = await block.extendedBlock();
     const timestamp = await block.timestamp();
     return logEvents(this.ethereum.codec, extendedBlock, DEPLOY_INSTANCE_EVENT).map(e => {
@@ -519,7 +537,8 @@ export class AragonOrganisationCreatedEventFactory {
 
   async fromBlock(block: Block): Promise<OrganisationCreatedEvent[]> {
     const fromTransactions = await this.fromTransactions(block);
-    const fromEvents = await this.fromEvents(block);
-    return fromTransactions.concat(fromEvents);
+    const fromDeployInstanceEvent = await this.fromDeployInstanceEvent(block);
+    const fromSetupDaoEvent = await this.fromSetupDaoEvent(block);
+    return fromTransactions.concat(fromDeployInstanceEvent).concat(fromSetupDaoEvent);
   }
 }
