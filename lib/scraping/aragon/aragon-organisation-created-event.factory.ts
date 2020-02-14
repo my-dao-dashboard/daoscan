@@ -443,6 +443,7 @@ interface SetupDAOParams {
 }
 
 const SETUP_DAO_EVENT: BlockchainEvent<SetupDAOParams> = {
+  contracts: ["0x772e046Dc341bc197c6Ef1EE083e1a1368d65646"],
   signature: "0x17592627a66846ce06d92a1708275bc653b2a3f34aec855584b819872a8ba413",
   abi: [{ indexed: false, name: "dao", type: "address" }]
 };
