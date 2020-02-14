@@ -456,7 +456,6 @@ export class AragonOrganisationCreatedEventFactory {
   ) {}
 
   isSuitableReceipt(receipt: ExtendedTransactionReceipt): boolean {
-    console.log("receipt", receipt);
     const destination = receipt.to?.toLowerCase();
     const status = receipt.status;
     return (

@@ -25,7 +25,7 @@ export class BlockController {
     try {
       if (isHttp(event)) {
         const blockAddEvent = this.eventFactory.fromString(event.body);
-
+        console.log(`Doing block #${blockAddEvent.id}`);
         const inplace = Boolean(event.queryStringParameters?.inplace);
         const fanout = !inplace;
         const commands = await this.addScenario.execute(blockAddEvent, fanout);
@@ -39,6 +39,7 @@ export class BlockController {
         await Promise.all(
           event.Records.map(async record => {
             const blockAddEvent = this.eventFactory.fromString(record.body);
+            console.log(`Doing block #${blockAddEvent.id}`);
             await this.addScenario.execute(blockAddEvent);
           })
         );
