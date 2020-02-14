@@ -90,13 +90,11 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
       const savedEvent = await entityManager.save(eventRow);
       console.log("Saved event", savedEvent);
       if (fromRow.accountAddress !== ZERO_ADDRESS) {
-        fromRow.eventId = savedEvent.id;
         const savedFromRow = await entityManager.save(fromRow);
         console.log("Saved from", savedFromRow);
         await this.saveHistory(entityManager, savedEvent, savedFromRow);
       }
       if (toRow.accountAddress !== ZERO_ADDRESS) {
-        toRow.eventId = savedEvent.id;
         const savedToRow = await entityManager.save(toRow);
         console.log("Saved to", savedToRow);
         await this.saveHistory(entityManager, savedEvent, savedToRow);
