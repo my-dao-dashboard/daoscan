@@ -21,7 +21,9 @@ const KIT_ADDRESSES = new Set(
     "0xd737632caC4d039C9B0EEcc94C12267407a271b5", // Company (0.8)
     "0x67430642C0c3B5E6538049B9E9eE719f2a4BeE7c", // Membership (0.8)
     "0x3a06A6544e48708142508D9042f94DDdA769d04F", // Reputation (0.8)
-    "0xc54c5dB63aB0E79FBb9555373B969093dEb17859" // Open Enterprise (0.8.4)
+    "0xc54c5dB63aB0E79FBb9555373B969093dEb17859", // Open Enterprise (0.8.4)
+    "0xd4bc1aFD46e744F1834cad01B2262d095DCB6C9B", // Fundraising (0.8.7)
+    "0xbc2A863ef2B96d454aC7790D5A9E8cFfd8EccBa8" // Dandelion
   ].map(a => a.toLowerCase())
 );
 
@@ -364,6 +366,66 @@ const KIT_SIGNATURES = new Map<string, AbiInput[]>([
         type: "uint64"
       }
     ]
+  ],
+  // Fundraising (0.8.7)
+  [
+    "0x350cbe71",
+    [
+      {
+        name: "name",
+        type: "string"
+      },
+      {
+        name: "virtualSupplies",
+        type: "uint256[2]"
+      },
+      {
+        name: "_virtualBalances",
+        type: "uint256[2]"
+      },
+      {
+        name: "_slippages",
+        type: "uint256[2]"
+      },
+      {
+        name: "_rateDAI",
+        type: "uint256"
+      },
+      {
+        name: "_floorDAI",
+        type: "uint256"
+      }
+    ]
+  ],
+  // Dandelion: installDandelionApps
+  [
+    "0xffb94e0e",
+    [
+      {
+        name: "name",
+        type: "string"
+      },
+      {
+        name: "_redemptionsRedeemableTokens",
+        type: "address[]"
+      },
+      {
+        name: "_tokenRequestAcceptedDepositTokens",
+        type: "address[]"
+      },
+      {
+        name: "_timeLockToken",
+        type: "address"
+      },
+      {
+        name: "_timeLockSettings",
+        type: "uint256[3]"
+      },
+      {
+        name: "_votingSettings",
+        type: "uint64[5]"
+      }
+    ]
   ]
 ]);
 
@@ -372,6 +434,15 @@ interface DeployInstanceParams {
 }
 
 const DEPLOY_INSTANCE_EVENT: BlockchainEvent<DeployInstanceParams> = {
+  signature: "0x8f42a14c9fe9e09f4fe8eeee69ae878731c838b6497425d4c30e1d09336cf34b",
+  abi: [{ indexed: false, name: "dao", type: "address" }]
+};
+
+interface DeployCompanyDAOParams {
+  dao: string;
+}
+
+const DEPLOY_DAO_EVENT: BlockchainEvent<DeployCompanyDAOParams> = {
   signature: "0x8f42a14c9fe9e09f4fe8eeee69ae878731c838b6497425d4c30e1d09336cf34b",
   abi: [{ indexed: false, name: "dao", type: "address" }]
 };
@@ -387,6 +458,7 @@ export class AragonOrganisationCreatedEventFactory {
   ) {}
 
   isSuitableReceipt(receipt: ExtendedTransactionReceipt): boolean {
+    console.log("receipt", receipt);
     const destination = receipt.to?.toLowerCase();
     const status = receipt.status;
     return (
