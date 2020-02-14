@@ -3,7 +3,7 @@ import fs from "fs";
 import axios from "axios";
 import _ from "lodash";
 import axiosRetry from "axios-retry";
-import {sleep} from "../../lib/shared/sleep";
+import { sleep } from "../../lib/shared/sleep";
 
 axiosRetry(axios, { retries: 10, retryCondition: () => true, retryDelay: (retryCount, error) => retryCount * 1000 });
 
@@ -25,7 +25,7 @@ async function grabBlocks(address: string) {
 }
 
 async function parseOrg(address: string) {
-  const blockNumbers = (await grabBlocks(address))
+  const blockNumbers = await grabBlocks(address);
   await Promise.all(
     blockNumbers.map(async n => {
       await axios.post("https://api.daoscan.net/block", {
@@ -37,14 +37,17 @@ async function parseOrg(address: string) {
 }
 
 async function main() {
-  for (let index = 0; index < addresses.length; index++) {
+  const start = 0;
+  const stop = addresses.length;
+  console.log(`To Process: ${addresses.length} total, remaining ${start}-${stop}`);
+  for (let index = start; index < stop; index++) {
     const before = new Date();
     const address = addresses[index];
     await parseOrg(address);
     const after = new Date();
     const delta = after.valueOf() - before.valueOf();
     const seconds = Math.floor(delta / 1000);
-    const etaHours = ((((addresses.length - index)) * seconds) / 3600).toFixed(1);
+    const etaHours = (((stop - index) * seconds) / 3600).toFixed(1);
     console.log(`Done with ${index}: ${address.toLowerCase()}, ETA ${etaHours}h`);
   }
 }

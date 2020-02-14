@@ -18,13 +18,14 @@ const web3 = new Web3(new Web3.providers.HttpProvider("http://mainnet.eth.daosca
 
 axiosRetry(axios, { retries: 10, retryCondition: () => true, retryDelay: (retryCount, error) => retryCount * 1000 });
 
+const organisationRepository = Container.get(OrganisationRepository);
+const applicationRepository = Container.get(ApplicationRepository);
+
 async function main() {
-  const organisationRepository = Container.get(OrganisationRepository);
   const organisations = await organisationRepository.all(PLATFORM.ARAGON);
   const addresses = organisations.map(org => org.address.toLowerCase());
   for (let index = 0; index < addresses.length; index++) {
     const address = addresses[index];
-    const applicationRepository = Container.get(ApplicationRepository);
     const shareTokenAddress = await applicationRepository.tokenAddress(address);
     if (shareTokenAddress && shareTokenAddress !== "0x0000000000000000000000000000000000000000") {
       const shareToken = new web3.eth.Contract(ERC20_TOKEN_ABI as AbiItem[], shareTokenAddress);
