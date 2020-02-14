@@ -12,14 +12,14 @@ export function logEvents<A extends Indexed<string>>(
   event: BlockchainEvent<A>,
   filter?: (log: Log) => boolean
 ): LogEvent<A>[] {
-  const destinations = event.contracts?.map(c => c.toLowerCase());
+  const sources = event.sources?.map(c => c.toLowerCase());
   return block.logs
     .filter(log => {
       const isRemoved = (log as any).removed;
       const isKnown = log.topics[0] === event.signature;
       const isFiltered = filter ? filter(log) : true;
-      const isDirected = destinations ? destinations.includes(log.address.toLowerCase()) : true;
-      return !isRemoved && isKnown && isFiltered && isDirected;
+      const isSourced = sources ? sources.includes(log.address.toLowerCase()) : true;
+      return !isRemoved && isKnown && isFiltered && isSourced;
     })
     .map(log => {
       return {
