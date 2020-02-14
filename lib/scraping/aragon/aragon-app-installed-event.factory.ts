@@ -10,7 +10,6 @@ import { TOKEN_CONTROLLER_ABI } from "./token-controller.abi";
 import { AppInstalledEvent, AppInstalledEventProps } from "../events/app-installed.event";
 import { EventRepository } from "../../storage/event.repository";
 import { ApplicationRepository } from "../../storage/application.repository";
-import { HistoryRepository } from "../../storage/history.repository";
 
 export interface NewAppProxyParams {
   proxy: string;
@@ -44,7 +43,6 @@ export class AragonAppInstalledEventFactory {
     @Inject(EthereumService.name) private readonly ethereum: EthereumService,
     @Inject(EventRepository.name) private readonly eventRepository: EventRepository,
     @Inject(ApplicationRepository.name) private readonly applicationRepository: ApplicationRepository,
-    @Inject(HistoryRepository.name) private readonly historyRepository: HistoryRepository,
     @Inject(ConnectionFactory.name) private readonly connectionFactory: ConnectionFactory
   ) {}
 
@@ -107,13 +105,7 @@ export class AragonAppInstalledEventFactory {
   }
 
   fromJSON(json: AppInstalledEventProps) {
-    return new AppInstalledEvent(
-      json,
-      this.eventRepository,
-      this.applicationRepository,
-      this.historyRepository,
-      this.connectionFactory
-    );
+    return new AppInstalledEvent(json, this.eventRepository, this.applicationRepository, this.connectionFactory);
   }
 
   async fromBlock(block: Block): Promise<AppInstalledEvent[]> {

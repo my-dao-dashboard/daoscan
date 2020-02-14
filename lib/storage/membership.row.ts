@@ -8,6 +8,10 @@ export class Membership {
   // @ts-ignore
   id: bigint;
 
+  @Column("bigint", { transformer: bigintTransformer })
+  // @ts-ignore
+  eventId: bigint;
+
   @Column()
   // @ts-ignore
   organisationAddress: string;

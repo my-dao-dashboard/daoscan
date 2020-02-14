@@ -30,14 +30,4 @@ export class EventRepository {
     const repository = await this.repositoryFactory.reading(Event);
     return repository.find({ blockId, blockHash });
   }
-
-  async oldOnes(limit: number) {
-    const eventRepository = await this.repositoryFactory.reading(Event);
-    return eventRepository
-      .createQueryBuilder("event")
-      .where('event.id NOT IN (SELECT "eventId" from history)')
-      .limit(limit)
-      .addOrderBy('"blockId"', "ASC")
-      .getMany();
-  }
 }

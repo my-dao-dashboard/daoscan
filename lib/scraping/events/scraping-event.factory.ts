@@ -15,7 +15,6 @@ import { ShareTransferEvent } from "./share-transfer.event";
 import { MembershipRepository } from "../../storage/membership.repository";
 import { AddDelegateEvent } from "./add-delegate.event";
 import { DelegateRepository } from "../../storage/delegate.repository";
-import { HistoryRepository } from "../../storage/history.repository";
 
 @Service(ScrapingEventFactory.name)
 export class ScrapingEventFactory {
@@ -27,8 +26,7 @@ export class ScrapingEventFactory {
     @Inject(OrganisationRepository.name) private readonly organisationRepository: OrganisationRepository,
     @Inject(MembershipRepository.name) private readonly membershipRepository: MembershipRepository,
     @Inject(DelegateRepository.name) private readonly delegateRepository: DelegateRepository,
-    @Inject(ConnectionFactory.name) private readonly connectionFactory: ConnectionFactory,
-    @Inject(HistoryRepository.name) private readonly historyRepository: HistoryRepository
+    @Inject(ConnectionFactory.name) private readonly connectionFactory: ConnectionFactory
   ) {}
 
   async fromStorage(eventId: bigint): Promise<ScrapingEvent | undefined> {
@@ -44,37 +42,18 @@ export class ScrapingEventFactory {
   fromJSON(json: ScrapingEvent): ScrapingEvent {
     switch (json.kind) {
       case SCRAPING_EVENT_KIND.APP_INSTALLED:
-        return new AppInstalledEvent(
-          json,
-          this.eventRepository,
-          this.applicationRepository,
-          this.historyRepository,
-          this.connectionFactory
-        );
+        return new AppInstalledEvent(json, this.eventRepository, this.applicationRepository, this.connectionFactory);
       case SCRAPING_EVENT_KIND.ORGANISATION_CREATED:
         return new OrganisationCreatedEvent(
           json,
           this.eventRepository,
           this.organisationRepository,
-          this.historyRepository,
           this.connectionFactory
         );
       case SCRAPING_EVENT_KIND.SHARE_TRANSFER:
-        return new ShareTransferEvent(
-          json,
-          this.eventRepository,
-          this.membershipRepository,
-          this.historyRepository,
-          this.connectionFactory
-        );
+        return new ShareTransferEvent(json, this.eventRepository, this.membershipRepository, this.connectionFactory);
       case SCRAPING_EVENT_KIND.ADD_DELEGATE:
-        return new AddDelegateEvent(
-          json,
-          this.connectionFactory,
-          this.eventRepository,
-          this.delegateRepository,
-          this.historyRepository
-        );
+        return new AddDelegateEvent(json, this.connectionFactory, this.eventRepository);
       default:
         throw new UnreachableCaseError(json);
     }

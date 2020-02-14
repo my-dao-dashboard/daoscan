@@ -37,7 +37,7 @@ async function parseOrg(address: string) {
 }
 
 async function main() {
-  for (let index = 389; index < addresses.length; index++) {
+  for (let index = 0; index < addresses.length; index++) {
     const before = new Date();
     const address = addresses[index];
     await parseOrg(address);
@@ -45,7 +45,7 @@ async function main() {
     const delta = after.valueOf() - before.valueOf();
     const seconds = Math.floor(delta / 1000);
     const etaHours = ((((addresses.length - index)) * seconds) / 3600).toFixed(1);
-    console.log(`Done with ${index}:${address}, ETA ${etaHours}h`);
+    console.log(`Done with ${index}: ${address.toLowerCase()}, ETA ${etaHours}h`);
   }
 }
 

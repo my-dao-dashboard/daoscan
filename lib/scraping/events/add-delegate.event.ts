@@ -6,9 +6,7 @@ import { ConnectionFactory } from "../../storage/connection.factory";
 import { Delegate } from "../../storage/delegate.row";
 import { EventRepository } from "../../storage/event.repository";
 import { DelegateRepository } from "../../storage/delegate.repository";
-import { History } from "../../storage/history.row";
 import { RESOURCE_KIND } from "../../storage/resource.kind";
-import { HistoryRepository } from "../../storage/history.repository";
 
 export interface AddDelegateEventProps {
   platform: PLATFORM;
@@ -28,9 +26,7 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
   constructor(
     private readonly props: AddDelegateEventProps,
     private readonly connectionFactory: ConnectionFactory,
-    private readonly eventRepository: EventRepository,
-    private readonly delegateRepository: DelegateRepository,
-    private readonly historyRepository: HistoryRepository
+    private readonly eventRepository: EventRepository
   ) {}
 
   get logIndex() {
@@ -77,19 +73,13 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
     delegateRow.delegateFor = this.delegateFor;
     delegateRow.organisationAddress = this.organisationAddress;
 
-    const historyRow = new History();
-    historyRow.resourceKind = RESOURCE_KIND.DELEGATE;
-
     const writing = await this.connectionFactory.writing();
     await writing.transaction(async entityManager => {
       const savedEvent = await entityManager.save(eventRow);
       console.log("Saved event", savedEvent);
+      delegateRow.eventId = savedEvent.id;
       const savedDelegate = await entityManager.save(delegateRow);
       console.log("Saved delegate", savedDelegate);
-      historyRow.eventId = savedEvent.id;
-      historyRow.resourceId = savedDelegate.id;
-      const savedHistory = await entityManager.save(historyRow);
-      console.log("Saved history", savedHistory);
     });
   }
 
@@ -97,21 +87,12 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
     const eventRow = this.buildEventRow();
     const foundEvent = await this.eventRepository.findSame(eventRow);
     if (foundEvent) {
-      const historyRows = await this.historyRepository.allByEventId(foundEvent.id, RESOURCE_KIND.DELEGATE);
-      const resourceIds = historyRows.map(h => h.resourceId.toString());
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {
-        if (resourceIds.length > 0) {
-          await entityManager.delete(Delegate, resourceIds);
-          console.log("Deleting delegates", resourceIds);
-        }
         await entityManager.delete(Event, foundEvent);
         console.log("Deleted event", foundEvent);
-        if (historyRows.length > 0) {
-          const historyIds = historyRows.map(h => h.id.toString());
-          const deleteResult = await entityManager.delete(History, historyIds);
-          console.log(`Deleted ${deleteResult.affected} history entries`);
-        }
+        const deleteResult = await entityManager.delete(Delegate, { eventId: foundEvent.id });
+        console.log(`Deleted ${deleteResult.affected} delegates`);
       });
     } else {
       console.log("Can not find event", this);

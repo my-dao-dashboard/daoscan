@@ -6,8 +6,6 @@ import { EventRepository } from "../../storage/event.repository";
 import { Application } from "../../storage/application.row";
 import { ConnectionFactory } from "../../storage/connection.factory";
 import { ApplicationRepository } from "../../storage/application.repository";
-import { HistoryRepository } from "../../storage/history.repository";
-import { History } from "../../storage/history.row";
 import { RESOURCE_KIND } from "../../storage/resource.kind";
 
 export interface AppInstalledEventProps {
@@ -29,7 +27,6 @@ export class AppInstalledEvent implements IScrapingEvent {
     props: AppInstalledEventProps,
     private readonly eventRepository: EventRepository,
     private readonly applicationRepository: ApplicationRepository,
-    private readonly historyRepository: HistoryRepository,
     private readonly connectionFactory: ConnectionFactory
   ) {
     this.props = props;
@@ -75,19 +72,13 @@ export class AppInstalledEvent implements IScrapingEvent {
     applicationRow.appId = this.appId;
     applicationRow.organisationAddress = this.organisationAddress;
 
-    const historyRow = new History();
-    historyRow.resourceKind = RESOURCE_KIND.APPLICATION;
-
     const writing = await this.connectionFactory.writing();
     await writing.transaction(async entityManager => {
-      const savedApplication = await entityManager.save(applicationRow);
-      console.log("Saved application", savedApplication);
       const savedEvent = await entityManager.save(eventRow);
       console.log("Saved event", savedEvent);
-      historyRow.eventId = savedEvent.id;
-      historyRow.resourceId = savedApplication.id;
-      const savedHistory = await entityManager.save(historyRow);
-      console.log("Saved history", savedHistory);
+      applicationRow.eventId = savedEvent.id;
+      const savedApplication = await entityManager.save(applicationRow);
+      console.log("Saved application", savedApplication);
     });
   }
 
@@ -95,16 +86,12 @@ export class AppInstalledEvent implements IScrapingEvent {
     console.log("AppInstalledEvent.revert", this.toJSON());
     const [eventRow, found] = await this.findRow();
     if (found) {
-      const historyRows = await this.historyRepository.allByEventId(found.id, RESOURCE_KIND.APPLICATION);
-      const resourceIds = historyRows.map(h => h.resourceId.toString());
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {
-        await entityManager.delete(Application, resourceIds);
-        console.log("Deleted applications", resourceIds);
-        await entityManager.delete(History, { eventId: found.id.toString() });
-        console.log("Deleted history entries", found.id);
         await entityManager.delete(Event, found);
         console.log("Deleted event", found);
+        const deleteResult = await entityManager.delete(Application, { eventId: found.id });
+        console.log(`Deleted ${deleteResult.affected} applications`);
       });
     } else {
       console.log("Can not find event", this);

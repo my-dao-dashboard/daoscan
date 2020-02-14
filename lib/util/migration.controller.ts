@@ -43,16 +43,16 @@ export class MigrationController {
   async timestamps(event: APIGatewayEvent): Promise<{ amount: number }> {
     this.ensureAuthorization(event);
     const limit = Number(event.queryStringParameters?.limit) || 100;
-    const rawEvents = await this.events.oldOnes(limit);
     let n = 0;
-    for (let e of rawEvents) {
-      const dsEvent = await this.eventFactory.fromStorage(e.id);
-      if (dsEvent) {
-        await dsEvent.revert();
-        await dsEvent.commit();
-        n = n + 1;
-      }
-    }
+    // const rawEvents = await this.events.oldOnes(limit);
+    // for (let e of rawEvents) {
+    //   const dsEvent = await this.eventFactory.fromStorage(e.id);
+    //   if (dsEvent) {
+    //     await dsEvent.revert();
+    //     await dsEvent.commit();
+    //     n = n + 1;
+    //   }
+    // }
 
     return {
       amount: n

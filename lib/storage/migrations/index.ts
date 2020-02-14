@@ -33,3 +33,5 @@ export * from "./1569249294600-DropEventIdFromDelegates";
 export * from "./1569249294700-DropEventIdFromMemberships";
 export * from "./1569249294800-DropEventIdFromEvents";
 export * from "./1569249294900-RenameEventsSerialIdToId";
+export * from "./1569249295000-AddEventIdsBack";
+export * from "./1569249296000-DropHistoryTable";
