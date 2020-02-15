@@ -11,7 +11,8 @@ import { EventRepository } from "../../storage/event.repository";
 
 const KIT_ADDRESSES = new Set(
   [
-    "0xd4bc1aFD46e744F1834cad01B2262d095DCB6C9B" // Fundraising (0.8.7)
+    "0xd4bc1aFD46e744F1834cad01B2262d095DCB6C9B", // Fundraising (0.8.7),
+    "0x67430642C0c3B5E6538049B9E9eE719f2a4BeE7c" // Membership (0.8)
   ].map(a => a.toLowerCase())
 );
 
@@ -43,6 +44,94 @@ const KIT_SIGNATURES = new Map<string, AbiInput[]>([
       {
         name: "_floorDAI",
         type: "uint256"
+      }
+    ]
+  ],
+  // Membership (0.8)
+  [
+    "0x8a29ac04",
+    [
+      {
+        name: "tokenName",
+        type: "string"
+      },
+      {
+        name: "tokenSymbol",
+        type: "string"
+      },
+      {
+        name: "name",
+        type: "string"
+      },
+      {
+        name: "members",
+        type: "address[]"
+      },
+      {
+        name: "votingSettings",
+        type: "uint64[3]"
+      },
+      {
+        name: "financePeriod",
+        type: "uint64"
+      },
+      {
+        name: "useAgentAsVault",
+        type: "bool"
+      }
+    ]
+  ],
+
+  // Membership (0.8)
+  [
+    "0xce489612",
+    [
+      {
+        name: "name",
+        type: "string"
+      },
+      {
+        name: "members",
+        type: "address[]"
+      },
+      {
+        name: "votingSettings",
+        type: "uint64[3]"
+      },
+      {
+        name: "payrollSettings",
+        type: "uint256[4]"
+      }
+    ]
+  ],
+
+  // Membership (0.8)
+  [
+    "0x2ce4ea94",
+    [
+      {
+        name: "name",
+        type: "string"
+      },
+      {
+        name: "members",
+        type: "address[]"
+      },
+      {
+        name: "votingSettings",
+        type: "uint64[3]"
+      },
+      {
+        name: "financePeriod",
+        type: "uint64"
+      },
+      {
+        name: "useAgentAsVault",
+        type: "bool"
+      },
+      {
+        name: "payrollSettings",
+        type: "uint256[4]"
       }
     ]
   ]

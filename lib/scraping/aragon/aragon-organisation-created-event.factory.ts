@@ -19,7 +19,6 @@ const KIT_ADDRESSES = new Set(
     "0x87aa2980dde7d2D4e57191f16BB57cF80bf6E5A6", // Multisig 2 (0.7)
     "0x4d1A892f42c947fa952b57bc6939b27A96215CfA", // Company Board (0.8)
     "0xd737632caC4d039C9B0EEcc94C12267407a271b5", // Company (0.8)
-    "0x67430642C0c3B5E6538049B9E9eE719f2a4BeE7c", // Membership (0.8)
     "0x3a06A6544e48708142508D9042f94DDdA769d04F", // Reputation (0.8)
     "0xc54c5dB63aB0E79FBb9555373B969093dEb17859", // Open Enterprise (0.8.4)
     "0xbc2A863ef2B96d454aC7790D5A9E8cFfd8EccBa8" // Dandelion
@@ -243,95 +242,6 @@ const KIT_SIGNATURES = new Map<string, AbiInput[]>([
     ]
   ],
 
-  // Membership (0.8)
-  [
-    "0x8a29ac04",
-    [
-      {
-        name: "tokenName",
-        type: "string"
-      },
-      {
-        name: "tokenSymbol",
-        type: "string"
-      },
-      {
-        name: "name",
-        type: "string"
-      },
-      {
-        name: "members",
-        type: "address[]"
-      },
-      {
-        name: "votingSettings",
-        type: "uint64[3]"
-      },
-      {
-        name: "financePeriod",
-        type: "uint64"
-      },
-      {
-        name: "useAgentAsVault",
-        type: "bool"
-      }
-    ]
-  ],
-
-  // Membership (0.8)
-  [
-    "0xce489612",
-    [
-      {
-        name: "name",
-        type: "string"
-      },
-      {
-        name: "members",
-        type: "address[]"
-      },
-      {
-        name: "votingSettings",
-        type: "uint64[3]"
-      },
-      {
-        name: "payrollSettings",
-        type: "uint256[4]"
-      }
-    ]
-  ],
-
-  // Membership (0.8)
-  [
-    "0x2ce4ea94",
-    [
-      {
-        name: "name",
-        type: "string"
-      },
-      {
-        name: "members",
-        type: "address[]"
-      },
-      {
-        name: "votingSettings",
-        type: "uint64[3]"
-      },
-      {
-        name: "financePeriod",
-        type: "uint64"
-      },
-      {
-        name: "useAgentAsVault",
-        type: "bool"
-      },
-      {
-        name: "payrollSettings",
-        type: "uint256[4]"
-      }
-    ]
-  ],
-
   // Open Enterprise (0.8.4)
   [
     "0xa0f6918d",
@@ -412,6 +322,8 @@ const DEPLOY_INSTANCE_EVENT_BUNCH = new Map<string, string>([
   ["0x772e046Dc341bc197c6Ef1EE083e1a1368d65646", "0x17592627a66846ce06d92a1708275bc653b2a3f34aec855584b819872a8ba413"],
   // Fundraising Template
   ["0xd4bc1afd46e744f1834cad01b2262d095dcb6c9b", "0x0b13a9ab90735191cd544fd95ba68d1385144561cbdeb8acb8035de9a86432f5"],
+  // Membership Template
+  ["0x67430642C0c3B5E6538049B9E9eE719f2a4BeE7c", "0x0b13a9ab90735191cd544fd95ba68d1385144561cbdeb8acb8035de9a86432f5"],
   // Whatever
   ["0x595b34c93aa2c2ba0a38daeede629a0dfbdcc559", "0x3a7eb042a769adf51e9be78b68ed7af0ad7b379246536efc376ed2ca01238282"],
   ["0xc29f0599DF12EB4Cbe1a34354c4BaC6D944071d1", "0x3a7eb042a769adf51e9be78b68ed7af0ad7b379246536efc376ed2ca01238282"]
