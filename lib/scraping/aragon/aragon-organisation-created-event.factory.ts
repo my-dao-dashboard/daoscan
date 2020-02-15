@@ -407,25 +407,15 @@ const DEPLOY_INSTANCE_EVENT: BlockchainEvent<DeployInstanceParams> = {
   abi: [{ indexed: false, name: "dao", type: "address" }]
 };
 
-// BareTemplate: 0x772e046Dc341bc197c6Ef1EE083e1a1368d65646
-const SETUP_DAO_EVENT: BlockchainEvent<DeployInstanceParams> = {
-  sources: ["0x772e046Dc341bc197c6Ef1EE083e1a1368d65646"],
-  signature: "0x17592627a66846ce06d92a1708275bc653b2a3f34aec855584b819872a8ba413",
-  abi: [{ indexed: false, name: "dao", type: "address" }]
-};
-
-// BareTemplate: 0x772e046Dc341bc197c6Ef1EE083e1a1368d65646
-const FUNDRAISING_DEPLOY_DAO_EVENT: BlockchainEvent<DeployInstanceParams> = {
-  sources: ["0xd4bc1afd46e744f1834cad01b2262d095dcb6c9b"],
-  signature: "0x0b13a9ab90735191cd544fd95ba68d1385144561cbdeb8acb8035de9a86432f5",
-  abi: [{ indexed: false, name: "dao", type: "address" }]
-};
-
-const DEPLOY_DAO_EVENT: BlockchainEvent<DeployInstanceParams> = {
-  sources: ["0x595b34c93aa2c2ba0a38daeede629a0dfbdcc559"],
-  signature: "0x3a7eb042a769adf51e9be78b68ed7af0ad7b379246536efc376ed2ca01238282",
-  abi: [{ indexed: false, name: "dao", type: "address" }]
-};
+const DEPLOY_INSTANCE_EVENT_BUNCH = new Map<string, string>([
+  // Bare Template
+  ["0x772e046Dc341bc197c6Ef1EE083e1a1368d65646", "0x17592627a66846ce06d92a1708275bc653b2a3f34aec855584b819872a8ba413"],
+  // Fundraising Template
+  ["0xd4bc1afd46e744f1834cad01b2262d095dcb6c9b", "0x0b13a9ab90735191cd544fd95ba68d1385144561cbdeb8acb8035de9a86432f5"],
+  // Whatever
+  ["0x595b34c93aa2c2ba0a38daeede629a0dfbdcc559", "0x3a7eb042a769adf51e9be78b68ed7af0ad7b379246536efc376ed2ca01238282"],
+  ["0xc29f0599DF12EB4Cbe1a34354c4BaC6D944071d1", "0x3a7eb042a769adf51e9be78b68ed7af0ad7b379246536efc376ed2ca01238282"]
+]);
 
 @Service(AragonOrganisationCreatedEventFactory.name)
 export class AragonOrganisationCreatedEventFactory {
@@ -473,6 +463,33 @@ export class AragonOrganisationCreatedEventFactory {
     );
   }
 
+  async fromDeployInstanceBunch(block: Block): Promise<OrganisationCreatedEvent[]> {
+    const extendedBlock = await block.extendedBlock();
+    const timestamp = await block.timestamp();
+    let result: OrganisationCreatedEvent[] = [];
+    DEPLOY_INSTANCE_EVENT_BUNCH.forEach((signature, source) => {
+      const event: BlockchainEvent<DeployInstanceParams> = {
+        sources: [source],
+        signature: signature,
+        abi: [{ indexed: false, name: "dao", type: "address" }]
+      };
+      const events = logEvents(this.ethereum.codec, extendedBlock, event).map(e => {
+        const organisationAddress = e.dao;
+        return this.fromJSON({
+          platform: PLATFORM.ARAGON,
+          name: organisationAddress.toLowerCase(),
+          address: organisationAddress.toLowerCase(),
+          txid: e.txid,
+          blockNumber: Number(e.blockNumber),
+          blockHash: block.hash,
+          timestamp: Number(timestamp)
+        });
+      });
+      result = result.concat(events);
+    });
+    return result;
+  }
+
   async fromDeployInstanceEvent(
     block: Block,
     event: BlockchainEvent<DeployInstanceParams>
@@ -506,13 +523,7 @@ export class AragonOrganisationCreatedEventFactory {
   async fromBlock(block: Block): Promise<OrganisationCreatedEvent[]> {
     const fromTransactions = await this.fromTransactions(block);
     const fromDeployInstanceEvent = await this.fromDeployInstanceEvent(block, DEPLOY_INSTANCE_EVENT);
-    const bareTemplateUsed = await this.fromDeployInstanceEvent(block, SETUP_DAO_EVENT);
-    const fundraisingTemplateUsed = await this.fromDeployInstanceEvent(block, FUNDRAISING_DEPLOY_DAO_EVENT);
-    const kernelUsed = await this.fromDeployInstanceEvent(block, DEPLOY_DAO_EVENT);
-    return fromTransactions
-      .concat(fromDeployInstanceEvent)
-      .concat(bareTemplateUsed)
-      .concat(fundraisingTemplateUsed)
-      .concat(kernelUsed);
+    const factoryUsed = await this.fromDeployInstanceBunch(block);
+    return fromTransactions.concat(fromDeployInstanceEvent).concat(factoryUsed);
   }
 }

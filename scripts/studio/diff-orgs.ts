@@ -19,7 +19,7 @@ async function main() {
   const organisations = await organisationRepository.all(PLATFORM.ARAGON);
   const orgAddresses = organisations.map(org => org.address.toLowerCase());
   const notHandled = addresses.filter((a: string) => !orgAddresses.includes(a));
-  console.log("Not handled", notHandled);
+  console.log("Not handled", notHandled.length, notHandled);
   // for (let h of notHandled) {
   //   await parseOrg(h);
   // }
