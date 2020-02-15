@@ -421,6 +421,12 @@ const FUNDRAISING_DEPLOY_DAO_EVENT: BlockchainEvent<DeployInstanceParams> = {
   abi: [{ indexed: false, name: "dao", type: "address" }]
 };
 
+const DEPLOY_DAO_EVENT: BlockchainEvent<DeployInstanceParams> = {
+  sources: ["0x595b34c93aa2c2ba0a38daeede629a0dfbdcc559"],
+  signature: "0x3a7eb042a769adf51e9be78b68ed7af0ad7b379246536efc376ed2ca01238282",
+  abi: [{ indexed: false, name: "dao", type: "address" }]
+};
+
 @Service(AragonOrganisationCreatedEventFactory.name)
 export class AragonOrganisationCreatedEventFactory {
   constructor(
@@ -467,23 +473,6 @@ export class AragonOrganisationCreatedEventFactory {
     );
   }
 
-  async fromSetupDaoEvent(block: Block): Promise<OrganisationCreatedEvent[]> {
-    const extendedBlock = await block.extendedBlock();
-    const timestamp = await block.timestamp();
-    return logEvents(this.ethereum.codec, extendedBlock, SETUP_DAO_EVENT).map(e => {
-      const organisationAddress = e.dao;
-      return this.fromJSON({
-        platform: PLATFORM.ARAGON,
-        name: organisationAddress.toLowerCase(),
-        address: organisationAddress.toLowerCase(),
-        txid: e.txid,
-        blockNumber: Number(e.blockNumber),
-        blockHash: block.hash,
-        timestamp: Number(timestamp)
-      });
-    });
-  }
-
   async fromDeployInstanceEvent(
     block: Block,
     event: BlockchainEvent<DeployInstanceParams>
@@ -519,9 +508,11 @@ export class AragonOrganisationCreatedEventFactory {
     const fromDeployInstanceEvent = await this.fromDeployInstanceEvent(block, DEPLOY_INSTANCE_EVENT);
     const bareTemplateUsed = await this.fromDeployInstanceEvent(block, SETUP_DAO_EVENT);
     const fundraisingTemplateUsed = await this.fromDeployInstanceEvent(block, FUNDRAISING_DEPLOY_DAO_EVENT);
+    const kernelUsed = await this.fromDeployInstanceEvent(block, DEPLOY_DAO_EVENT);
     return fromTransactions
       .concat(fromDeployInstanceEvent)
       .concat(bareTemplateUsed)
-      .concat(fundraisingTemplateUsed);
+      .concat(fundraisingTemplateUsed)
+      .concat(kernelUsed);
   }
 }
