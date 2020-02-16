@@ -35,7 +35,11 @@ export class OrganisationRepository {
 
   async all(platform: PLATFORM): Promise<Organisation[]> {
     const repository = await this.repositoryFactory.reading(Organisation);
-    return repository.find({ platform });
+    return repository
+      .createQueryBuilder("organisation")
+      .where({ platform })
+      .addOrderBy("organisation.id", "DESC")
+      .getMany();
   }
 
   async byId(id: bigint) {

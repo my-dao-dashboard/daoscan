@@ -27,7 +27,7 @@ export class SetOrganisationNameEvent implements IScrapingEvent {
   readonly blockHash = this.props.blockHash;
   readonly blockNumber = this.props.blockNumber;
   readonly timestamp = this.props.timestamp;
-  readonly address = this.props.address;
+  readonly address = this.props.address.toLowerCase();
   readonly txid = this.props.txid;
   readonly name = this.props.name;
 

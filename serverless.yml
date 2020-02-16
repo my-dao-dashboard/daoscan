@@ -88,6 +88,7 @@ functions:
           path: block/range
           method: post
   scraping-command-handle:
+    concurrency: 1
     handler: functions/scraping.commandHandle
     events:
       - sqs:

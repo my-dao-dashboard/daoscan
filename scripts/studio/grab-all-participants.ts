@@ -25,7 +25,10 @@ async function main() {
   const organisations = await organisationRepository.all(PLATFORM.ARAGON);
   const addresses = organisations.map(org => org.address.toLowerCase());
   console.log("Got organisations", addresses.length);
-  for (let index = 0; index < addresses.length; index++) {
+  const start = 26;
+  const stop = addresses.length;
+  console.log(`Parsing from ${start} to ${stop}`);
+  for (let index = start; index < stop; index++) {
     const address = addresses[index];
     const shareTokenAddress = await applicationRepository.tokenAddress(address);
     if (shareTokenAddress && shareTokenAddress !== "0x0000000000000000000000000000000000000000") {
@@ -38,15 +41,16 @@ async function main() {
       });
       const blockNumbers = _.uniq(events.map(event => Number(event.blockNumber)));
       console.log("Posting block numbers", blockNumbers);
-      await Promise.all(
-        blockNumbers.map(async n => {
-          const response = await axios.post("https://api.daoscan.net/block", {
-            id: n
-          });
-          console.log(JSON.stringify(response.data, null, 4));
-        })
-      );
-      await sleep(100);
+      let m = 0;
+      for (let n of blockNumbers) {
+        const response = await axios.post("https://api.daoscan.net/block", {
+          id: n
+        });
+        console.log(`Done with ${m + 1} blocks out of ${blockNumbers.length}`);
+        // console.log(JSON.stringify(response.data, null, 4));
+        await sleep(500);
+        m = m + 1;
+      }
     }
     console.log(`Done with ${address}: ${index}/${addresses.length}`);
   }
