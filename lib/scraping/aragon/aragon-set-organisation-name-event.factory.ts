@@ -12,7 +12,8 @@ import { EventRepository } from "../../storage/event.repository";
 const KIT_ADDRESSES = new Set(
   [
     "0xd4bc1aFD46e744F1834cad01B2262d095DCB6C9B", // Fundraising (0.8.7),
-    "0x67430642C0c3B5E6538049B9E9eE719f2a4BeE7c" // Membership (0.8)
+    "0x67430642C0c3B5E6538049B9E9eE719f2a4BeE7c", // Membership (0.8),
+    "0x3a06A6544e48708142508D9042f94DDdA769d04F" // Reputation (0.8)
   ].map(a => a.toLowerCase())
 );
 
@@ -116,6 +117,112 @@ const KIT_SIGNATURES = new Map<string, AbiInput[]>([
       {
         name: "members",
         type: "address[]"
+      },
+      {
+        name: "votingSettings",
+        type: "uint64[3]"
+      },
+      {
+        name: "financePeriod",
+        type: "uint64"
+      },
+      {
+        name: "useAgentAsVault",
+        type: "bool"
+      },
+      {
+        name: "payrollSettings",
+        type: "uint256[4]"
+      }
+    ]
+  ],
+  // Reputation (0.8)
+  [
+    "0x885b48e7",
+    [
+      {
+        name: "tokenName",
+        type: "string"
+      },
+      {
+        name: "tokenSymbol",
+        type: "string"
+      },
+      {
+        name: "name",
+        type: "string"
+      },
+      {
+        name: "holders",
+        type: "address[]"
+      },
+      {
+        name: "stakes",
+        type: "uint256[]"
+      },
+      {
+        name: "votingSettings",
+        type: "uint64[3]"
+      },
+      {
+        name: "financePeriod",
+        type: "uint64"
+      },
+      {
+        name: "useAgentAsVault",
+        type: "bool"
+      }
+    ]
+  ],
+
+  // Company (0.8)
+  // Reputation (0.8)
+  [
+    "0x0eb8e519",
+    [
+      {
+        name: "name",
+        type: "string"
+      },
+      {
+        name: "holders",
+        type: "address[]"
+      },
+      {
+        name: "stakes",
+        type: "uint256[]"
+      },
+      {
+        name: "votingSettings",
+        type: "uint64[3]"
+      },
+      {
+        name: "financePeriod",
+        type: "uint64"
+      },
+      {
+        name: "useAgentAsVault",
+        type: "bool"
+      }
+    ]
+  ],
+
+  // Company (0.8)
+  // Reputation (0.8)
+  [
+    "0xe2234b49",
+    [
+      {
+        name: "name",
+        type: "string"
+      },
+      {
+        name: "holders",
+        type: "address[]"
+      },
+      {
+        name: "stakes",
+        type: "uint256[]"
       },
       {
         name: "votingSettings",
