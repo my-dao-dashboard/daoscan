@@ -28,7 +28,7 @@ export async function parseOrg(address: string) {
   const blockNumbers = await grabBlocks(address);
   await Promise.all(
     blockNumbers.map(async n => {
-      await axios.post("https://api.daoscan.net/block", {
+      await axios.post("https://api.daoscan.net/block?inplace=true", {
         id: n
       });
     })
