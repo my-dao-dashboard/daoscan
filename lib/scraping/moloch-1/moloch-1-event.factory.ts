@@ -4,6 +4,7 @@ import { ScrapingEvent } from "../events/scraping-event";
 import { LogEvent, logEvents } from "../events-from-logs";
 import {
   SUBMIT_PROPOSAL_BLOCKCHAIN_EVENT,
+  SUBMIT_VOTE_BLOCKCHAIN_EVENT,
   SUMMON_COMPLETE_BLOCKCHAIN_EVENT,
   SummonCompleteParams
 } from "./moloch-1.blockchain-events";
@@ -25,6 +26,7 @@ import { DelegateRepository } from "../../storage/delegate.repository";
 import { MOLOCH_NAMES } from "./moloch-names";
 import { HistoryRepository } from "../../storage/history.repository";
 import { SubmitProposalEvent } from "../events/submit-proposal.event";
+import { SubmitVoteEvent, VOTE_DECISION } from "../events/submit-vote.event";
 
 async function organisationName(address: string): Promise<string> {
   const found = MOLOCH_NAMES.get(address);
@@ -54,13 +56,15 @@ export class Moloch1EventFactory {
     const summonerShareTransfer = await this.summonerShareTransfer(block);
     const summonerDelegate = await this.summonerDelegate(block);
     const proposalEvents = await this.submitProposal(block);
+    const votes = await this.submitVote(block);
     let result = new Array<ScrapingEvent>();
     return result
       .concat(organisationCreatedEvents)
       .concat(appInstalledEvents)
       .concat(summonerShareTransfer)
       .concat(summonerDelegate)
-      .concat(proposalEvents);
+      .concat(proposalEvents)
+      .concat(votes);
   }
 
   async summonerDelegate(block: Block): Promise<AddDelegateEvent[]> {
@@ -210,7 +214,7 @@ export class Moloch1EventFactory {
     return events.filter((e, i) => filtered[i]);
   }
 
-  async submitProposal(block: Block) {
+  async submitProposal(block: Block): Promise<SubmitProposalEvent[]> {
     const extendedBlock = await block.extendedBlock();
     const timestamp = await block.timestamp();
     return logEvents(this.ethereum.codec, extendedBlock, SUBMIT_PROPOSAL_BLOCKCHAIN_EVENT).map(e => {
@@ -242,6 +246,25 @@ export class Moloch1EventFactory {
         this.eventRepository,
         this.historyRepository
       );
+    });
+  }
+
+  async submitVote(block: Block) {
+    const extendedBlock = await block.extendedBlock();
+    const timestamp = await block.timestamp();
+    return logEvents(this.ethereum.codec, extendedBlock, SUBMIT_VOTE_BLOCKCHAIN_EVENT).map(e => {
+      const receipt = e.receipt;
+      return new SubmitVoteEvent({
+        platform: PLATFORM.MOLOCH_1,
+        blockHash: receipt.blockHash,
+        blockNumber: receipt.blockNumber,
+        organisationAddress: e.address,
+        proposalIndex: Number(e.proposalIndex),
+        timestamp: timestamp,
+        txid: receipt.transactionHash,
+        voter: e.memberAddress,
+        decision: VOTE_DECISION.fromNumber(Number(e.uintVote))
+      });
     });
   }
 }

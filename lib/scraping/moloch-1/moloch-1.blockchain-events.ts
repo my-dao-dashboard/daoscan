@@ -1,5 +1,6 @@
 import { BlockchainEvent } from "../blockchain-event";
 import { Indexed } from "../../shared/indexed";
+import { stringify } from "querystring";
 
 export interface SummonCompleteParams extends Indexed<string> {
   summoner: string;
@@ -14,7 +15,7 @@ export const SUMMON_COMPLETE_BLOCKCHAIN_EVENT: BlockchainEvent<SummonCompletePar
   ]
 };
 
-export interface SubmitProposalParams extends Indexed<string> {
+export interface SubmitProposalParams {
   applicant: string;
   tokenTribute: string;
   sharesRequested: string;
@@ -30,5 +31,22 @@ export const SUBMIT_PROPOSAL_BLOCKCHAIN_EVENT: BlockchainEvent<SubmitProposalPar
     { indexed: true, name: "applicant", type: "address" },
     { indexed: false, name: "tokenTribute", type: "uint256" },
     { indexed: false, name: "sharesRequested", type: "uint256" }
+  ]
+};
+
+export interface SubmitVoteParams {
+  proposalIndex: string;
+  delegateKey: string;
+  memberAddress: string;
+  uintVote: number;
+}
+
+export const SUBMIT_VOTE_BLOCKCHAIN_EVENT: BlockchainEvent<SubmitVoteParams> = {
+  signature: "0x29bf0061f2faa9daa482f061b116195432d435536d8af4ae6b3c5dd78223679b",
+  abi: [
+    { indexed: true, name: "proposalIndex", type: "uint256" },
+    { indexed: true, name: "delegateKey", type: "address" },
+    { indexed: true, name: "memberAddress", type: "address" },
+    { indexed: false, name: "uintVote", type: "uint8" }
   ]
 };
