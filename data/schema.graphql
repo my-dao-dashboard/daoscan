@@ -1,5 +1,17 @@
 scalar JSON
 
+enum Decision {
+  YES
+  NO
+  ABSTAIN
+}
+
+type Vote {
+  createdAt: String
+  voter: Participant
+  decision: Decision
+}
+
 type Participant {
   address: String!
   shares: Token
@@ -17,6 +29,7 @@ type Proposal {
   proposer: String!
   createdAt: String
   payload: JSON
+  votes: [Vote]
 }
 
 type Organisation {
@@ -32,6 +45,7 @@ type Organisation {
   participants: [Participant]
   participant(address: String!): Participant
   proposals: [Proposal]
+  proposal(index: Int): Proposal
 }
 
 type Account {

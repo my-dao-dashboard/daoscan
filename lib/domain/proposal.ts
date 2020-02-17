@@ -1,4 +1,5 @@
 interface ProposalProps {
+  organisationAddress: string;
   index: number;
   proposer: string;
   createdAt: Date;
@@ -11,6 +12,7 @@ export class Proposal {
   readonly createdAt = this.props.createdAt.toISOString();
   readonly createdAtDate = this.props.createdAt;
   readonly payload = this.props.payload;
+  readonly organisationAddress = this.props.organisationAddress;
 
-  constructor(readonly props: ProposalProps) {}
+  constructor(private readonly props: ProposalProps) {}
 }

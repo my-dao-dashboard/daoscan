@@ -67,6 +67,16 @@ export class OrganisationResolver {
   }
 
   @bind()
+  async proposal(root: Organisation, args: { index: number }) {
+    const row = await this.proposalRepository.byOrganisationAndIndex(root.address, args.index);
+    if (row) {
+      return this.proposalFactory.fromRow(row);
+    } else {
+      return undefined;
+    }
+  }
+
+  @bind()
   async participants(root: Organisation): Promise<Participant[]> {
     return root.participants();
   }

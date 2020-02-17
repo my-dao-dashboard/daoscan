@@ -246,7 +246,7 @@ export class Moloch1EventFactory {
           blockHash: block.hash,
           platform: PLATFORM.MOLOCH_1,
           payload: {
-            applicant: e.applicant,
+            applicant: e.applicant.toLowerCase(),
             description: parseDetails(parameters.details),
             sharesRequested: e.sharesRequested,
             tribute: e.tokenTribute

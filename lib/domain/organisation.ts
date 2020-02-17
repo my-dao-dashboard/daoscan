@@ -19,6 +19,10 @@ export class Organisation {
     return this.service.bank(this.platform, this.address);
   }
 
+  async participant(participantAddress: string) {
+    return this.service.participant(this, participantAddress);
+  }
+
   async participants(): Promise<Participant[]> {
     return this.service.participants(this);
   }

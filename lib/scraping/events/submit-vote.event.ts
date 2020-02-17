@@ -24,8 +24,8 @@ interface SubmitVoteEventProps {
 
 export class SubmitVoteEvent implements IScrapingEvent, SubmitVoteEventProps {
   readonly kind = SCRAPING_EVENT_KIND.SUBMIT_VOTE;
-  readonly organisationAddress = this.props.organisationAddress;
-  readonly voter = this.props.voter;
+  readonly organisationAddress = this.props.organisationAddress.toLowerCase();
+  readonly voter = this.props.voter.toLowerCase();
   readonly proposalIndex = this.props.proposalIndex;
   readonly timestamp = this.props.timestamp;
   readonly txid = this.props.txid;

@@ -9,6 +9,7 @@ import { AccountResolver } from "./account.resolver";
 import { OrganisationResolver } from "./organisation.resolver";
 import { GlobalStatsResolver } from "./global-stats.resolver";
 import { ParticipantResolver } from "./participant.resolver";
+import { ProposalResolver } from "./proposal.resolver";
 
 @Service(GraphqlController.name)
 export class GraphqlController {
@@ -18,7 +19,8 @@ export class GraphqlController {
     @Inject(AccountResolver.name) private readonly accountResolver: AccountResolver,
     @Inject(OrganisationResolver.name) private readonly organisationResolver: OrganisationResolver,
     @Inject(GlobalStatsResolver.name) private readonly globalStatsResolver: GlobalStatsResolver,
-    @Inject(ParticipantResolver.name) private readonly participantResolver: ParticipantResolver
+    @Inject(ParticipantResolver.name) private readonly participantResolver: ParticipantResolver,
+    @Inject(ProposalResolver.name) private readonly proposalResolver: ProposalResolver
   ) {
     const server = new ApolloServer({
       schema: this.schema(),
@@ -67,13 +69,17 @@ export class GraphqlController {
         shareValue: this.organisationResolver.shareValue,
         participants: this.organisationResolver.participants,
         participant: this.organisationResolver.participant,
-        proposals: this.organisationResolver.proposals
+        proposals: this.organisationResolver.proposals,
+        proposal: this.organisationResolver.proposal
       },
       Participant: {
         shares: this.participantResolver.shares
       },
       Account: {
         organisations: this.accountResolver.organisations
+      },
+      Proposal: {
+        votes: this.proposalResolver.votes
       }
     };
   }

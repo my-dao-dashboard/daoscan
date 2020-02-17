@@ -7,6 +7,10 @@ import { RESOURCE_KIND } from "./resource.kind";
 export class HistoryRepository {
   constructor(@Inject(RepositoryFactory.name) private readonly repositoryFactory: RepositoryFactory) {}
 
+  async forVote(resourceId: bigint) {
+    return this.byResourceOrFail(resourceId, RESOURCE_KIND.VOTE);
+  }
+
   async forProposal(resourceId: bigint) {
     return this.byResourceOrFail(resourceId, RESOURCE_KIND.PROPOSAL);
   }
