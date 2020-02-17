@@ -1,32 +1,14 @@
 import { IScrapingEvent } from "./scraping-event.interface";
 import { SCRAPING_EVENT_KIND } from "./scraping-event.kind";
-import { NotImplementedError } from "../../shared/errors";
 import { PLATFORM } from "../../domain/platform";
-import {Proposal} from "../../storage/proposal.row";
-import {History} from "../../storage/history.row";
-import {RESOURCE_KIND} from "../../storage/resource.kind";
-import {Event} from "../../storage/event.row";
-
-export enum VOTE_DECISION {
-  ABSTAIN = "ABSTAIN",
-  YES = "YES",
-  NO = "NO"
-}
-
-export namespace VOTE_DECISION {
-  export function fromNumber(vote: number) {
-    switch (vote) {
-      case 0:
-        return VOTE_DECISION.ABSTAIN;
-      case 1:
-        return VOTE_DECISION.YES;
-      case 2:
-        return VOTE_DECISION.NO;
-      default:
-        throw new Error(`Unknown vote ${vote} for Moloch contract`);
-    }
-  }
-}
+import { History } from "../../storage/history.row";
+import { RESOURCE_KIND } from "../../storage/resource.kind";
+import { Event } from "../../storage/event.row";
+import { VOTE_DECISION } from "../../domain/vote-decision";
+import { Vote } from "../../storage/vote.row";
+import { ConnectionFactory } from "../../storage/connection.factory";
+import { EventRepository } from "../../storage/event.repository";
+import { HistoryRepository } from "../../storage/history.repository";
 
 interface SubmitVoteEventProps {
   platform: PLATFORM;
@@ -52,14 +34,71 @@ export class SubmitVoteEvent implements IScrapingEvent, SubmitVoteEventProps {
   readonly platform = this.props.platform;
   readonly decision = this.props.decision;
 
-  constructor(readonly props: SubmitVoteEventProps) {}
+  constructor(
+    private readonly props: SubmitVoteEventProps,
+    private readonly connectionFactory: ConnectionFactory,
+    private readonly eventRepository: EventRepository,
+    private readonly historyRepository: HistoryRepository
+  ) {}
 
   async commit(): Promise<void> {
-    throw new NotImplementedError("SubmitVoteEvent.commit");
+    const eventRow = this.buildEventRow();
+
+    const voteRow = new Vote();
+    voteRow.decision = this.decision;
+    voteRow.organisationAddress = this.organisationAddress;
+    voteRow.proposalIndex = this.proposalIndex;
+    voteRow.voter = this.voter;
+
+    const historyRow = new History();
+    historyRow.resourceKind = RESOURCE_KIND.VOTE;
+    const writing = await this.connectionFactory.writing();
+    await writing.transaction(async entityManager => {
+      const savedEvent = await entityManager.save(eventRow);
+      console.log("Saved event", savedEvent);
+      const savedVote = await entityManager.save(voteRow);
+      console.log("Saved vote", savedVote);
+      historyRow.eventId = savedEvent.id;
+      historyRow.resourceId = savedVote.id;
+      const savedHistory = await entityManager.save(historyRow);
+      console.log("Saved history", savedHistory);
+    });
   }
 
   async revert(): Promise<void> {
-    throw new NotImplementedError("SubmitVoteEvent.revert");
+    const eventRow = this.buildEventRow();
+    const found = await this.eventRepository.findSame(eventRow);
+    if (found) {
+      const historyRows = await this.historyRepository.allByEventIdAndKind(found.id, RESOURCE_KIND.VOTE);
+      const resourceIds = historyRows.map(h => h.resourceId.toString());
+      const writing = await this.connectionFactory.writing();
+      await writing.transaction(async entityManager => {
+        const deleteEvents = await entityManager.delete(Event, eventRow);
+        console.log(`Saved ${deleteEvents.affected} events`);
+        if (historyRows.length > 0) {
+          const deleteHistory = await entityManager.delete(History, historyRows);
+          console.log(`Deleted ${deleteHistory.affected} history entries`);
+        }
+        if (resourceIds.length > 0) {
+          const deleteProposals = await entityManager.delete(Vote, resourceIds);
+          console.log(`Deleted ${deleteProposals.affected} votes`);
+        }
+      });
+    } else {
+      console.log("Nothing to revert", eventRow);
+    }
+  }
+
+  buildEventRow() {
+    const eventRow = new Event();
+    eventRow.platform = this.platform;
+    eventRow.blockHash = this.blockHash;
+    eventRow.blockId = BigInt(this.blockNumber);
+    eventRow.payload = this;
+    eventRow.timestamp = new Date(this.timestamp * 1000);
+    eventRow.organisationAddress = this.organisationAddress;
+    eventRow.kind = this.kind;
+    return eventRow;
   }
 
   toJSON(): any {

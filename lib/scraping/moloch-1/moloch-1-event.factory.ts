@@ -26,7 +26,8 @@ import { DelegateRepository } from "../../storage/delegate.repository";
 import { MOLOCH_NAMES } from "./moloch-names";
 import { HistoryRepository } from "../../storage/history.repository";
 import { SubmitProposalEvent } from "../events/submit-proposal.event";
-import { SubmitVoteEvent, VOTE_DECISION } from "../events/submit-vote.event";
+import { SubmitVoteEvent } from "../events/submit-vote.event";
+import { VOTE_DECISION } from "../../domain/vote-decision";
 
 async function organisationName(address: string): Promise<string> {
   const found = MOLOCH_NAMES.get(address);
@@ -254,17 +255,22 @@ export class Moloch1EventFactory {
     const timestamp = await block.timestamp();
     return logEvents(this.ethereum.codec, extendedBlock, SUBMIT_VOTE_BLOCKCHAIN_EVENT).map(e => {
       const receipt = e.receipt;
-      return new SubmitVoteEvent({
-        platform: PLATFORM.MOLOCH_1,
-        blockHash: receipt.blockHash,
-        blockNumber: receipt.blockNumber,
-        organisationAddress: e.address,
-        proposalIndex: Number(e.proposalIndex),
-        timestamp: timestamp,
-        txid: receipt.transactionHash,
-        voter: e.memberAddress,
-        decision: VOTE_DECISION.fromNumber(Number(e.uintVote))
-      });
+      return new SubmitVoteEvent(
+        {
+          platform: PLATFORM.MOLOCH_1,
+          blockHash: receipt.blockHash,
+          blockNumber: receipt.blockNumber,
+          organisationAddress: e.address,
+          proposalIndex: Number(e.proposalIndex),
+          timestamp: timestamp,
+          txid: receipt.transactionHash,
+          voter: e.memberAddress,
+          decision: VOTE_DECISION.fromNumber(Number(e.uintVote))
+        },
+        this.connectionFactory,
+        this.eventRepository,
+        this.historyRepository
+      );
     });
   }
 }

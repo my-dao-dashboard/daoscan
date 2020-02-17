@@ -19,6 +19,7 @@ import { HistoryRepository } from "../../storage/history.repository";
 import { SetOrganisationNameEvent } from "./set-organisation-name.event";
 import { SubmitProposalEvent } from "./submit-proposal.event";
 import { NotImplementedError } from "../../shared/errors";
+import { SubmitVoteEvent } from "./submit-vote.event";
 
 @Service(ScrapingEventFactory.name)
 export class ScrapingEventFactory {
@@ -83,7 +84,7 @@ export class ScrapingEventFactory {
       case SCRAPING_EVENT_KIND.SUBMIT_PROPOSAL:
         return new SubmitProposalEvent(json, this.connectionFactory, this.eventRepository, this.historyRepository);
       case SCRAPING_EVENT_KIND.SUBMIT_VOTE:
-        throw new NotImplementedError("ScrapingEventFactory:SCRAPING_EVENT_KIND.SUBMIT_VOTE");
+        return new SubmitVoteEvent(json, this.connectionFactory, this.eventRepository, this.historyRepository);
       default:
         throw new UnreachableCaseError(json);
     }

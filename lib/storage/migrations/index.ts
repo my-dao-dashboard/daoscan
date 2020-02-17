@@ -38,3 +38,4 @@ export * from "./1569249296000-DropHistoryTable";
 export * from "./1569249296100-RecreateHistoryTable";
 export * from "./1569249296200-AddDeltaToHistory";
 export * from "./1569249296300-CreateProposals";
+export * from "./1569249296400-CreateVotes";
