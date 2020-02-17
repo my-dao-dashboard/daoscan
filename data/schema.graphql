@@ -14,7 +14,6 @@ type Organisation {
   address: String!
   platform: String!
   name: String!
-  txid: String!
   timestamp: Int
   blockNumber: Int
   totalSupply: Token
