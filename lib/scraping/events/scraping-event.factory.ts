@@ -17,6 +17,8 @@ import { AddDelegateEvent } from "./add-delegate.event";
 import { DelegateRepository } from "../../storage/delegate.repository";
 import { HistoryRepository } from "../../storage/history.repository";
 import { SetOrganisationNameEvent } from "./set-organisation-name.event";
+import { NotImplementedError } from "../../shared/errors";
+import { SubmitProposalEvent } from "./submit-proposal.event";
 
 @Service(ScrapingEventFactory.name)
 export class ScrapingEventFactory {
@@ -78,6 +80,8 @@ export class ScrapingEventFactory {
           this.historyRepository,
           this.eventRepository
         );
+      case SCRAPING_EVENT_KIND.SUBMIT_PROPOSAL:
+        return new SubmitProposalEvent(json, this.connectionFactory, this.eventRepository, this.historyRepository);
       default:
         throw new UnreachableCaseError(json);
     }
@@ -85,9 +89,7 @@ export class ScrapingEventFactory {
 
   async fromBlock(block: Block): Promise<ScrapingEvent[]> {
     const aragonEvents = await this.aragon.fromBlock(block);
-    // TODO Moloch
-    // const molochEvents = await this.moloch.fromBlock(block);
-    // return aragonEvents.concat(molochEvents);
-    return aragonEvents;
+    const molochEvents = await this.moloch.fromBlock(block);
+    return aragonEvents.concat(molochEvents);
   }
 }

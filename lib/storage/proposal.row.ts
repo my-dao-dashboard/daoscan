@@ -1,21 +1,25 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
 import { bigintTransformer } from "./bigint.transformer";
 
-@Entity("delegates")
-export class Delegate {
+@Entity("proposals")
+export class Proposal {
   @PrimaryColumn("bigint", { transformer: bigintTransformer, generated: true })
   // @ts-ignore
   id: bigint;
 
   @Column()
   // @ts-ignore
-  address: string; // delegate address
-
-  @Column()
-  // @ts-ignore
-  delegateFor: string;
+  index: number;
 
   @Column()
   // @ts-ignore
   organisationAddress: string;
+
+  @Column()
+  // @ts-ignore
+  proposer: string;
+
+  @Column({ type: "jsonb" })
+  // @ts-ignore
+  payload: any;
 }

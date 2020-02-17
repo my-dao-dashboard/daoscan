@@ -72,26 +72,6 @@ export class AragonOrganisationCreatedEventFactory {
     return result;
   }
 
-  async fromDeployInstanceEvent(
-    block: Block,
-    event: BlockchainEvent<DeployInstanceParams>
-  ): Promise<OrganisationCreatedEvent[]> {
-    const extendedBlock = await block.extendedBlock();
-    const timestamp = await block.timestamp();
-    return logEvents(this.ethereum.codec, extendedBlock, event).map(e => {
-      const organisationAddress = e.dao;
-      return this.fromJSON({
-        platform: PLATFORM.ARAGON,
-        name: organisationAddress.toLowerCase(),
-        address: organisationAddress.toLowerCase(),
-        txid: e.txid,
-        blockNumber: Number(e.blockNumber),
-        blockHash: block.hash,
-        timestamp: Number(timestamp)
-      });
-    });
-  }
-
   fromJSON(json: OrganisationCreatedEventProps) {
     return new OrganisationCreatedEvent(
       json,

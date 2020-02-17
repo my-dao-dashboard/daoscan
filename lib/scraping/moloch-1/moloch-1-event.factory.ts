@@ -2,7 +2,11 @@ import { Inject, Service } from "typedi";
 import { Block } from "../block";
 import { ScrapingEvent } from "../events/scraping-event";
 import { LogEvent, logEvents } from "../events-from-logs";
-import { SUMMON_COMPLETE_BLOCKCHAIN_EVENT, SummonCompleteParams } from "./summon-complete.blockchain-event";
+import {
+  SUBMIT_PROPOSAL_BLOCKCHAIN_EVENT,
+  SUMMON_COMPLETE_BLOCKCHAIN_EVENT,
+  SummonCompleteParams
+} from "./moloch-1.blockchain-events";
 import { PLATFORM } from "../../domain/platform";
 import { EthereumService } from "../../services/ethereum.service";
 import { OrganisationCreatedEvent } from "../events/organisation-created.event";
@@ -20,6 +24,7 @@ import { AddDelegateEvent, AddDelegateEventProps } from "../events/add-delegate.
 import { DelegateRepository } from "../../storage/delegate.repository";
 import { MOLOCH_NAMES } from "./moloch-names";
 import { HistoryRepository } from "../../storage/history.repository";
+import { SubmitProposalEvent } from "../events/submit-proposal.event";
 
 async function organisationName(address: string): Promise<string> {
   const found = MOLOCH_NAMES.get(address);
@@ -48,12 +53,14 @@ export class Moloch1EventFactory {
     const appInstalledEvents = await this.appInstalledEvents(organisationCreatedEvents);
     const summonerShareTransfer = await this.summonerShareTransfer(block);
     const summonerDelegate = await this.summonerDelegate(block);
+    const proposalEvents = await this.submitProposal(block);
     let result = new Array<ScrapingEvent>();
     return result
       .concat(organisationCreatedEvents)
       .concat(appInstalledEvents)
       .concat(summonerShareTransfer)
-      .concat(summonerDelegate);
+      .concat(summonerDelegate)
+      .concat(proposalEvents);
   }
 
   async summonerDelegate(block: Block): Promise<AddDelegateEvent[]> {
@@ -201,5 +208,40 @@ export class Moloch1EventFactory {
       })
     );
     return events.filter((e, i) => filtered[i]);
+  }
+
+  async submitProposal(block: Block) {
+    const extendedBlock = await block.extendedBlock();
+    const timestamp = await block.timestamp();
+    return logEvents(this.ethereum.codec, extendedBlock, SUBMIT_PROPOSAL_BLOCKCHAIN_EVENT).map(e => {
+      const receipt = e.receipt;
+      const abi = [
+        { name: "applicant", type: "address" },
+        { name: "tokenTribute", type: "uint256" },
+        { name: "sharesRequested", type: "uint256" },
+        { name: "details", type: "string" }
+      ];
+      const parameters = this.ethereum.codec.decodeParameters(abi, "0x" + receipt.input.slice(10));
+      return new SubmitProposalEvent(
+        {
+          index: Number(e.proposalIndex),
+          proposer: e.memberAddress,
+          timestamp: timestamp,
+          txid: e.txid,
+          blockNumber: e.blockNumber,
+          organisationAddress: e.address,
+          blockHash: block.hash,
+          platform: PLATFORM.MOLOCH_1,
+          payload: {
+            description: parameters.details,
+            sharesRequested: e.sharesRequested,
+            tribute: e.tokenTribute
+          }
+        },
+        this.connectionFactory,
+        this.eventRepository,
+        this.historyRepository
+      );
+    });
   }
 }
