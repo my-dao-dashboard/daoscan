@@ -14,8 +14,6 @@ type Organisation {
   address: String!
   platform: String!
   name: String!
-  timestamp: Int
-  blockNumber: Int
   totalSupply: Token
   shareValue(symbol: String!): Token!
   bank: [Token]
