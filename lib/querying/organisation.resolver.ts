@@ -8,6 +8,8 @@ import { Organisation } from "../domain/organisation";
 import { OrganisationFactory } from "../domain/organisation.factory";
 import { IToken } from "../domain/token.interface";
 import { Participant } from "../domain/participant";
+import { ProposalRepository } from "../storage/proposal.repository";
+import { ProposalFactory } from "../domain/proposal.factory";
 
 @Service(OrganisationResolver.name)
 export class OrganisationResolver {
@@ -15,7 +17,9 @@ export class OrganisationResolver {
     @Inject(EthereumService.name) private readonly ethereum: EthereumService,
     @Inject(MembershipRepository.name) private readonly membershipRepository: MembershipRepository,
     @Inject(BalanceService.name) private readonly balance: BalanceService,
-    @Inject(OrganisationFactory.name) private readonly organisationFactory: OrganisationFactory
+    @Inject(OrganisationFactory.name) private readonly organisationFactory: OrganisationFactory,
+    @Inject(ProposalRepository.name) private readonly proposalRepository: ProposalRepository,
+    @Inject(ProposalFactory.name) private readonly proposalFactory: ProposalFactory
   ) {}
 
   @bind()
@@ -53,6 +57,13 @@ export class OrganisationResolver {
     } else {
       return null;
     }
+  }
+
+  @bind()
+  async proposals(root: Organisation) {
+    const rows = await this.proposalRepository.allByOrganisation(root.address);
+    const promised = rows.map(r => this.proposalFactory.fromRow(r));
+    return Promise.all(promised);
   }
 
   @bind()

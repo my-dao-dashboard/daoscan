@@ -38,6 +38,14 @@ async function organisationName(address: string): Promise<string> {
   }
 }
 
+function parseDetails(details: any) {
+  try {
+    return JSON.parse(details);
+  } catch {
+    return details;
+  }
+}
+
 @Service(Moloch1EventFactory.name)
 export class Moloch1EventFactory {
   constructor(
@@ -238,7 +246,8 @@ export class Moloch1EventFactory {
           blockHash: block.hash,
           platform: PLATFORM.MOLOCH_1,
           payload: {
-            description: parameters.details,
+            applicant: e.applicant,
+            description: parseDetails(parameters.details),
             sharesRequested: e.sharesRequested,
             tribute: e.tokenTribute
           }

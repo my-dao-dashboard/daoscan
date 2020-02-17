@@ -1,3 +1,5 @@
+scalar JSON
+
 type Participant {
   address: String!
   shares: Token
@@ -8,6 +10,13 @@ type Token {
   symbol: String
   amount: String!
   decimals: Int!
+}
+
+type Proposal {
+  index: Int!
+  proposer: String!
+  createdAt: String
+  payload: JSON
 }
 
 type Organisation {
@@ -22,6 +31,7 @@ type Organisation {
   bank: [Token]
   participants: [Participant]
   participant(address: String!): Participant
+  proposals: [Proposal]
 }
 
 type Account {
