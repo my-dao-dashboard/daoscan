@@ -19,7 +19,8 @@ export class ProposalFactory {
       proposer: row.proposer,
       createdAt: eventRow.timestamp,
       payload: row.payload,
-      organisationAddress: row.organisationAddress
+      organisationAddress: row.organisationAddress,
+      status: row.status
     });
   }
 }

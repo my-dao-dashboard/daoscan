@@ -1,5 +1,6 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
 import { bigintTransformer } from "./bigint.transformer";
+import { PROPOSAL_STATUS } from "../domain/proposal";
 
 @Entity("proposals")
 export class Proposal {
@@ -22,4 +23,8 @@ export class Proposal {
   @Column({ type: "jsonb" })
   // @ts-ignore
   payload: any;
+
+  @Column({ type: "enum", enum: PROPOSAL_STATUS })
+  // @ts-ignore
+  status: PROPOSAL_STATUS;
 }

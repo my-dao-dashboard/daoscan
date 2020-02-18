@@ -8,6 +8,7 @@ import { History } from "../../storage/history.row";
 import { RESOURCE_KIND } from "../../storage/resource.kind";
 import { EventRepository } from "../../storage/event.repository";
 import { HistoryRepository } from "../../storage/history.repository";
+import { PROPOSAL_STATUS } from "../../domain/proposal";
 
 export interface SubmitProposalEventProps {
   index: number;
@@ -50,6 +51,7 @@ export class SubmitProposalEvent implements IScrapingEvent, SubmitProposalEventP
     proposalRow.organisationAddress = this.organisationAddress;
     proposalRow.proposer = this.proposer;
     proposalRow.payload = this.payload;
+    proposalRow.status = PROPOSAL_STATUS.ACTIVE;
 
     const historyRow = new History();
     historyRow.resourceKind = RESOURCE_KIND.PROPOSAL;

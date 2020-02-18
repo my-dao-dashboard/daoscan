@@ -39,3 +39,4 @@ export * from "./1569249296100-RecreateHistoryTable";
 export * from "./1569249296200-AddDeltaToHistory";
 export * from "./1569249296300-CreateProposals";
 export * from "./1569249296400-CreateVotes";
+export * from "./1569249296500-AddStatusToProposal";

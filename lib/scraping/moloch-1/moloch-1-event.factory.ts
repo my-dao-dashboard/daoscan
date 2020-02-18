@@ -3,6 +3,7 @@ import { Block } from "../block";
 import { ScrapingEvent } from "../events/scraping-event";
 import { LogEvent, logEvents } from "../events-from-logs";
 import {
+  PROCESS_PROPOSAL_BLOCKCHAIN_EVENT,
   SUBMIT_PROPOSAL_BLOCKCHAIN_EVENT,
   SUBMIT_VOTE_BLOCKCHAIN_EVENT,
   SUMMON_COMPLETE_BLOCKCHAIN_EVENT,
@@ -28,6 +29,8 @@ import { HistoryRepository } from "../../storage/history.repository";
 import { SubmitProposalEvent } from "../events/submit-proposal.event";
 import { SubmitVoteEvent } from "../events/submit-vote.event";
 import { VOTE_DECISION } from "../../domain/vote-decision";
+import { ProcessProposalEvent } from "../events/process-proposal.event";
+import { ProposalRepository } from "../../storage/proposal.repository";
 
 async function organisationName(address: string): Promise<string> {
   const found = MOLOCH_NAMES.get(address);
@@ -56,7 +59,8 @@ export class Moloch1EventFactory {
     @Inject(ApplicationRepository.name) private readonly applicationRepository: ApplicationRepository,
     @Inject(MembershipRepository.name) private readonly membershipRepository: MembershipRepository,
     @Inject(DelegateRepository.name) private readonly delegateRepository: DelegateRepository,
-    @Inject(HistoryRepository.name) private readonly historyRepository: HistoryRepository
+    @Inject(HistoryRepository.name) private readonly historyRepository: HistoryRepository,
+    @Inject(ProposalRepository.name) private readonly proposalRepository: ProposalRepository
   ) {}
 
   async fromBlock(block: Block): Promise<ScrapingEvent[]> {
@@ -66,6 +70,8 @@ export class Moloch1EventFactory {
     const summonerDelegate = await this.summonerDelegate(block);
     const proposalEvents = await this.submitProposal(block);
     const votes = await this.submitVote(block);
+    const processProposal = await this.processProposal(block);
+    const shareTransferAfterProposal = await this.shareTransferAfterProposalProcessed(processProposal);
     let result = new Array<ScrapingEvent>();
     return result
       .concat(organisationCreatedEvents)
@@ -73,7 +79,9 @@ export class Moloch1EventFactory {
       .concat(summonerShareTransfer)
       .concat(summonerDelegate)
       .concat(proposalEvents)
-      .concat(votes);
+      .concat(votes)
+      .concat(processProposal)
+      .concat(shareTransferAfterProposal);
   }
 
   async summonerDelegate(block: Block): Promise<AddDelegateEvent[]> {
@@ -276,6 +284,58 @@ export class Moloch1EventFactory {
           voter: e.memberAddress,
           decision: VOTE_DECISION.fromNumber(Number(e.uintVote))
         },
+        this.connectionFactory,
+        this.eventRepository,
+        this.historyRepository
+      );
+    });
+  }
+
+  async shareTransferAfterProposalProcessed(events: ProcessProposalEvent[]) {
+    const transferEvents = events
+      .filter(e => e.didPass)
+      .map(async e => {
+        const proposal = await this.proposalRepository.byOrganisationAndIndex(e.organisationAddress, e.index);
+        return new ShareTransferEvent(
+          {
+            amount: proposal?.payload.sharesRequested,
+            blockHash: e.blockHash,
+            blockNumber: e.blockNumber,
+            from: ZERO_ADDRESS,
+            logIndex: e.logIndex,
+            organisationAddress: e.organisationAddress,
+            platform: PLATFORM.MOLOCH_1,
+            shareAddress: e.organisationAddress,
+            timestamp: e.timestamp,
+            to: proposal?.payload.applicant,
+            txid: e.txid
+          },
+          this.eventRepository,
+          this.membershipRepository,
+          this.connectionFactory,
+          this.historyRepository
+        );
+      });
+    return Promise.all(transferEvents);
+  }
+
+  async processProposal(block: Block): Promise<ProcessProposalEvent[]> {
+    const extendedBlock = await block.extendedBlock();
+    const timestamp = await block.timestamp();
+    return logEvents(this.ethereum.codec, extendedBlock, PROCESS_PROPOSAL_BLOCKCHAIN_EVENT).map(e => {
+      return new ProcessProposalEvent(
+        {
+          index: Number(e.proposalIndex),
+          organisationAddress: e.address,
+          didPass: Boolean(e.didPass),
+          blockHash: block.hash,
+          blockNumber: Number(block.id),
+          platform: PLATFORM.MOLOCH_1,
+          timestamp: timestamp,
+          txid: e.txid,
+          logIndex: e.logIndex
+        },
+        this.proposalRepository,
         this.connectionFactory,
         this.eventRepository,
         this.historyRepository

@@ -50,3 +50,24 @@ export const SUBMIT_VOTE_BLOCKCHAIN_EVENT: BlockchainEvent<SubmitVoteParams> = {
     { indexed: false, name: "uintVote", type: "uint8" }
   ]
 };
+
+export interface ProcessProposalParams {
+  proposalIndex: string;
+  applicant: string;
+  memberAddress: string;
+  tokenTribute: string;
+  sharesRequested: string;
+  didPass: boolean;
+}
+
+export const PROCESS_PROPOSAL_BLOCKCHAIN_EVENT: BlockchainEvent<ProcessProposalParams> = {
+  signature: "0x3f6fc303a82367bb4947244ba21c569a5ed2e870610f1a693366142309d7cbea",
+  abi: [
+    { indexed: true, name: "proposalIndex", type: "uint256" },
+    { indexed: true, name: "applicant", type: "address" },
+    { indexed: true, name: "memberAddress", type: "address" },
+    { indexed: false, name: "tokenTribute", type: "uint256" },
+    { indexed: false, name: "sharesRequested", type: "uint256" },
+    { indexed: false, name: "didPass", type: "bool" }
+  ]
+};
