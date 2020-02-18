@@ -71,3 +71,16 @@ export const PROCESS_PROPOSAL_BLOCKCHAIN_EVENT: BlockchainEvent<ProcessProposalP
     { indexed: false, name: "didPass", type: "bool" }
   ]
 };
+
+export interface UpdateDelegateKeysParams {
+  memberAddress: string;
+  newDelegateKey: string;
+}
+
+export const UPDATE_DELEGATE_KEY_BLOCKCHAIN_EVENT: BlockchainEvent<UpdateDelegateKeysParams> = {
+  signature: "0xde7b64a369e10562cc2e71f0f1f944eaf144b75fead6ecb51fac9c4dd6934885",
+  abi: [
+    { indexed: true, name: "memberAddress", type: "address" },
+    { indexed: false, name: "newDelegateKey", type: "address" }
+  ]
+};

@@ -7,7 +7,8 @@ import {
   SUBMIT_PROPOSAL_BLOCKCHAIN_EVENT,
   SUBMIT_VOTE_BLOCKCHAIN_EVENT,
   SUMMON_COMPLETE_BLOCKCHAIN_EVENT,
-  SummonCompleteParams
+  SummonCompleteParams,
+  UPDATE_DELEGATE_KEY_BLOCKCHAIN_EVENT
 } from "./moloch-1.blockchain-events";
 import { PLATFORM } from "../../domain/platform";
 import { EthereumService } from "../../services/ethereum.service";
@@ -72,6 +73,7 @@ export class Moloch1EventFactory {
     const votes = await this.submitVote(block);
     const processProposal = await this.processProposal(block);
     const shareTransferAfterProposal = await this.shareTransferAfterProposalProcessed(processProposal);
+    const updateDelegateKey = await this.updateDelegateKey(block);
     let result = new Array<ScrapingEvent>();
     return result
       .concat(organisationCreatedEvents)
@@ -81,7 +83,8 @@ export class Moloch1EventFactory {
       .concat(proposalEvents)
       .concat(votes)
       .concat(processProposal)
-      .concat(shareTransferAfterProposal);
+      .concat(shareTransferAfterProposal)
+      .concat(updateDelegateKey);
   }
 
   async summonerDelegate(block: Block): Promise<AddDelegateEvent[]> {
@@ -336,6 +339,29 @@ export class Moloch1EventFactory {
           logIndex: e.logIndex
         },
         this.proposalRepository,
+        this.connectionFactory,
+        this.eventRepository,
+        this.historyRepository
+      );
+    });
+  }
+
+  async updateDelegateKey(block: Block) {
+    const extendedBlock = await block.extendedBlock();
+    const timestampDate = await block.timestampDate();
+    return logEvents(this.ethereum.codec, extendedBlock, UPDATE_DELEGATE_KEY_BLOCKCHAIN_EVENT).map(e => {
+      return new AddDelegateEvent(
+        {
+          address: e.newDelegateKey,
+          blockHash: block.hash,
+          blockNumber: Number(block.id),
+          delegateFor: e.memberAddress,
+          logIndex: e.logIndex,
+          organisationAddress: e.receipt.to,
+          platform: PLATFORM.MOLOCH_1,
+          timestamp: timestampDate,
+          txid: e.txid
+        },
         this.connectionFactory,
         this.eventRepository,
         this.historyRepository
