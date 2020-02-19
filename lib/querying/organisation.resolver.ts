@@ -1,7 +1,6 @@
 import { Inject, Service } from "typedi";
 import { bind } from "decko";
 import { EthereumService } from "../services/ethereum.service";
-import { ParticipantPresentation } from "./participant.presentation";
 import { MembershipRepository } from "../storage/membership.repository";
 import { BalanceService } from "./balance.service";
 import { Organisation } from "../domain/organisation";
@@ -11,6 +10,7 @@ import { ProposalFactory } from "../domain/proposal.factory";
 import { OrganisationService } from "../domain/organisation.service";
 import { OrganisationParticipantConnection } from "./organisation-participant-connection";
 import { Token } from "../domain/token";
+import { Participant } from "../domain/participant";
 
 @Service(OrganisationResolver.name)
 export class OrganisationResolver {
@@ -40,13 +40,11 @@ export class OrganisationResolver {
   }
 
   @bind()
-  async participant(root: Organisation, args: { address: string }): Promise<ParticipantPresentation | null> {
+  async participant(root: Organisation, args: { address: string }): Promise<Participant | null> {
     const participantAddress = await this.ethereum.canonicalAddress(args.address);
-    const shares = await root.shares();
     const participant = await this.membershipRepository.byAddressInOrganisation(root.address, participantAddress);
-    if (participant && shares) {
-      const balance = await shares.balanceOf(participantAddress);
-      return new ParticipantPresentation(participantAddress, balance);
+    if (participant) {
+      return new Participant(participantAddress, root);
     } else {
       return null;
     }
