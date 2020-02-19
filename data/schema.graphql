@@ -27,6 +27,7 @@ type Token {
   symbol: String
   amount: String!
   decimals: Int!
+  value(symbol: String!): Token
 }
 
 type Proposal {

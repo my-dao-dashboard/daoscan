@@ -39,8 +39,12 @@ export class Shares implements IToken {
   async usdValue(): Promise<number> {
     const perTokenPromised = this.bank.map(async token => {
       const usdPrice = await this.messari.usdPrice(token.symbol);
-      const realAmount = new BigNumber(token.amount).div(10 ** token.decimals).toNumber();
-      return usdPrice * realAmount;
+      if (usdPrice) {
+        const realAmount = new BigNumber(token.amount).div(10 ** token.decimals).toNumber();
+        return usdPrice * realAmount;
+      } else {
+        return 0;
+      }
     });
     const perToken = await Promise.all<number>(perTokenPromised);
     const totalUsd = perToken.reduce((acc, n) => acc + n, 0);
@@ -48,16 +52,20 @@ export class Shares implements IToken {
     return new BigNumber(totalUsd).div(sharesNumber).toNumber();
   }
 
-  async value(symbol: string): Promise<IToken> {
+  async value(symbol: string): Promise<IToken | undefined> {
     const assetPrice = await this.messari.usdPrice(symbol);
     const usdValue = await this.usdValue();
-    const assetAmount = usdValue / assetPrice;
-    const amount = (assetAmount * 10 ** 4).toFixed(0);
-    return {
-      name: symbol,
-      symbol: symbol,
-      amount: amount,
-      decimals: 4
-    };
+    if (assetPrice) {
+      const assetAmount = usdValue / assetPrice;
+      const amount = (assetAmount * 10 ** 4).toFixed(0);
+      return {
+        name: symbol,
+        symbol: symbol,
+        amount: amount,
+        decimals: 4
+      };
+    } else {
+      return undefined;
+    }
   }
 }

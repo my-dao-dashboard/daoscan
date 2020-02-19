@@ -10,6 +10,7 @@ import { OrganisationResolver } from "./organisation.resolver";
 import { GlobalStatsResolver } from "./global-stats.resolver";
 import { ParticipantResolver } from "./participant.resolver";
 import { ProposalResolver } from "./proposal.resolver";
+import { TokenResolver } from "./token.resolver";
 
 @Service(GraphqlController.name)
 export class GraphqlController {
@@ -20,7 +21,8 @@ export class GraphqlController {
     @Inject(OrganisationResolver.name) private readonly organisationResolver: OrganisationResolver,
     @Inject(GlobalStatsResolver.name) private readonly globalStatsResolver: GlobalStatsResolver,
     @Inject(ParticipantResolver.name) private readonly participantResolver: ParticipantResolver,
-    @Inject(ProposalResolver.name) private readonly proposalResolver: ProposalResolver
+    @Inject(ProposalResolver.name) private readonly proposalResolver: ProposalResolver,
+    @Inject(TokenResolver.name) private readonly tokenResolver: TokenResolver
   ) {
     const server = new ApolloServer({
       schema: this.schema(),
@@ -80,6 +82,9 @@ export class GraphqlController {
       },
       Proposal: {
         votes: this.proposalResolver.votes
+      },
+      Token: {
+        value: this.tokenResolver.value
       }
     };
   }
