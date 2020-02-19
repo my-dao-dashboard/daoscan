@@ -6,11 +6,11 @@ import { MembershipRepository } from "../storage/membership.repository";
 import { BalanceService } from "./balance.service";
 import { Organisation } from "../domain/organisation";
 import { OrganisationFactory } from "../domain/organisation.factory";
-import { IToken } from "../domain/token.interface";
 import { ProposalRepository } from "../storage/proposal.repository";
 import { ProposalFactory } from "../domain/proposal.factory";
 import { OrganisationService } from "../domain/organisation.service";
 import { OrganisationParticipantConnection } from "./organisation-participant-connection";
+import { Token } from "../domain/token";
 
 @Service(OrganisationResolver.name)
 export class OrganisationResolver {
@@ -35,27 +35,18 @@ export class OrganisationResolver {
   }
 
   @bind()
-  async bank(root: Organisation) {
+  async bank(root: Organisation): Promise<Token[]> {
     return root.bank();
-  }
-
-  @bind()
-  async shareValue(root: Organisation, args: { symbol: string }): Promise<IToken | undefined> {
-    const shares = await root.shares();
-    if (shares) {
-      return shares.value(args.symbol);
-    }
   }
 
   @bind()
   async participant(root: Organisation, args: { address: string }): Promise<ParticipantPresentation | null> {
     const participantAddress = await this.ethereum.canonicalAddress(args.address);
     const shares = await root.shares();
-    const token = shares?.token;
     const participant = await this.membershipRepository.byAddressInOrganisation(root.address, participantAddress);
-    if (participant && token) {
-      const shares = await this.balance.balanceOf(participantAddress, token);
-      return new ParticipantPresentation(participantAddress, shares);
+    if (participant && shares) {
+      const balance = await shares.balanceOf(participantAddress);
+      return new ParticipantPresentation(participantAddress, balance);
     } else {
       return null;
     }

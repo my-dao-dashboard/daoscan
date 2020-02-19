@@ -3,10 +3,14 @@ import { EthereumService } from "../services/ethereum.service";
 import { Contract } from "web3-eth-contract";
 import { KNOWN_TOKENS } from "./known-tokens";
 import { Token } from "../domain/token";
+import { MessariService } from "./messari.service";
 
 @Service(BalanceService.name)
 export class BalanceService {
-  constructor(@Inject(EthereumService.name) private readonly ethereum: EthereumService) {}
+  constructor(
+    @Inject(EthereumService.name) private readonly ethereum: EthereumService,
+    @Inject(MessariService.name) private readonly messari: MessariService
+  ) {}
 
   get tokenContracts(): Contract[] {
     return KNOWN_TOKENS.map(t => {
@@ -16,12 +20,15 @@ export class BalanceService {
 
   async ethBalance(address: string): Promise<Token> {
     const ethBalance = await this.ethereum.balance(address);
-    return new Token({
-      name: "ETH",
-      symbol: "ETH",
-      decimals: 18,
-      amount: ethBalance
-    });
+    return new Token(
+      {
+        name: "ETH",
+        symbol: "ETH",
+        decimals: 18,
+        amount: ethBalance
+      },
+      this.messari
+    );
   }
 
   async balanceOf(address: string, contract: Contract): Promise<Token> {
@@ -33,12 +40,15 @@ export class BalanceService {
       : this.ethereum.codec.decodeString(await contract.methods.symbol().call());
     const amount = await contract.methods.balanceOf(address).call();
     const decimals = await contract.methods.decimals().call();
-    return new Token({
-      name: name,
-      symbol: symbol,
-      decimals: Number(decimals),
-      amount: amount
-    });
+    return new Token(
+      {
+        name: name,
+        symbol: symbol,
+        decimals: Number(decimals),
+        amount: amount
+      },
+      this.messari
+    );
   }
 
   async tokenBalances(address: string): Promise<Token[]> {

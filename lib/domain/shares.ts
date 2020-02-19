@@ -1,21 +1,31 @@
-import { IToken } from "./token.interface";
-import BigNumber from "bignumber.js";
 import { MessariService } from "../querying/messari.service";
 import { Contract } from "web3-eth-contract";
 import { PLATFORM } from "./platform";
 import { UnreachableCaseError } from "../shared/unreachable-case-error";
+import { Token } from "./token";
+import BigNumber from "bignumber.js";
 
-export class Shares implements IToken {
-  constructor(
-    readonly decimals: number,
-    readonly amount: string,
-    readonly symbol: string,
-    readonly name: string,
-    readonly token: Contract,
-    readonly platform: PLATFORM,
-    private readonly bank: IToken[],
-    private readonly messari: MessariService
-  ) {}
+interface Props {
+  name: string;
+  symbol: string;
+  decimals: number;
+  amount: string;
+  token: Contract;
+  platform: PLATFORM;
+  bank: Token[];
+}
+
+export class Shares extends Token {
+  private readonly platform: PLATFORM;
+  private readonly token: Contract;
+  private readonly bank: Token[];
+
+  constructor(props: Props, messari: MessariService) {
+    super(props, messari);
+    this.platform = props.platform;
+    this.token = props.token;
+    this.bank = props.bank;
+  }
 
   async balanceOf(participantAddress: string) {
     switch (this.platform) {
@@ -52,18 +62,21 @@ export class Shares implements IToken {
     return new BigNumber(totalUsd).div(sharesNumber).toNumber();
   }
 
-  async value(symbol: string): Promise<IToken | undefined> {
+  async value(symbol: string): Promise<Token | undefined> {
     const assetPrice = await this.messari.usdPrice(symbol);
     const usdValue = await this.usdValue();
     if (assetPrice) {
       const assetAmount = usdValue / assetPrice;
       const amount = (assetAmount * 10 ** 4).toFixed(0);
-      return {
-        name: symbol,
-        symbol: symbol,
-        amount: amount,
-        decimals: 4
-      };
+      return new Token(
+        {
+          name: symbol,
+          symbol: symbol,
+          amount: amount,
+          decimals: 4
+        },
+        this.messari
+      );
     } else {
       return undefined;
     }
