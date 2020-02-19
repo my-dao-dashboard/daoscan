@@ -2,6 +2,7 @@ import { Organisation as OrganisationRow } from "../storage/organisation.row";
 import { Shares } from "./shares";
 import { IToken } from "./token.interface";
 import { OrganisationService } from "./organisation.service";
+import { Memoize } from "typescript-memoize";
 
 export class Organisation {
   readonly address = this.row.address;
@@ -10,10 +11,12 @@ export class Organisation {
 
   constructor(private readonly row: OrganisationRow, private readonly service: OrganisationService) {}
 
+  @Memoize()
   shares(): Promise<Shares | undefined> {
     return this.service.shares(this.platform, this.address, this.name);
   }
 
+  @Memoize()
   async bank(): Promise<IToken[]> {
     return this.service.bank(this.platform, this.address);
   }

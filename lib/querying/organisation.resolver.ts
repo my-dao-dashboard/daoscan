@@ -10,8 +10,7 @@ import { IToken } from "../domain/token.interface";
 import { ProposalRepository } from "../storage/proposal.repository";
 import { ProposalFactory } from "../domain/proposal.factory";
 import { OrganisationService } from "../domain/organisation.service";
-import { ParticipantConnection } from "./participant-connection";
-import { ParticipantConnectionService } from "./participant-connection.service";
+import { OrganisationParticipantConnection } from "./organisation-participant-connection";
 
 @Service(OrganisationResolver.name)
 export class OrganisationResolver {
@@ -22,9 +21,7 @@ export class OrganisationResolver {
     @Inject(OrganisationFactory.name) private readonly organisationFactory: OrganisationFactory,
     @Inject(ProposalRepository.name) private readonly proposalRepository: ProposalRepository,
     @Inject(ProposalFactory.name) private readonly proposalFactory: ProposalFactory,
-    @Inject(OrganisationService.name) private readonly organisationService: OrganisationService,
-    @Inject(ParticipantConnectionService.name)
-    private readonly participantConnectionService: ParticipantConnectionService
+    @Inject(OrganisationService.name) private readonly organisationService: OrganisationService
   ) {}
 
   @bind()
@@ -83,25 +80,6 @@ export class OrganisationResolver {
 
   @bind()
   async participants(root: Organisation, args: { first?: number; after?: string }) {
-    const first = args.first || 25;
-    return new ParticipantConnection(root, first, args.after, this.participantConnectionService);
-    // const connection = await this.organisationService.participantsConnection(root, first, args.after);
-    // console.log(connection)
-    // const participants = await root.participants();
-    // const lastOne = participants[participants.length - 1];
-    // const endCursor = lastOne ? Buffer.from(lastOne.address).toString("base64") : null;
-    // return {
-    //   totalCount: participants.length,
-    //   edges: participants.map(p => {
-    //     return {
-    //       node: p,
-    //       cursor: Buffer.from(p.address).toString("base64")
-    //     };
-    //   }),
-    //   pageInfo: {
-    //     endCursor: endCursor,
-    //     hasNextPage: false
-    //   }
-    // };
+    return new OrganisationParticipantConnection(root, args.first, args.after, this.membershipRepository);
   }
 }

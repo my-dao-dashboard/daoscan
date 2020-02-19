@@ -42,7 +42,7 @@ type ParticipantConnectionEdge {
   cursor: String
 }
 
-type ParticipantConnection {
+type OrganisationParticipantConnection {
   totalCount: Int!
   edges: [ParticipantConnectionEdge]
   pageInfo: PageInfo
@@ -58,7 +58,7 @@ type Organisation {
   totalSupply: Token
   shareValue(symbol: String!): Token!
   bank: [Token]
-  participants(first: Int, after: String): ParticipantConnection
+  participants(first: Int, after: String): OrganisationParticipantConnection
   participant(address: String!): Participant
   proposals: [Proposal]
   proposal(index: Int): Proposal
