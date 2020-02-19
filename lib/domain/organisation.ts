@@ -2,7 +2,6 @@ import { Organisation as OrganisationRow } from "../storage/organisation.row";
 import { Shares } from "./shares";
 import { IToken } from "./token.interface";
 import { OrganisationService } from "./organisation.service";
-import { Participant } from "./participant";
 
 export class Organisation {
   readonly address = this.row.address;
@@ -21,9 +20,5 @@ export class Organisation {
 
   async participant(participantAddress: string) {
     return this.service.participant(this, participantAddress);
-  }
-
-  async participants(): Promise<Participant[]> {
-    return this.service.participants(this);
   }
 }

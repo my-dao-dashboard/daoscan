@@ -1,6 +1,7 @@
 import { Inject, Service } from "typedi";
 import { RepositoryFactory } from "./repository.factory";
 import { Membership } from "./membership.row";
+import { MoreThan } from "typeorm";
 
 @Service(MembershipRepository.name)
 export class MembershipRepository {
@@ -35,11 +36,34 @@ export class MembershipRepository {
     return records.map(r => r.organisationAddress);
   }
 
-  async allByOrganisationAddress(organisationAddress: string) {
+  async countByOrganisationAddress(organisationAddress: string) {
     const repository = await this.repositoryFactory.reading(Membership);
-    return repository.find({
-      organisationAddress: organisationAddress
-    });
+    const raw = await repository
+      .createQueryBuilder("membership")
+      .select('count(distinct ("accountAddress"))', "count")
+      .where("membership.organisationAddress = :organisationAddress", { organisationAddress })
+      .getRawOne();
+    return Number(raw.count);
+  }
+
+  async allByOrganisationAddress(
+    organisationAddress: string,
+    first: number,
+    after: string | undefined
+  ): Promise<string[]> {
+    const repository = await this.repositoryFactory.reading(Membership);
+    let query = repository
+      .createQueryBuilder("membership")
+      .where({ organisationAddress: organisationAddress })
+      .groupBy("membership.accountAddress")
+      .orderBy("membership.accountAddress", "ASC")
+      .select("membership.accountAddress", "accountAddress")
+      .limit(first);
+    if (after) {
+      query = query.andWhere("membership.accountAddress > :after", { after: after });
+    }
+    const records = await query.getRawMany();
+    return records.map(r => r.accountAddress);
   }
 
   async byAddressInOrganisation(organisationAddress: string, accountAddress: string): Promise<Membership | undefined> {

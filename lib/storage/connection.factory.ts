@@ -26,7 +26,7 @@ export class ConnectionFactory {
       url: this.readingConnectionUrl,
       migrationsRun: false,
       entities: [`${path.join(__dirname, "./*.row.{ts,js}")}`],
-      logging: false
+      logging: true
     });
   }
 
@@ -39,7 +39,7 @@ export class ConnectionFactory {
       migrationsRun: true,
       migrations: Object.values(migrations),
       entities: [`${path.join(__dirname, "./*.row.{ts,js}")}`],
-      logging: false
+      logging: true
     });
   }
 }

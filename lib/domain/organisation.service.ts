@@ -56,9 +56,4 @@ export class OrganisationService {
       return undefined;
     }
   }
-
-  async participants(organisation: Organisation) {
-    const raw = await this.membershipRepository.allByOrganisationAddress(organisation.address);
-    return raw.map(r => new Participant(r.accountAddress, organisation));
-  }
 }

@@ -6,6 +6,11 @@ enum Decision {
   ABSTAIN
 }
 
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean
+}
+
 type Vote {
   createdAt: String
   voter: Participant
@@ -32,6 +37,17 @@ type Proposal {
   votes: [Vote]
 }
 
+type ParticipantConnectionEdge {
+  node: Participant
+  cursor: String
+}
+
+type ParticipantConnection {
+  totalCount: Int!
+  edges: [ParticipantConnectionEdge]
+  pageInfo: PageInfo
+}
+
 type Organisation {
   address: String!
   platform: String!
@@ -42,7 +58,7 @@ type Organisation {
   totalSupply: Token
   shareValue(symbol: String!): Token!
   bank: [Token]
-  participants: [Participant]
+  participants(first: Int, after: String): ParticipantConnection
   participant(address: String!): Participant
   proposals: [Proposal]
   proposal(index: Int): Proposal
