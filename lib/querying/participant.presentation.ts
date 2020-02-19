@@ -1,5 +1,5 @@
-import { TokenPresentation } from "./token.presentation";
+import { Token } from "../domain/token";
 
 export class ParticipantPresentation {
-  constructor(readonly address: string, readonly shares: TokenPresentation) {}
+  constructor(readonly address: string, readonly shares: Token) {}
 }
