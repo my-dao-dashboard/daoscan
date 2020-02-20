@@ -1,3 +1,22 @@
+scalar JSON
+
+enum Decision {
+  YES
+  NO
+  ABSTAIN
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean
+}
+
+type Vote {
+  createdAt: String
+  voter: Participant
+  decision: Decision
+}
+
 type Participant {
   address: String!
   shares: Token
@@ -8,6 +27,26 @@ type Token {
   symbol: String
   amount: String!
   decimals: Int!
+  value(symbol: String!): Token
+}
+
+type Proposal {
+  index: Int!
+  proposer: String!
+  createdAt: String
+  payload: JSON
+  votes: [Vote]
+}
+
+type ParticipantConnectionEdge {
+  node: Participant
+  cursor: String
+}
+
+type OrganisationParticipantConnection {
+  totalCount: Int!
+  edges: [ParticipantConnectionEdge]
+  pageInfo: PageInfo
 }
 
 type Organisation {
@@ -15,10 +54,11 @@ type Organisation {
   platform: String!
   name: String!
   totalSupply: Token
-  shareValue(symbol: String!): Token!
   bank: [Token]
-  participants: [Participant]
+  participants(first: Int, after: String): OrganisationParticipantConnection
   participant(address: String!): Participant
+  proposals: [Proposal]
+  proposal(index: Int): Proposal
 }
 
 type Account {

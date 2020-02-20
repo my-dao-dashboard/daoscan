@@ -17,6 +17,11 @@ import { AddDelegateEvent } from "./add-delegate.event";
 import { DelegateRepository } from "../../storage/delegate.repository";
 import { HistoryRepository } from "../../storage/history.repository";
 import { SetOrganisationNameEvent } from "./set-organisation-name.event";
+import { SubmitProposalEvent } from "./submit-proposal.event";
+import { NotImplementedError } from "../../shared/errors";
+import { SubmitVoteEvent } from "./submit-vote.event";
+import { ProcessProposalEvent } from "./process-proposal.event";
+import { ProposalRepository } from "../../storage/proposal.repository";
 
 @Service(ScrapingEventFactory.name)
 export class ScrapingEventFactory {
@@ -29,7 +34,8 @@ export class ScrapingEventFactory {
     @Inject(MembershipRepository.name) private readonly membershipRepository: MembershipRepository,
     @Inject(DelegateRepository.name) private readonly delegateRepository: DelegateRepository,
     @Inject(HistoryRepository.name) private readonly historyRepository: HistoryRepository,
-    @Inject(ConnectionFactory.name) private readonly connectionFactory: ConnectionFactory
+    @Inject(ConnectionFactory.name) private readonly connectionFactory: ConnectionFactory,
+    @Inject(ProposalRepository.name) private readonly proposalRepository: ProposalRepository
   ) {}
 
   async fromStorage(eventId: bigint): Promise<ScrapingEvent | undefined> {
@@ -78,6 +84,18 @@ export class ScrapingEventFactory {
           this.historyRepository,
           this.eventRepository
         );
+      case SCRAPING_EVENT_KIND.SUBMIT_PROPOSAL:
+        return new SubmitProposalEvent(json, this.connectionFactory, this.eventRepository, this.historyRepository);
+      case SCRAPING_EVENT_KIND.SUBMIT_VOTE:
+        return new SubmitVoteEvent(json, this.connectionFactory, this.eventRepository, this.historyRepository);
+      case SCRAPING_EVENT_KIND.PROCESS_PROPOSAL:
+        return new ProcessProposalEvent(
+          json,
+          this.proposalRepository,
+          this.connectionFactory,
+          this.eventRepository,
+          this.historyRepository
+        );
       default:
         throw new UnreachableCaseError(json);
     }
@@ -85,9 +103,7 @@ export class ScrapingEventFactory {
 
   async fromBlock(block: Block): Promise<ScrapingEvent[]> {
     const aragonEvents = await this.aragon.fromBlock(block);
-    // TODO Moloch
-    // const molochEvents = await this.moloch.fromBlock(block);
-    // return aragonEvents.concat(molochEvents);
-    return aragonEvents;
+    const molochEvents = await this.moloch.fromBlock(block);
+    return aragonEvents.concat(molochEvents);
   }
 }

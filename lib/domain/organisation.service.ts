@@ -4,12 +4,12 @@ import { ApplicationRepository } from "../storage/application.repository";
 import { PLATFORM } from "./platform";
 import { APP_ID } from "../storage/app-id";
 import { UnreachableCaseError } from "../shared/unreachable-case-error";
-import { IToken } from "./token.interface";
 import { BalanceService } from "../querying/balance.service";
 import { Shares } from "./shares";
 import { MembershipRepository } from "../storage/membership.repository";
 import { Participant } from "./participant";
 import { Organisation } from "./organisation";
+import { Token } from "./token";
 
 @Service(OrganisationService.name)
 export class OrganisationService {
@@ -36,7 +36,7 @@ export class OrganisationService {
     }
   }
 
-  async bank(platform: PLATFORM, organisationAddress: string): Promise<IToken[]> {
+  async bank(platform: PLATFORM, organisationAddress: string): Promise<Token[]> {
     const bankAddress = await this.bankAddress(platform, organisationAddress);
     if (bankAddress) {
       const ethBalance = await this.balance.ethBalance(bankAddress);
@@ -48,8 +48,12 @@ export class OrganisationService {
     }
   }
 
-  async participants(organisation: Organisation) {
-    const raw = await this.membershipRepository.allByOrganisationAddress(organisation.address);
-    return raw.map(r => new Participant(r.accountAddress, organisation));
+  async participant(organisation: Organisation, participantAddress: string) {
+    const raw = await this.membershipRepository.byAddressInOrganisation(organisation.address, participantAddress);
+    if (raw) {
+      return new Participant(raw.accountAddress, organisation);
+    } else {
+      return undefined;
+    }
   }
 }

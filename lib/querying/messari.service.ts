@@ -19,7 +19,7 @@ export class MessariService {
     return found || symbol;
   }
 
-  async usdPrice(symbol: string): Promise<number> {
+  async usdPrice(symbol: string): Promise<number | undefined> {
     const cached = this.cache.get(symbol);
     if (cached) {
       return cached;
@@ -33,11 +33,11 @@ export class MessariService {
           this.cache.set(symbol, price);
           return price;
         } else {
-          return 0;
+          return undefined;
         }
       } catch (e) {
         console.error(e);
-        return 0;
+        return undefined;
       }
     }
   }

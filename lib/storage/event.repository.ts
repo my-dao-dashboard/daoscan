@@ -6,6 +6,11 @@ import { Event } from "./event.row";
 export class EventRepository {
   constructor(@Inject(RepositoryFactory.name) private readonly repositoryFactory: RepositoryFactory) {}
 
+  async byIdOrFail(id: bigint) {
+    const repository = await this.repositoryFactory.reading(Event);
+    return repository.findOneOrFail({ id: id });
+  }
+
   async byId(id: bigint): Promise<Event | undefined> {
     const repository = await this.repositoryFactory.reading(Event);
     return repository.findOne({ id: id });

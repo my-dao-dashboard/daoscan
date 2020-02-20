@@ -2,7 +2,14 @@ import { Inject, Service } from "typedi";
 import { Block } from "../block";
 import { ScrapingEvent } from "../events/scraping-event";
 import { LogEvent, logEvents } from "../events-from-logs";
-import { SUMMON_COMPLETE_BLOCKCHAIN_EVENT, SummonCompleteParams } from "./summon-complete.blockchain-event";
+import {
+  PROCESS_PROPOSAL_BLOCKCHAIN_EVENT,
+  SUBMIT_PROPOSAL_BLOCKCHAIN_EVENT,
+  SUBMIT_VOTE_BLOCKCHAIN_EVENT,
+  SUMMON_COMPLETE_BLOCKCHAIN_EVENT,
+  SummonCompleteParams,
+  UPDATE_DELEGATE_KEY_BLOCKCHAIN_EVENT
+} from "./moloch-1.blockchain-events";
 import { PLATFORM } from "../../domain/platform";
 import { EthereumService } from "../../services/ethereum.service";
 import { OrganisationCreatedEvent } from "../events/organisation-created.event";
@@ -20,6 +27,11 @@ import { AddDelegateEvent, AddDelegateEventProps } from "../events/add-delegate.
 import { DelegateRepository } from "../../storage/delegate.repository";
 import { MOLOCH_NAMES } from "./moloch-names";
 import { HistoryRepository } from "../../storage/history.repository";
+import { SubmitProposalEvent } from "../events/submit-proposal.event";
+import { SubmitVoteEvent } from "../events/submit-vote.event";
+import { VOTE_DECISION } from "../../domain/vote-decision";
+import { ProcessProposalEvent } from "../events/process-proposal.event";
+import { ProposalRepository } from "../../storage/proposal.repository";
 
 async function organisationName(address: string): Promise<string> {
   const found = MOLOCH_NAMES.get(address);
@@ -27,6 +39,14 @@ async function organisationName(address: string): Promise<string> {
     return found;
   } else {
     return address;
+  }
+}
+
+function parseDetails(details: any) {
+  try {
+    return JSON.parse(details);
+  } catch {
+    return details;
   }
 }
 
@@ -40,7 +60,8 @@ export class Moloch1EventFactory {
     @Inject(ApplicationRepository.name) private readonly applicationRepository: ApplicationRepository,
     @Inject(MembershipRepository.name) private readonly membershipRepository: MembershipRepository,
     @Inject(DelegateRepository.name) private readonly delegateRepository: DelegateRepository,
-    @Inject(HistoryRepository.name) private readonly historyRepository: HistoryRepository
+    @Inject(HistoryRepository.name) private readonly historyRepository: HistoryRepository,
+    @Inject(ProposalRepository.name) private readonly proposalRepository: ProposalRepository
   ) {}
 
   async fromBlock(block: Block): Promise<ScrapingEvent[]> {
@@ -48,12 +69,22 @@ export class Moloch1EventFactory {
     const appInstalledEvents = await this.appInstalledEvents(organisationCreatedEvents);
     const summonerShareTransfer = await this.summonerShareTransfer(block);
     const summonerDelegate = await this.summonerDelegate(block);
+    const proposalEvents = await this.submitProposal(block);
+    const votes = await this.submitVote(block);
+    const processProposal = await this.processProposal(block);
+    const shareTransferAfterProposal = await this.shareTransferAfterProposalProcessed(processProposal);
+    const updateDelegateKey = await this.updateDelegateKey(block);
     let result = new Array<ScrapingEvent>();
     return result
       .concat(organisationCreatedEvents)
       .concat(appInstalledEvents)
       .concat(summonerShareTransfer)
-      .concat(summonerDelegate);
+      .concat(summonerDelegate)
+      .concat(proposalEvents)
+      .concat(votes)
+      .concat(processProposal)
+      .concat(shareTransferAfterProposal)
+      .concat(updateDelegateKey);
   }
 
   async summonerDelegate(block: Block): Promise<AddDelegateEvent[]> {
@@ -201,5 +232,140 @@ export class Moloch1EventFactory {
       })
     );
     return events.filter((e, i) => filtered[i]);
+  }
+
+  async submitProposal(block: Block): Promise<SubmitProposalEvent[]> {
+    const extendedBlock = await block.extendedBlock();
+    const timestamp = await block.timestamp();
+    return logEvents(this.ethereum.codec, extendedBlock, SUBMIT_PROPOSAL_BLOCKCHAIN_EVENT).map(e => {
+      const receipt = e.receipt;
+      const abi = [
+        { name: "applicant", type: "address" },
+        { name: "tokenTribute", type: "uint256" },
+        { name: "sharesRequested", type: "uint256" },
+        { name: "details", type: "string" }
+      ];
+      const parameters = this.ethereum.codec.decodeParameters(abi, "0x" + receipt.input.slice(10));
+      return new SubmitProposalEvent(
+        {
+          index: Number(e.proposalIndex),
+          proposer: e.memberAddress,
+          timestamp: timestamp,
+          txid: e.txid,
+          blockNumber: e.blockNumber,
+          organisationAddress: e.address,
+          blockHash: block.hash,
+          platform: PLATFORM.MOLOCH_1,
+          payload: {
+            applicant: e.applicant.toLowerCase(),
+            description: parseDetails(parameters.details),
+            sharesRequested: e.sharesRequested,
+            tribute: e.tokenTribute
+          }
+        },
+        this.connectionFactory,
+        this.eventRepository,
+        this.historyRepository
+      );
+    });
+  }
+
+  async submitVote(block: Block) {
+    const extendedBlock = await block.extendedBlock();
+    const timestamp = await block.timestamp();
+    return logEvents(this.ethereum.codec, extendedBlock, SUBMIT_VOTE_BLOCKCHAIN_EVENT).map(e => {
+      const receipt = e.receipt;
+      return new SubmitVoteEvent(
+        {
+          platform: PLATFORM.MOLOCH_1,
+          blockHash: receipt.blockHash,
+          blockNumber: receipt.blockNumber,
+          organisationAddress: e.address,
+          proposalIndex: Number(e.proposalIndex),
+          timestamp: timestamp,
+          txid: receipt.transactionHash,
+          voter: e.memberAddress,
+          decision: VOTE_DECISION.fromNumber(Number(e.uintVote))
+        },
+        this.connectionFactory,
+        this.eventRepository,
+        this.historyRepository
+      );
+    });
+  }
+
+  async shareTransferAfterProposalProcessed(events: ProcessProposalEvent[]) {
+    const transferEvents = events
+      .filter(e => e.didPass)
+      .map(async e => {
+        const proposal = await this.proposalRepository.byOrganisationAndIndex(e.organisationAddress, e.index);
+        return new ShareTransferEvent(
+          {
+            amount: proposal?.payload.sharesRequested,
+            blockHash: e.blockHash,
+            blockNumber: e.blockNumber,
+            from: ZERO_ADDRESS,
+            logIndex: e.logIndex,
+            organisationAddress: e.organisationAddress,
+            platform: PLATFORM.MOLOCH_1,
+            shareAddress: e.organisationAddress,
+            timestamp: e.timestamp,
+            to: proposal?.payload.applicant,
+            txid: e.txid
+          },
+          this.eventRepository,
+          this.membershipRepository,
+          this.connectionFactory,
+          this.historyRepository
+        );
+      });
+    return Promise.all(transferEvents);
+  }
+
+  async processProposal(block: Block): Promise<ProcessProposalEvent[]> {
+    const extendedBlock = await block.extendedBlock();
+    const timestamp = await block.timestamp();
+    return logEvents(this.ethereum.codec, extendedBlock, PROCESS_PROPOSAL_BLOCKCHAIN_EVENT).map(e => {
+      return new ProcessProposalEvent(
+        {
+          index: Number(e.proposalIndex),
+          organisationAddress: e.address,
+          didPass: Boolean(e.didPass),
+          blockHash: block.hash,
+          blockNumber: Number(block.id),
+          platform: PLATFORM.MOLOCH_1,
+          timestamp: timestamp,
+          txid: e.txid,
+          logIndex: e.logIndex
+        },
+        this.proposalRepository,
+        this.connectionFactory,
+        this.eventRepository,
+        this.historyRepository
+      );
+    });
+  }
+
+  async updateDelegateKey(block: Block) {
+    const extendedBlock = await block.extendedBlock();
+    const timestampDate = await block.timestampDate();
+    return logEvents(this.ethereum.codec, extendedBlock, UPDATE_DELEGATE_KEY_BLOCKCHAIN_EVENT).map(e => {
+      return new AddDelegateEvent(
+        {
+          address: e.newDelegateKey,
+          blockHash: block.hash,
+          blockNumber: Number(block.id),
+          delegateFor: e.memberAddress,
+          logIndex: e.logIndex,
+          organisationAddress: e.receipt.to,
+          platform: PLATFORM.MOLOCH_1,
+          timestamp: timestampDate,
+          txid: e.txid
+        },
+        this.connectionFactory,
+        this.eventRepository,
+        this.historyRepository
+      );
+    });
   }
 }
