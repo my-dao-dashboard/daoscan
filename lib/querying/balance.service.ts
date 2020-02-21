@@ -3,13 +3,13 @@ import { EthereumService } from "../services/ethereum.service";
 import { Contract } from "web3-eth-contract";
 import { KNOWN_TOKENS } from "./known-tokens";
 import { Token } from "../domain/token";
-import { MessariService } from "./messari.service";
+import { TokenFactory } from "../domain/token.factory";
 
 @Service(BalanceService.name)
 export class BalanceService {
   constructor(
     @Inject(EthereumService.name) private readonly ethereum: EthereumService,
-    @Inject(MessariService.name) private readonly messari: MessariService
+    @Inject(TokenFactory.name) private readonly tokenFactory: TokenFactory
   ) {}
 
   get tokenContracts(): Contract[] {
@@ -20,15 +20,12 @@ export class BalanceService {
 
   async ethBalance(address: string): Promise<Token> {
     const ethBalance = await this.ethereum.balance(address);
-    return new Token(
-      {
-        name: "ETH",
-        symbol: "ETH",
-        decimals: 18,
-        amount: ethBalance
-      },
-      this.messari
-    );
+    return this.tokenFactory.build({
+      name: "ETH",
+      symbol: "ETH",
+      decimals: 18,
+      amount: ethBalance
+    });
   }
 
   async balanceOf(address: string, contract: Contract): Promise<Token> {
@@ -40,15 +37,12 @@ export class BalanceService {
       : this.ethereum.codec.decodeString(await contract.methods.symbol().call());
     const amount = await contract.methods.balanceOf(address).call();
     const decimals = await contract.methods.decimals().call();
-    return new Token(
-      {
-        name: name,
-        symbol: symbol,
-        decimals: Number(decimals),
-        amount: amount
-      },
-      this.messari
-    );
+    return this.tokenFactory.build({
+      name: name,
+      symbol: symbol,
+      decimals: Number(decimals),
+      amount: amount
+    });
   }
 
   async tokenBalances(address: string): Promise<Token[]> {
