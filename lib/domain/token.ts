@@ -1,7 +1,7 @@
 import { MessariService } from "../querying/messari.service";
 import BigNumber from "bignumber.js";
 
-interface Props {
+export interface TokenProps {
   name: string;
   symbol: string;
   amount: string;
@@ -14,7 +14,7 @@ export class Token {
   readonly amount = this.props.amount;
   readonly decimals = this.props.decimals;
 
-  constructor(private readonly props: Props, protected readonly messari: MessariService) {}
+  constructor(private readonly props: TokenProps, protected readonly messari: MessariService) {}
 
   async value(targetSymbol: string): Promise<Token | undefined> {
     const usdPerUnit = await this.messari.usdPrice(this.symbol);
@@ -35,5 +35,14 @@ export class Token {
     } else {
       return undefined;
     }
+  }
+
+  toJSON() {
+    return {
+      name: this.name,
+      symbol: this.symbol,
+      amount: this.amount,
+      decimals: this.decimals
+    };
   }
 }

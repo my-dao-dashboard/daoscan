@@ -6,6 +6,13 @@ enum Decision {
   ABSTAIN
 }
 
+enum ProposalStatus {
+  ACTIVE
+  PASS
+  REJECT
+  ABORT
+}
+
 type PageInfo {
   endCursor: String
   hasNextPage: Boolean
@@ -34,6 +41,7 @@ type Proposal {
   index: Int!
   proposer: String!
   createdAt: String
+  status: ProposalStatus
   payload: JSON
   votes: [Vote]
 }

@@ -32,6 +32,10 @@ import { SubmitVoteEvent } from "../events/submit-vote.event";
 import { VOTE_DECISION } from "../../domain/vote-decision";
 import { ProcessProposalEvent } from "../events/process-proposal.event";
 import { ProposalRepository } from "../../storage/proposal.repository";
+import { AbiItem } from "web3-utils";
+import ERC20_TOKEN_ABI from "../../querying/erc20-token.abi.json";
+import { Token } from "../../domain/token";
+import { TokenFactory } from "../../domain/token.factory";
 
 async function organisationName(address: string): Promise<string> {
   const found = MOLOCH_NAMES.get(address);
@@ -61,7 +65,8 @@ export class Moloch1EventFactory {
     @Inject(MembershipRepository.name) private readonly membershipRepository: MembershipRepository,
     @Inject(DelegateRepository.name) private readonly delegateRepository: DelegateRepository,
     @Inject(HistoryRepository.name) private readonly historyRepository: HistoryRepository,
-    @Inject(ProposalRepository.name) private readonly proposalRepository: ProposalRepository
+    @Inject(ProposalRepository.name) private readonly proposalRepository: ProposalRepository,
+    @Inject(TokenFactory.name) private readonly tokenFactory: TokenFactory
   ) {}
 
   async fromBlock(block: Block): Promise<ScrapingEvent[]> {
@@ -237,7 +242,7 @@ export class Moloch1EventFactory {
   async submitProposal(block: Block): Promise<SubmitProposalEvent[]> {
     const extendedBlock = await block.extendedBlock();
     const timestamp = await block.timestamp();
-    return logEvents(this.ethereum.codec, extendedBlock, SUBMIT_PROPOSAL_BLOCKCHAIN_EVENT).map(e => {
+    const promised = logEvents(this.ethereum.codec, extendedBlock, SUBMIT_PROPOSAL_BLOCKCHAIN_EVENT).map(async e => {
       const receipt = e.receipt;
       const abi = [
         { name: "applicant", type: "address" },
@@ -246,6 +251,24 @@ export class Moloch1EventFactory {
         { name: "details", type: "string" }
       ];
       const parameters = this.ethereum.codec.decodeParameters(abi, "0x" + receipt.input.slice(10));
+      const contract = this.ethereum.contract(MOLOCH_1_ABI as AbiItem[], e.address);
+      const approvedTokenAddress = await contract.methods.approvedToken().call();
+      const approvedToken = this.ethereum.contract(ERC20_TOKEN_ABI as AbiItem[], approvedTokenAddress);
+      const tokenName = this.ethereum.codec.decodeString(await approvedToken.methods.name().call());
+      const tokenSymbol = this.ethereum.codec.decodeString(await approvedToken.methods.symbol().call());
+      const decimals = await approvedToken.methods.decimals().call();
+      const tribute = this.tokenFactory.build({
+        name: tokenName,
+        symbol: tokenSymbol,
+        amount: e.tokenTribute,
+        decimals: decimals
+      });
+      const sharesRequested = this.tokenFactory.build({
+        name: "Shares",
+        symbol: "Shares",
+        amount: e.sharesRequested,
+        decimals: 0
+      });
       return new SubmitProposalEvent(
         {
           index: Number(e.proposalIndex),
@@ -259,8 +282,8 @@ export class Moloch1EventFactory {
           payload: {
             applicant: e.applicant.toLowerCase(),
             description: parseDetails(parameters.details),
-            sharesRequested: e.sharesRequested,
-            tribute: e.tokenTribute
+            sharesRequested: sharesRequested.toJSON(),
+            tribute: tribute.toJSON()
           }
         },
         this.connectionFactory,
@@ -268,6 +291,7 @@ export class Moloch1EventFactory {
         this.historyRepository
       );
     });
+    return Promise.all(promised);
   }
 
   async submitVote(block: Block) {
@@ -301,7 +325,7 @@ export class Moloch1EventFactory {
         const proposal = await this.proposalRepository.byOrganisationAndIndex(e.organisationAddress, e.index);
         return new ShareTransferEvent(
           {
-            amount: proposal?.payload.sharesRequested,
+            amount: proposal?.payload.sharesRequested.amount,
             blockHash: e.blockHash,
             blockNumber: e.blockNumber,
             from: ZERO_ADDRESS,

@@ -19,7 +19,7 @@ export class ProposalRepository {
     return repository
       .createQueryBuilder("proposal")
       .where("proposal.organisationAddress = :organisationAddress", { organisationAddress: organisationAddress })
-      .addOrderBy("proposal.index", "ASC")
+      .addOrderBy("proposal.index", "DESC")
       .getMany();
   }
 }
