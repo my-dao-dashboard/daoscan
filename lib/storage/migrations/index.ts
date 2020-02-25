@@ -40,3 +40,4 @@ export * from "./1569249296200-AddDeltaToHistory";
 export * from "./1569249296300-CreateProposals";
 export * from "./1569249296400-CreateVotes";
 export * from "./1569249296500-AddStatusToProposal";
+export * from "./1569249296600-AddCreationTimeToOrganisation";
