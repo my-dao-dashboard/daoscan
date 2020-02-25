@@ -9,6 +9,7 @@ import { History } from "../../storage/history.row";
 import { RESOURCE_KIND } from "../../storage/resource.kind";
 import { Organisation } from "../../storage/organisation.row";
 import { EventRepository } from "../../storage/event.repository";
+import { DateTime } from "luxon";
 
 export interface SetOrganisationNameEventProps {
   blockNumber: number;
@@ -41,7 +42,7 @@ export class SetOrganisationNameEvent implements IScrapingEvent {
 
   async commit(): Promise<void> {
     const eventRow = this.buildEventRow();
-    const organisation = await this.findOrBuildOrganisationRow();
+    const organisation = await this.findOrBuildOrganisationRow(eventRow);
     const writing = await this.connectionFactory.writing();
 
     const history = new History();
@@ -94,7 +95,7 @@ export class SetOrganisationNameEvent implements IScrapingEvent {
     }
   }
 
-  async findOrBuildOrganisationRow() {
+  async findOrBuildOrganisationRow(event: Event) {
     const foundOrganisation = await this.organisationRepository.byAddress(this.address);
     if (foundOrganisation) {
       return foundOrganisation;
@@ -103,6 +104,7 @@ export class SetOrganisationNameEvent implements IScrapingEvent {
       organisationRow.name = this.name;
       organisationRow.address = this.address;
       organisationRow.platform = this.platform;
+      organisationRow.createdAt = DateTime.fromJSDate(event.timestamp);
       return organisationRow;
     }
   }
