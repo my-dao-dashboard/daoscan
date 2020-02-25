@@ -15,6 +15,14 @@ export class HistoryRepository {
     return this.byResourceOrFail(resourceId, RESOURCE_KIND.PROPOSAL);
   }
 
+  async allByResource(resourceId: bigint, resourceKind: RESOURCE_KIND) {
+    const repository = await this.repositoryFactory.reading(History);
+    return repository.find({
+      resourceId: resourceId,
+      resourceKind: resourceKind
+    });
+  }
+
   async byResourceOrFail(resourceId: bigint, resourceKind: RESOURCE_KIND): Promise<History> {
     const repository = await this.repositoryFactory.reading(History);
     return repository.findOneOrFail({

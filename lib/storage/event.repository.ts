@@ -1,6 +1,8 @@
 import { Inject, Service } from "typedi";
 import { RepositoryFactory } from "./repository.factory";
 import { Event } from "./event.row";
+import { In } from "typeorm";
+import { SCRAPING_EVENT_KIND } from "../scraping/events/scraping-event.kind";
 
 @Service(EventRepository.name)
 export class EventRepository {
@@ -9,6 +11,17 @@ export class EventRepository {
   async byIdOrFail(id: bigint) {
     const repository = await this.repositoryFactory.reading(Event);
     return repository.findOneOrFail({ id: id });
+  }
+
+  async allByIds(ids: bigint[]) {
+    const repository = await this.repositoryFactory.reading(Event);
+    return repository.find({
+      where: { id: In(ids.map(id => id.toString())), kind: SCRAPING_EVENT_KIND.ORGANISATION_CREATED },
+      order: {
+        timestamp: "DESC"
+      },
+      take: 1
+    });
   }
 
   async byId(id: bigint): Promise<Event | undefined> {
