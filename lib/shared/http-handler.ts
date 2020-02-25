@@ -36,6 +36,7 @@ export function httpHandler<R>(f: (event: APIGatewayEvent, context: Context) => 
       const result = await f(event, context);
       return ok(result);
     } catch (e) {
+      console.error(e);
       return error(e);
     }
   };
