@@ -1,72 +1,7 @@
-scalar JSON
+# This file was generated based on ".graphqlconfig". Do not edit manually.
 
-enum Decision {
-  YES
-  NO
-  ABSTAIN
-}
-
-enum ProposalStatus {
-  ACTIVE
-  PASS
-  REJECT
-  ABORT
-}
-
-type PageInfo {
-  endCursor: String
-  hasNextPage: Boolean
-}
-
-type Vote {
-  createdAt: String
-  voter: Participant
-  decision: Decision
-}
-
-type Participant {
-  address: String!
-  shares: Token
-}
-
-type Token {
-  name: String
-  symbol: String
-  amount: String!
-  decimals: Int!
-  value(symbol: String!): Token
-}
-
-type Proposal {
-  index: Int!
-  proposer: String!
-  createdAt: String
-  status: ProposalStatus
-  payload: JSON
-  votes: [Vote]
-}
-
-type ParticipantConnectionEdge {
-  node: Participant
-  cursor: String
-}
-
-type OrganisationParticipantConnection {
-  totalCount: Int!
-  edges: [ParticipantConnectionEdge]
-  pageInfo: PageInfo
-}
-
-type Organisation {
-  address: String!
-  platform: String!
-  name: String!
-  totalSupply: Token
-  bank: [Token]
-  participants(first: Int, after: String): OrganisationParticipantConnection
-  participant(address: String!): Participant
-  proposals: [Proposal]
-  proposal(index: Int): Proposal
+schema {
+  query: Query
 }
 
 type Account {
@@ -76,9 +11,51 @@ type Account {
 
 type GlobalStats {
   lastBlock: Int
+  membershipsCount: Int
   organisationsCount: Int
   participantsCount: Int
-  membershipsCount: Int
+}
+
+type Organisation {
+  address: String!
+  bank: [Token]
+  name: String!
+  participant(address: String!): Participant
+  participants(after: String, first: Int): OrganisationParticipantConnection
+  platform: String!
+  proposal(index: Int): Proposal
+  proposals: [Proposal]
+  totalSupply: Token
+}
+
+type OrganisationParticipantConnection {
+  edges: [ParticipantConnectionEdge]
+  pageInfo: PageInfo
+  totalCount: Int!
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean
+}
+
+type Participant {
+  address: String!
+  shares: Token
+}
+
+type ParticipantConnectionEdge {
+  cursor: String
+  node: Participant
+}
+
+type Proposal {
+  createdAt: String
+  index: Int!
+  payload: JSON
+  proposer: String!
+  status: ProposalStatus
+  votes: [Vote]
 }
 
 type Query {
@@ -86,3 +63,33 @@ type Query {
   organisation(address: String): Organisation
   stats: GlobalStats
 }
+
+type Token {
+  amount: String!
+  decimals: Int!
+  name: String
+  symbol: String
+  value(symbol: String!): Token
+}
+
+type Vote {
+  createdAt: String
+  decision: Decision
+  voter: Participant
+}
+
+enum Decision {
+  ABSTAIN
+  NO
+  YES
+}
+
+enum ProposalStatus {
+  ABORT
+  ACTIVE
+  PASS
+  REJECT
+}
+
+
+scalar JSON
