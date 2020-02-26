@@ -4,6 +4,7 @@ import { EthereumService } from "../services/ethereum.service";
 import { OrganisationRepository } from "../storage/organisation.repository";
 import { ScrapingEventFactory } from "../scraping/events/scraping-event.factory";
 import { OrganisationService } from "./organisation.service";
+import { Organisation as OrganisationRow } from "../storage/organisation.row";
 
 @Service(OrganisationFactory.name)
 export class OrganisationFactory {
@@ -13,6 +14,10 @@ export class OrganisationFactory {
     @Inject(ScrapingEventFactory.name) private readonly scrapingEventFactory: ScrapingEventFactory,
     @Inject(OrganisationService.name) private readonly organisationService: OrganisationService
   ) {}
+
+  fromRow(row: OrganisationRow) {
+    return new Organisation(row, this.organisationService);
+  }
 
   async byAddress(address: string): Promise<Organisation | undefined> {
     const organisationAddress = await this.ethereum.canonicalAddress(address);

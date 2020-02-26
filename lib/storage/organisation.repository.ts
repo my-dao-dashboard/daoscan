@@ -2,8 +2,66 @@ import { Inject, Service } from "typedi";
 import { RepositoryFactory } from "./repository.factory";
 import { Organisation } from "./organisation.row";
 import { PLATFORM } from "../domain/platform";
-import { LessThan } from "typeorm";
+import { LessThan, LessThanOrEqual, MoreThanOrEqual, Repository, SelectQueryBuilder } from "typeorm";
 import { DateTime } from "luxon";
+
+type Cursor = { id: bigint; createdAt: DateTime };
+
+class PaginationQuery {
+  private readonly alias = this.query.alias;
+
+  constructor(readonly query: SelectQueryBuilder<Organisation>) {}
+
+  static build(repository: Repository<Organisation>) {
+    const query = repository.createQueryBuilder("org").orderBy({
+      "org.createdAt": "DESC",
+      "org.id": "DESC"
+    });
+    return new PaginationQuery(query);
+  }
+
+  before(cursor: Cursor, include: boolean) {
+    const cmp = include ? ">=" : ">";
+    const next = this.query
+      .clone()
+      .where({ createdAt: MoreThanOrEqual(cursor.createdAt) })
+      .andWhere(`(${this.alias}.createdAt ${cmp} :createdAt OR ${this.alias}.id ${cmp} :id)`, {
+        createdAt: cursor.createdAt.toISO(),
+        id: cursor.id.toString()
+      });
+    return new PaginationQuery(next);
+  }
+
+  after(cursor: Cursor, include: boolean) {
+    const cmp = include ? "<=" : "<";
+    const next = this.query
+      .clone()
+      .where({ createdAt: LessThanOrEqual(cursor.createdAt) })
+      .andWhere(`(${this.alias}.createdAt ${cmp} :createdAt OR ${this.alias}.id ${cmp} :id)`, {
+        createdAt: cursor.createdAt.toISO(),
+        id: cursor.id.toString()
+      });
+    return new PaginationQuery(next);
+  }
+
+  skip(n: number) {
+    const next = this.query.clone().skip(n);
+    return new PaginationQuery(next);
+  }
+
+  take(n: number) {
+    const next = this.query.clone().take(n);
+    return new PaginationQuery(next);
+  }
+
+  getCount() {
+    return this.query.getCount();
+  }
+
+  getMany() {
+    return this.query.getMany();
+  }
+}
 
 @Service(OrganisationRepository.name)
 export class OrganisationRepository {
@@ -14,6 +72,45 @@ export class OrganisationRepository {
     return repository.findOne({
       address: address
     });
+  }
+
+  async first(n: number, cursor?: Cursor) {
+    const repository = await this.repositoryFactory.reading(Organisation);
+    let query = PaginationQuery.build(repository);
+    let hasPreviousPage = false;
+    if (cursor) {
+      const previousCount = await query.before(cursor, true).getCount();
+      hasPreviousPage = previousCount > 0;
+      query = query.after(cursor, false);
+    }
+    const nextCount = await query.getCount();
+    const entries = await query.take(n).getMany();
+    return {
+      hasNextPage: nextCount > n,
+      hasPreviousPage: hasPreviousPage,
+      entries: entries
+    };
+  }
+
+  async last(n: number, cursor: Cursor) {
+    const repository = await this.repositoryFactory.reading(Organisation);
+    const query = PaginationQuery.build(repository);
+    const before = query.before(cursor, false);
+
+    const beforeCount = await before.getCount();
+    const afterCount = await query.after(cursor, true).getCount();
+
+    const offset = beforeCount - n > 0 ? beforeCount - n : 0;
+
+    const entries = await before
+      .skip(offset)
+      .take(n)
+      .getMany();
+    return {
+      hasPreviousPage: offset > 0,
+      hasNextPage: afterCount > 0,
+      entries: entries
+    };
   }
 
   async count() {

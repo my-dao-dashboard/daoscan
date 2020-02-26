@@ -2,6 +2,7 @@ import { Organisation } from "../domain/organisation";
 import { MembershipRepository } from "../storage/membership.repository";
 import { Participant } from "../domain/participant";
 import { Mutex } from "await-semaphore";
+import { IEdge } from "./edge.interface";
 
 const DEFAULT_PAGE_SIZE = 25;
 
@@ -13,15 +14,10 @@ function participantToCursor(participant: Participant) {
   return Buffer.from(participant.address).toString("base64");
 }
 
-interface Edge {
-  node: Participant;
-  cursor: string;
-}
-
 export class OrganisationParticipantConnection {
   readonly first: number;
   readonly after: string | undefined;
-  private _edges: Edge[] | undefined;
+  private _edges: IEdge<Participant>[] | undefined;
   private edgesMutex = new Mutex();
 
   constructor(
@@ -38,7 +34,7 @@ export class OrganisationParticipantConnection {
     return this.membershipRepository.countByOrganisationAddress(this.organisation.address);
   }
 
-  async edges(): Promise<Edge[]> {
+  async edges(): Promise<IEdge<Participant>[]> {
     return this.edgesMutex.use(async () => {
       if (this._edges) {
         return this._edges;

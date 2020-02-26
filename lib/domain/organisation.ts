@@ -8,8 +8,14 @@ export class Organisation {
   readonly address = this.row.address;
   readonly platform = this.row.platform;
   readonly name = this.row.name;
+  readonly id = this.row.id;
 
   constructor(private readonly row: OrganisationRow, private readonly service: OrganisationService) {}
+
+  @Memoize()
+  get createdAt(): string {
+    return this.row.createdAt.toISO();
+  }
 
   @Memoize()
   shares(): Promise<Shares | undefined> {

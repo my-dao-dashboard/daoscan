@@ -11,6 +11,9 @@ import { OrganisationService } from "../domain/organisation.service";
 import { OrganisationParticipantConnection } from "./organisation-participant-connection";
 import { Token } from "../domain/token";
 import { Participant } from "../domain/participant";
+import { IPagination } from "./pagination.interface";
+import { OrganisationConnection } from "./organisation-connection";
+import { OrganisationRepository } from "../storage/organisation.repository";
 
 @Service(OrganisationResolver.name)
 export class OrganisationResolver {
@@ -21,12 +24,18 @@ export class OrganisationResolver {
     @Inject(OrganisationFactory.name) private readonly organisationFactory: OrganisationFactory,
     @Inject(ProposalRepository.name) private readonly proposalRepository: ProposalRepository,
     @Inject(ProposalFactory.name) private readonly proposalFactory: ProposalFactory,
-    @Inject(OrganisationService.name) private readonly organisationService: OrganisationService
+    @Inject(OrganisationService.name) private readonly organisationService: OrganisationService,
+    @Inject(OrganisationRepository.name) private readonly organisationRepository: OrganisationRepository
   ) {}
 
   @bind()
   async organisation(address: string): Promise<Organisation | undefined> {
     return this.organisationFactory.byAddress(address);
+  }
+
+  @bind()
+  async organisations(pagination: IPagination) {
+    return new OrganisationConnection(pagination, this.organisationRepository, this.organisationFactory);
   }
 
   @bind()

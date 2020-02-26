@@ -11,6 +11,7 @@ import { GlobalStatsResolver } from "./global-stats.resolver";
 import { ParticipantResolver } from "./participant.resolver";
 import { ProposalResolver } from "./proposal.resolver";
 import { TokenResolver } from "./token.resolver";
+import { IPagination } from "./pagination.interface";
 
 @Service(GraphqlController.name)
 export class GraphqlController {
@@ -63,7 +64,10 @@ export class GraphqlController {
         organisation: (root: undefined, args: { address: string }) => {
           return this.organisationResolver.organisation(args.address);
         },
-        stats: this.globalStatsResolver.globalStats
+        stats: this.globalStatsResolver.globalStats,
+        organisations: (root: undefined, args: IPagination) => {
+          return this.organisationResolver.organisations(args);
+        }
       },
       Organisation: {
         totalSupply: this.organisationResolver.totalSupply,

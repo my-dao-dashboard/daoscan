@@ -26,6 +26,18 @@ type Organisation {
   proposal(index: Int): Proposal
   proposals: [Proposal]
   totalSupply: Token
+  createdAt: String!
+}
+
+type OrganisationConnectionEdge {
+  cursor: String!
+  node: Organisation
+}
+
+type OrganisationConnection {
+  edges: [OrganisationConnectionEdge]
+  pageInfo: PageInfo
+  totalCount: Int!
 }
 
 type OrganisationParticipantConnection {
@@ -35,8 +47,10 @@ type OrganisationParticipantConnection {
 }
 
 type PageInfo {
+  startCursor: String
   endCursor: String
   hasNextPage: Boolean
+  hasPreviousPage: Boolean
 }
 
 type Participant {
@@ -62,6 +76,7 @@ type Query {
   account(address: String!): Account
   organisation(address: String): Organisation
   stats: GlobalStats
+  organisations(after: String, before: String, first: Int, last: Int): OrganisationConnection
 }
 
 type Token {
@@ -90,6 +105,5 @@ enum ProposalStatus {
   PASS
   REJECT
 }
-
 
 scalar JSON
