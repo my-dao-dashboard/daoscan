@@ -84,7 +84,7 @@ export class OrganisationRepository {
     const afterCount = await query.getCount();
     const entries = await query.take(n).getMany();
     const startIndex = totalCount - afterCount + 1;
-    const endIndex = startIndex + entries.length -1 ;
+    const endIndex = startIndex + entries.length - 1;
     return {
       startIndex: startIndex,
       endIndex: endIndex,
@@ -97,20 +97,24 @@ export class OrganisationRepository {
   async last(n: number, cursor: Cursor) {
     const repository = await this.repositoryFactory.reading(Organisation);
     const query = PaginationQuery.build(repository);
+    const totalCount = await query.getCount();
     const before = query.before(cursor, false);
 
     const beforeCount = await before.getCount();
-    const afterCount = await query.after(cursor, true).getCount();
-
     const offset = beforeCount - n > 0 ? beforeCount - n : 0;
 
     const entries = await before
       .skip(offset)
       .take(n)
       .getMany();
+
+    const startIndex = beforeCount - n + 1;
+    const endIndex = startIndex + n - 1;
+    const afterCount = totalCount - offset - n;
+
     return {
-      startIndex: beforeCount,
-      endIndex: afterCount,
+      startIndex: startIndex,
+      endIndex: endIndex,
       hasPreviousPage: offset > 0,
       hasNextPage: afterCount > 0,
       entries: entries

@@ -20,7 +20,7 @@ function decodeCursor(cursor: string) {
   };
 }
 
-const DEFAULT_PAGE = 1;
+const DEFAULT_PAGE = 25;
 
 export class OrganisationConnection {
   private _rows:
@@ -58,7 +58,6 @@ export class OrganisationConnection {
       startIndex: rows.startIndex,
       endIndex: rows.endIndex
     };
-    console.log("pageInfo", result);
     return result;
   }
 
