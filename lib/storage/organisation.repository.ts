@@ -89,7 +89,7 @@ export class OrganisationRepository {
       startIndex: startIndex,
       endIndex: endIndex,
       hasNextPage: afterCount > n,
-      hasPreviousPage: startIndex > 0,
+      hasPreviousPage: startIndex > 1,
       entries: entries
     };
   }
