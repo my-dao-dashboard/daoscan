@@ -6,7 +6,7 @@
     "build": "serverless package",
     "deploy:beta": "rm -rf .build/ && serverless deploy --stage beta",
     "deploy:prod": "rm -rf .build/ && serverless deploy --stage prod",
-    "start": "serverless offline",
+    "start": "serverless offline --useSeparateProcesses",
     "lint": "prettier --check \"{lib,functions}/**/*.ts\"",
     "lint:fix": "prettier --write \"{lib,functions}/**/*.ts\""
   },

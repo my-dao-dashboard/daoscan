@@ -47,6 +47,8 @@ type OrganisationParticipantConnection {
 }
 
 type PageInfo {
+  startIndex: Int
+  endIndex: Int
   startCursor: String
   endCursor: String
   hasNextPage: Boolean

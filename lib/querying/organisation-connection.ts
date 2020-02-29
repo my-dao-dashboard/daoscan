@@ -20,10 +20,18 @@ function decodeCursor(cursor: string) {
   };
 }
 
-const DEFAULT_PAGE = 25;
+const DEFAULT_PAGE = 1;
 
 export class OrganisationConnection {
-  private _rows: { hasNextPage: boolean; hasPreviousPage: boolean; entries: OrganisationRow[] } | undefined;
+  private _rows:
+    | {
+        startIndex: number;
+        endIndex: number;
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
+        entries: OrganisationRow[];
+      }
+    | undefined;
   private rowsMutex = new Mutex();
 
   constructor(
@@ -42,12 +50,16 @@ export class OrganisationConnection {
     const firstEdge = rows.entries[0];
     const startCursor = firstEdge ? organisationToCursor(firstEdge) : null;
     const endCursor = lastEdge ? organisationToCursor(lastEdge) : null;
-    return {
+    const result = {
       endCursor: endCursor,
       startCursor: startCursor,
       hasNextPage: rows.hasNextPage,
-      hasPreviousPage: rows.hasPreviousPage
+      hasPreviousPage: rows.hasPreviousPage,
+      startIndex: rows.startIndex,
+      endIndex: rows.endIndex
     };
+    console.log("pageInfo", result);
+    return result;
   }
 
   async edges() {

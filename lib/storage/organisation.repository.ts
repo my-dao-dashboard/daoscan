@@ -77,17 +77,19 @@ export class OrganisationRepository {
   async first(n: number, cursor?: Cursor) {
     const repository = await this.repositoryFactory.reading(Organisation);
     let query = PaginationQuery.build(repository);
-    let hasPreviousPage = false;
+    const totalCount = await query.getCount();
     if (cursor) {
-      const previousCount = await query.before(cursor, true).getCount();
-      hasPreviousPage = previousCount > 0;
       query = query.after(cursor, false);
     }
-    const nextCount = await query.getCount();
+    const afterCount = await query.getCount();
     const entries = await query.take(n).getMany();
+    const startIndex = totalCount - afterCount + 1;
+    const endIndex = startIndex + entries.length -1 ;
     return {
-      hasNextPage: nextCount > n,
-      hasPreviousPage: hasPreviousPage,
+      startIndex: startIndex,
+      endIndex: endIndex,
+      hasNextPage: afterCount > n,
+      hasPreviousPage: startIndex > 0,
       entries: entries
     };
   }
@@ -107,6 +109,8 @@ export class OrganisationRepository {
       .take(n)
       .getMany();
     return {
+      startIndex: beforeCount,
+      endIndex: afterCount,
       hasPreviousPage: offset > 0,
       hasNextPage: afterCount > 0,
       entries: entries
