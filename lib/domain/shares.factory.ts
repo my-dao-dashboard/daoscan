@@ -9,6 +9,7 @@ import { MOLOCH_1_ABI } from "../scraping/moloch-1/moloch-1.abi";
 import { UnreachableCaseError } from "../shared/unreachable-case-error";
 import { MessariService } from "../querying/messari.service";
 import { Token } from "./token";
+import { ZERO_ADDRESS } from "../shared/zero-address";
 
 @Service(SharesFactory.name)
 export class SharesFactory {
@@ -31,7 +32,7 @@ export class SharesFactory {
 
   async forMoloch1(address: string, name: string, bank: Token[]): Promise<Shares | undefined> {
     const tokenAddress = await this.applicationRepository.tokenAddress(address);
-    if (tokenAddress) {
+    if (tokenAddress && tokenAddress !== ZERO_ADDRESS) {
       const token = this.ethereum.contract(MOLOCH_1_ABI as AbiItem[], tokenAddress);
       const amount = await token.methods.totalShares().call();
       const symbol = name;
@@ -51,7 +52,7 @@ export class SharesFactory {
 
   async forAragon(address: string, bank: Token[]): Promise<Shares | undefined> {
     const tokenAddress = await this.applicationRepository.tokenAddress(address);
-    if (tokenAddress) {
+    if (tokenAddress && tokenAddress !== ZERO_ADDRESS) {
       const token = this.ethereum.contract(ERC20_TOKEN_ABI as AbiItem[], tokenAddress);
       const decimalsRaw = await token.methods.decimals().call();
       const amount = await token.methods.totalSupply().call();
