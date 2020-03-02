@@ -29,6 +29,18 @@ export interface ShareTransferEventProps {
 
 export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventProps {
   readonly kind = SCRAPING_EVENT_KIND.SHARE_TRANSFER;
+  readonly platform = this.props.platform;
+  readonly organisationAddress = this.props.organisationAddress;
+  readonly blockHash = this.props.blockHash;
+  readonly blockNumber = this.props.blockNumber;
+  readonly txid = this.props.txid;
+  readonly logIndex = this.props.logIndex;
+  readonly shareAddress = this.props.shareAddress;
+  readonly from = this.props.from;
+  readonly to = this.props.to;
+  readonly amount = this.props.amount;
+  readonly timestamp = this.props.timestamp;
+
   constructor(
     private readonly props: ShareTransferEventProps,
     private readonly eventRepository: EventRepository,
@@ -36,50 +48,6 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
     private readonly connectionFactory: ConnectionFactory,
     private readonly historyRepository: HistoryRepository
   ) {}
-
-  get platform() {
-    return this.props.platform;
-  }
-
-  get organisationAddress() {
-    return this.props.organisationAddress;
-  }
-
-  get blockHash() {
-    return this.props.blockHash;
-  }
-
-  get blockNumber() {
-    return this.props.blockNumber;
-  }
-
-  get txid() {
-    return this.props.txid;
-  }
-
-  get logIndex() {
-    return this.props.logIndex;
-  }
-
-  get shareAddress() {
-    return this.props.shareAddress;
-  }
-
-  get from() {
-    return this.props.from;
-  }
-
-  get to() {
-    return this.props.to;
-  }
-
-  get amount() {
-    return this.props.amount;
-  }
-
-  get timestamp() {
-    return this.props.timestamp;
-  }
 
   async commit(): Promise<void> {
     const eventRow = this.buildEventRow();
