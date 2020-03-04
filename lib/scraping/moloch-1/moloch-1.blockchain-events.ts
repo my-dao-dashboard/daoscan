@@ -15,6 +15,46 @@ export const SUMMON_COMPLETE_BLOCKCHAIN_EVENT: BlockchainEvent<SummonCompletePar
   ]
 };
 
+export interface RegisterMolochParams {
+  moloch: string;
+  summoner: string;
+  daoIdx: string;
+  title: string;
+  newContract: string;
+}
+
+export const REGISTER_MOLOCH_BLOCKCHAIN_EVENT: BlockchainEvent<RegisterMolochParams> = {
+  signature: "0xa50d98082663c2b716ab4f8b6b2a51fcaed7eae222cd3d74b19de4691ede728a",
+  sources: ["0x2840d12d926cc686217bb42B80b662C7D72ee787"],
+  abi: [
+    {
+      indexed: false,
+      name: "moloch",
+      type: "address"
+    },
+    {
+      indexed: true,
+      name: "summoner",
+      type: "address"
+    },
+    {
+      indexed: false,
+      name: "daoIdx",
+      type: "uint256"
+    },
+    {
+      indexed: false,
+      name: "title",
+      type: "string"
+    },
+    {
+      indexed: false,
+      name: "newContract",
+      type: "uint256"
+    }
+  ]
+};
+
 export interface SubmitProposalParams {
   applicant: string;
   tokenTribute: string;

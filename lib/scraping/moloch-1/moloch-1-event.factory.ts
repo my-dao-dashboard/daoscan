@@ -4,6 +4,7 @@ import { ScrapingEvent } from "../events/scraping-event";
 import { LogEvent, logEvents } from "../events-from-logs";
 import {
   PROCESS_PROPOSAL_BLOCKCHAIN_EVENT,
+  REGISTER_MOLOCH_BLOCKCHAIN_EVENT,
   SUBMIT_PROPOSAL_BLOCKCHAIN_EVENT,
   SUBMIT_VOTE_BLOCKCHAIN_EVENT,
   SUMMON_COMPLETE_BLOCKCHAIN_EVENT,
@@ -70,7 +71,12 @@ export class Moloch1EventFactory {
   ) {}
 
   async fromBlock(block: Block): Promise<ScrapingEvent[]> {
-    const organisationCreatedEvents = await this.organisationCreatedAsSummonComplete(block);
+    let organisationCreatedEvents = await this.organisationCreatedAsSummonComplete(block);
+    const organisationRegisteredEvents = await this.organisationRegistered(block);
+    organisationCreatedEvents = organisationCreatedEvents.filter(event => {
+      const found = organisationRegisteredEvents.find(e => event.address.toLowerCase() === e.address.toLowerCase());
+      return !found;
+    });
     const appInstalledEvents = await this.appInstalledEvents(organisationCreatedEvents);
     const summonerShareTransfer = await this.summonerShareTransfer(block);
     const summonerDelegate = await this.summonerDelegate(block);
@@ -80,8 +86,10 @@ export class Moloch1EventFactory {
     const shareTransferAfterProposal = await this.shareTransferAfterProposalProcessed(processProposal);
     const updateDelegateKey = await this.updateDelegateKey(block);
     let result = new Array<ScrapingEvent>();
+
     return result
       .concat(organisationCreatedEvents)
+      .concat(organisationRegisteredEvents)
       .concat(appInstalledEvents)
       .concat(summonerShareTransfer)
       .concat(summonerDelegate)
@@ -189,6 +197,49 @@ export class Moloch1EventFactory {
         this.connectionFactory
       );
     });
+  }
+
+  async organisationRegistered(block: Block) {
+    const timestamp = await block.timestamp();
+    const extendedBlock = await block.extendedBlock();
+    const events = logEvents(this.ethereum.codec, extendedBlock, REGISTER_MOLOCH_BLOCKCHAIN_EVENT);
+    const filtered = await Promise.all(
+      events.map(async e => {
+        const address = e.address;
+        const molochContract = this.ethereum.contract(MOLOCH_1_ABI, address);
+        try {
+          // Check if really Moloch contract
+          await molochContract.methods.periodDuration.call();
+          await molochContract.methods.votingPeriodLength.call();
+          await molochContract.methods.gracePeriodLength.call();
+          await molochContract.methods.summoningTime.call();
+          return true;
+        } catch (e) {
+          return false;
+        }
+      })
+    );
+    const filteredEvents = events.filter((e, i) => filtered[i]);
+
+    const promised = filteredEvents.map(async e => {
+      const props = {
+        platform: PLATFORM.MOLOCH_1,
+        name: e.title,
+        address: e.moloch.toLowerCase(),
+        txid: e.txid,
+        blockNumber: Number(e.blockNumber),
+        blockHash: block.hash,
+        timestamp: Number(timestamp)
+      };
+      return new OrganisationCreatedEvent(
+        props,
+        this.eventRepository,
+        this.organisationRepository,
+        this.historyRepository,
+        this.connectionFactory
+      );
+    });
+    return Promise.all(promised);
   }
 
   async organisationCreatedAsSummonComplete(block: Block): Promise<OrganisationCreatedEvent[]> {
