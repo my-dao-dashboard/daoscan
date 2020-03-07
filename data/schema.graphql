@@ -16,12 +16,18 @@ type GlobalStats {
   participantsCount: Int
 }
 
+type Application {
+  address: String!
+  appId: String!
+}
+
 type Organisation {
   address: String!
   bank: [Token]
   name: String!
   participant(address: String!): Participant
   participants(after: String, first: Int): OrganisationParticipantConnection
+  applications: [Application]
   platform: String!
   proposal(index: Int): Proposal
   proposals: [Proposal]

@@ -71,4 +71,11 @@ export class ApplicationRepository {
       return [];
     }
   }
+
+  async allByOrganisationAddress(organisationAddress: string) {
+    const repository = await this.repositoryFactory.reading(Application);
+    return repository.find({
+      organisationAddress: organisationAddress
+    });
+  }
 }

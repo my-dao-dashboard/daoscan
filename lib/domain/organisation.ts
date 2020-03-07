@@ -30,4 +30,9 @@ export class Organisation {
   async participant(participantAddress: string) {
     return this.service.participant(this, participantAddress);
   }
+
+  @Memoize()
+  async applications() {
+    return this.service.applications(this);
+  }
 }

@@ -56,4 +56,8 @@ export class OrganisationService {
       return undefined;
     }
   }
+
+  async applications(organisation: Organisation) {
+    return this.applicationRepository.allByOrganisationAddress(organisation.address);
+  }
 }

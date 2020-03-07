@@ -80,4 +80,9 @@ export class OrganisationResolver {
   async participants(root: Organisation, args: { first?: number; after?: string }) {
     return new OrganisationParticipantConnection(root, args.first, args.after, this.membershipRepository);
   }
+
+  @bind()
+  async applications(root: Organisation) {
+    return root.applications();
+  }
 }
