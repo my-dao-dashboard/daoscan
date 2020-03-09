@@ -1,7 +1,7 @@
 import { Inject, Service } from "typedi";
 import { RepositoryFactory } from "./repository.factory";
 import { Application } from "./application.row";
-import { APP_ID } from "./app-id";
+import { APP_ID } from "./applications.const";
 import { In } from "typeorm";
 
 @Service(ApplicationRepository.name)

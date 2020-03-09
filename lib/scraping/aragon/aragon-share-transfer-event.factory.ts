@@ -12,7 +12,7 @@ import _ from "lodash";
 import { EventRepository } from "../../storage/event.repository";
 import { MembershipRepository } from "../../storage/membership.repository";
 import { ConnectionFactory } from "../../storage/connection.factory";
-import { APP_ID } from "../../storage/app-id";
+import { APP_ID } from "../../storage/applications.const";
 import { HistoryRepository } from "../../storage/history.repository";
 
 export interface TransferParams {

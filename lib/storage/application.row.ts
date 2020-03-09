@@ -23,4 +23,8 @@ export class Application {
   @Column("varchar", { transformer: addressTransformer })
   // @ts-ignore
   address: string;
+
+  @Column()
+  // @ts-ignore
+  name: string;
 }

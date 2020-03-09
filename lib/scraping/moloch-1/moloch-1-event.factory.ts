@@ -18,7 +18,7 @@ import { ConnectionFactory } from "../../storage/connection.factory";
 import { EventRepository } from "../../storage/event.repository";
 import { OrganisationRepository } from "../../storage/organisation.repository";
 import { AppInstalledEvent, AppInstalledEventProps } from "../events/app-installed.event";
-import { APP_ID } from "../../storage/app-id";
+import { APP_ID } from "../../storage/applications.const";
 import { ApplicationRepository } from "../../storage/application.repository";
 import { MOLOCH_1_ABI } from "./moloch-1.abi";
 import { ShareTransferEvent, ShareTransferEventProps } from "../events/share-transfer.event";

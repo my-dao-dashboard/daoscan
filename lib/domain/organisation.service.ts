@@ -2,7 +2,7 @@ import { Inject, Service } from "typedi";
 import { SharesFactory } from "./shares.factory";
 import { ApplicationRepository } from "../storage/application.repository";
 import { PLATFORM } from "./platform";
-import { APP_ID } from "../storage/app-id";
+import { APP_ID } from "../storage/applications.const";
 import { UnreachableCaseError } from "../shared/unreachable-case-error";
 import { BalanceService } from "../querying/balance.service";
 import { Shares } from "./shares";

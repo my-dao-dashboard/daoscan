@@ -9,6 +9,7 @@ import { ApplicationRepository } from "../../storage/application.repository";
 import { RESOURCE_KIND } from "../../storage/resource.kind";
 import { History } from "../../storage/history.row";
 import { HistoryRepository } from "../../storage/history.repository";
+import { applicationNameById } from "../../storage/applications.const";
 
 export interface AppInstalledEventProps {
   blockNumber: number;
@@ -73,6 +74,7 @@ export class AppInstalledEvent implements IScrapingEvent {
     const applicationRow = new Application();
     applicationRow.address = this.proxyAddress;
     applicationRow.appId = this.appId;
+    applicationRow.name = await applicationNameById(applicationRow.appId);
     applicationRow.organisationAddress = this.organisationAddress;
 
     const history = new History();
