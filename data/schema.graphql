@@ -17,6 +17,7 @@ type GlobalStats {
 }
 
 type Application {
+  name: String!
   address: String!
   appId: String!
 }
