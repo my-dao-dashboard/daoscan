@@ -8,6 +8,7 @@ import { AbiCodec } from "./abi-codec";
 import { Contract, ContractOptions } from "web3-eth-contract";
 import { TransactionConfig } from "web3-core";
 import { ENV, EnvService } from "./env.service";
+import { RevertInstructionError } from "web3-core-helpers";
 
 export interface ExtendedTransactionReceipt extends TransactionReceipt {
   input: string;
@@ -72,7 +73,7 @@ export class EthereumService {
     return new this.web3.eth.Contract(jsonInterface, address, options);
   }
 
-  call(transactionConfig: TransactionConfig): Promise<string> {
+  call(transactionConfig: TransactionConfig): Promise<string | RevertInstructionError> {
     return this.web3.eth.call(transactionConfig);
   }
 

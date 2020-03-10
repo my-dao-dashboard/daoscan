@@ -61,7 +61,11 @@ export class AragonAppInstalledEventFactory {
       to: proxy,
       data
     });
-    return this.ethereum.codec.decodeParameter("address", result);
+    if (typeof result === "string") {
+      return this.ethereum.codec.decodeParameter("address", result);
+    } else {
+      throw result;
+    }
   }
 
   async fromEvents(block: Block): Promise<AppInstalledEvent[]> {

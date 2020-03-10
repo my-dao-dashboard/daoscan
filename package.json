@@ -28,7 +28,7 @@
     "typedi": "^0.8.0",
     "typeorm": "^0.2.24",
     "typescript-memoize": "^1.0.0-alpha.3",
-    "web3": "^1.2.4"
+    "web3": "^1.2.6"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.46",
