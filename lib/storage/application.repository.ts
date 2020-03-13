@@ -8,6 +8,11 @@ import { In } from "typeorm";
 export class ApplicationRepository {
   constructor(@Inject(RepositoryFactory.name) private readonly repositoryFactory: RepositoryFactory) {}
 
+  async all() {
+    const repository = await this.repositoryFactory.reading(Application);
+    return repository.find();
+  }
+
   async organisationAddressByApplicationAddress(address: string, appId: APP_ID): Promise<string | undefined> {
     const repository = await this.repositoryFactory.reading(Application);
     const applicationRow = await repository.findOne({
