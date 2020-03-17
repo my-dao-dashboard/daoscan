@@ -21,12 +21,15 @@ export class AragonEventFactory {
     const appInstalledEvents = await this.appInstalled.fromBlock(block);
     const shareTransferEvents = await this.shareTransfer.fromBlock(block, appInstalledEvents);
     const setNames = await this.setName.fromBlock(block);
+    const dedupeOrgCreation = organisationCreatedEvents.filter(e =>
+      !organisationCreatedEvents.find(created => created.address.toLowerCase() === e.address.toLowerCase())
+    );
 
     let result = new Array<ScrapingEvent>();
     return result
-      .concat(organisationCreatedEvents)
+      .concat(setNames)
       .concat(appInstalledEvents)
       .concat(shareTransferEvents)
-      .concat(setNames);
+      .concat(dedupeOrgCreation);
   }
 }

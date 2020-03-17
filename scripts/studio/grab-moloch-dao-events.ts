@@ -842,9 +842,9 @@ const blocks = [
 ];
 
 async function main() {
-  const moloch = ethereum.contract(MOLOCH_1_ABI, "0x1fd169A4f5c59ACf79d0Fd5d91D1201EF1Bce9f1");
-  const events = await moloch.getPastEvents("allEvents", { fromBlock: 7218566, toBlock: "latest" });
-  const allBlocks = events.map(e => e.blockNumber);
+  // const moloch = ethereum.contract(MOLOCH_1_ABI, "0x1fd169A4f5c59ACf79d0Fd5d91D1201EF1Bce9f1");
+  // const events = await moloch.getPastEvents("allEvents", { fromBlock: 7218566, toBlock: "latest" });
+  // const allBlocks = events.map(e => e.blockNumber);
   // const blocks = _.sortedUniq(allBlocks);
   // fs.writeFileSync("/Users/ukstv/Desktop/a.json", JSON.stringify(blocks));
   let n = 0;
@@ -855,6 +855,8 @@ async function main() {
     const commands = response.data.commands as any[];
     if (commands.length == 0) {
       console.log(`Empty commands for block ${b}`);
+    } else {
+      console.log(commands);
     }
     await sleep(200);
     console.log(`Done with ${n}`);
