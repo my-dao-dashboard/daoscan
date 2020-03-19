@@ -1,0 +1,16 @@
+query GetOrganisations {
+  organisations(page: {first: 1, after: "eyJpZCI6IjE2OSIsImNyZWF0ZWRBdCI6IjIwMjAtMDMtMTNUMTQ6MjU6MzMuMDAwKzA0OjAwIn0"}) {
+    edges {
+      node {
+        address
+        name
+      }
+    }
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
+    }
+  }
+}

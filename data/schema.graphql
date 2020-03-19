@@ -53,6 +53,13 @@ type OrganisationParticipantConnection {
   totalCount: Int!
 }
 
+input PageQuery {
+  after: String
+  before: String
+  first: Int
+  last: Int
+}
+
 type PageInfo {
   startIndex: Int
   endIndex: Int
@@ -85,7 +92,7 @@ type Query {
   account(address: String!): Account
   organisation(address: String): Organisation
   stats: GlobalStats
-  organisations(after: String, before: String, first: Int, last: Int): OrganisationConnection
+  organisations(page: PageQuery): OrganisationConnection
 }
 
 type Token {

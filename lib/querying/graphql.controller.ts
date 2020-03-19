@@ -65,8 +65,9 @@ export class GraphqlController {
           return this.organisationResolver.organisation(args.address);
         },
         stats: this.globalStatsResolver.globalStats,
-        organisations: (root: undefined, args: IPagination) => {
-          return this.organisationResolver.organisations(args);
+        organisations: (root: undefined, args: { page?: IPagination }) => {
+          const page = args.page || {};
+          return this.organisationResolver.organisations(page);
         }
       },
       Organisation: {
