@@ -50,7 +50,7 @@ export class OrganisationConnection {
     const firstEdge = rows.entries[0];
     const startCursor = firstEdge ? organisationToCursor(firstEdge) : null;
     const endCursor = lastEdge ? organisationToCursor(lastEdge) : null;
-    const result = {
+    return {
       endCursor: endCursor,
       startCursor: startCursor,
       hasNextPage: rows.hasNextPage,
@@ -58,7 +58,6 @@ export class OrganisationConnection {
       startIndex: rows.startIndex,
       endIndex: rows.endIndex
     };
-    return result;
   }
 
   async edges() {
