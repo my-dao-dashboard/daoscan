@@ -3,6 +3,7 @@ import { MembershipRepository } from "../storage/membership.repository";
 import { Participant } from "../domain/participant";
 import { Mutex } from "await-semaphore";
 import { IEdge } from "./edge.interface";
+import { IPagination } from "./pagination.interface";
 
 const DEFAULT_PAGE_SIZE = 25;
 
@@ -22,12 +23,11 @@ export class OrganisationParticipantConnection {
 
   constructor(
     readonly organisation: Organisation,
-    first: number | undefined,
-    after: string | undefined,
+    readonly page: IPagination,
     private readonly membershipRepository: MembershipRepository
   ) {
-    this.first = first || DEFAULT_PAGE_SIZE;
-    this.after = after ? cursorToParticipantAddress(after) : undefined;
+    this.first = page.first || DEFAULT_PAGE_SIZE;
+    this.after = page.after ? cursorToParticipantAddress(page.after) : undefined;
   }
 
   totalCount(): Promise<number> {

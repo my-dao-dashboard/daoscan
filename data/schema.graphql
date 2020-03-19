@@ -27,7 +27,7 @@ type Organisation {
   bank: [Token]
   name: String!
   participant(address: String!): Participant
-  participants(after: String, first: Int): OrganisationParticipantConnection
+  participants(page: PageQuery): OrganisationParticipantConnection
   applications: [Application]
   platform: String!
   proposal(index: Int): Proposal

@@ -77,8 +77,9 @@ export class OrganisationResolver {
   }
 
   @bind()
-  async participants(root: Organisation, args: { first?: number; after?: string }) {
-    return new OrganisationParticipantConnection(root, args.first, args.after, this.membershipRepository);
+  async participants(root: Organisation, args: { page?: IPagination }) {
+    const page = args?.page || {};
+    return new OrganisationParticipantConnection(root, page, this.membershipRepository);
   }
 
   @bind()
