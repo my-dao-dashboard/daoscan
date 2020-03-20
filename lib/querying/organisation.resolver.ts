@@ -14,6 +14,7 @@ import { Participant } from "../domain/participant";
 import { IPagination } from "./pagination.interface";
 import { OrganisationConnection } from "./organisation-connection";
 import { OrganisationRepository } from "../storage/organisation.repository";
+import { OrganisationProposalConnection } from "./organisation-proposal-connection";
 
 @Service(OrganisationResolver.name)
 export class OrganisationResolver {
@@ -60,10 +61,12 @@ export class OrganisationResolver {
   }
 
   @bind()
-  async proposals(root: Organisation) {
-    const rows = await this.proposalRepository.allByOrganisation(root.address);
-    const promised = rows.map(r => this.proposalFactory.fromRow(r));
-    return Promise.all(promised);
+  async proposals(root: Organisation, args: { page?: IPagination }) {
+    const page = args?.page || {};
+    return new OrganisationProposalConnection(root, page, this.proposalRepository);
+    // const rows = await this.proposalRepository.allByOrganisation(root.address);
+    // const promised = rows.map(r => this.proposalFactory.fromRow(r));
+    // return Promise.all(promised);
   }
 
   @bind()

@@ -1,0 +1,24 @@
+query GetProposals {
+  organisation(address: "0x1fd169a4f5c59acf79d0fd5d91d1201ef1bce9f1") {
+    proposals(page: {first: 1}) {
+      totalCount
+      edges {
+        node {
+          createdAt
+          index
+          payload
+          proposer
+          status
+        }
+      }
+      pageInfo {
+        startIndex
+        endIndex
+        startCursor
+        endCursor
+        hasNextPage
+        hasPreviousPage
+      }
+    }
+  }
+}

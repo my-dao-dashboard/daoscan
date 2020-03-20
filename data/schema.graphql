@@ -31,7 +31,7 @@ type Organisation {
   applications: [Application]
   platform: String!
   proposal(index: Int): Proposal
-  proposals: [Proposal]
+  proposals(page: PageQuery): OrganisationProposalConnection
   totalSupply: Token
   createdAt: String!
 }
@@ -49,6 +49,17 @@ type OrganisationConnection {
 
 type OrganisationParticipantConnection {
   edges: [ParticipantConnectionEdge]
+  pageInfo: PageInfo
+  totalCount: Int!
+}
+
+type ProposalConnectionEdge {
+  cursor: String
+  node: Proposal
+}
+
+type OrganisationProposalConnection {
+  edges: [ProposalConnectionEdge]
   pageInfo: PageInfo
   totalCount: Int!
 }

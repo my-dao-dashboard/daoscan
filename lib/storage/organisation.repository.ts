@@ -7,7 +7,7 @@ import { DateTime } from "luxon";
 
 type Cursor = { id: bigint; createdAt: DateTime };
 
-class PaginationQuery {
+class ConnectionQuery {
   private readonly alias = this.query.alias;
 
   constructor(readonly query: SelectQueryBuilder<Organisation>) {}
@@ -17,7 +17,7 @@ class PaginationQuery {
       "org.createdAt": "DESC",
       "org.id": "DESC"
     });
-    return new PaginationQuery(query);
+    return new ConnectionQuery(query);
   }
 
   before(cursor: Cursor, include: boolean) {
@@ -29,7 +29,7 @@ class PaginationQuery {
         createdAt: cursor.createdAt.toISO(),
         id: cursor.id.toString()
       });
-    return new PaginationQuery(next);
+    return new ConnectionQuery(next);
   }
 
   after(cursor: Cursor, include: boolean) {
@@ -41,17 +41,17 @@ class PaginationQuery {
         createdAt: cursor.createdAt.toISO(),
         id: cursor.id.toString()
       });
-    return new PaginationQuery(next);
+    return new ConnectionQuery(next);
   }
 
   skip(n: number) {
     const next = this.query.clone().skip(n);
-    return new PaginationQuery(next);
+    return new ConnectionQuery(next);
   }
 
   take(n: number) {
     const next = this.query.clone().take(n);
-    return new PaginationQuery(next);
+    return new ConnectionQuery(next);
   }
 
   getCount() {
@@ -76,7 +76,7 @@ export class OrganisationRepository {
 
   async first(n: number, cursor?: Cursor) {
     const repository = await this.repositoryFactory.reading(Organisation);
-    let query = PaginationQuery.build(repository);
+    let query = ConnectionQuery.build(repository);
     const totalCount = await query.getCount();
     if (cursor) {
       query = query.after(cursor, false);
@@ -96,7 +96,7 @@ export class OrganisationRepository {
 
   async last(n: number, cursor: Cursor) {
     const repository = await this.repositoryFactory.reading(Organisation);
-    const query = PaginationQuery.build(repository);
+    const query = ConnectionQuery.build(repository);
     const totalCount = await query.getCount();
     const before = query.before(cursor, false);
 
