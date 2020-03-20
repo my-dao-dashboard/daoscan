@@ -87,15 +87,13 @@ export class OrganisationProposalConnection {
 
   async _page(): Promise<Raw> {
     if (this.pagination.before) {
-      throw new Error("Not implemented");
-      // const last = this.pagination.last || DEFAULT_PAGE;
-      // const before = decodeCursor(this.pagination.before);
-      // return this.organisationRepository.last(last, before);
+      const last = this.pagination.last || DEFAULT_PAGE;
+      const before = decodeCursor(this.pagination.before);
+      return this.proposalRepository.last(this.organisation.address, last, before);
     } else {
       const first = this.pagination.first || DEFAULT_PAGE;
       const after = this.pagination.after ? decodeCursor(this.pagination.after) : undefined;
       return this.proposalRepository.first(this.organisation.address, first, after);
-      // return this.organisationRepository.first(first, after);
     }
   }
 }

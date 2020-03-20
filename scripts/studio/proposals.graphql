@@ -1,6 +1,6 @@
 query GetProposals {
   organisation(address: "0x1fd169a4f5c59acf79d0fd5d91d1201ef1bce9f1") {
-    proposals(page: {first: 1}) {
+    proposals(page: {last: 2, before: "eyJpbmRleCI6N30="}) {
       totalCount
       edges {
         node {

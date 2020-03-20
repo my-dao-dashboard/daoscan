@@ -64,9 +64,6 @@ export class OrganisationResolver {
   async proposals(root: Organisation, args: { page?: IPagination }) {
     const page = args?.page || {};
     return new OrganisationProposalConnection(root, page, this.proposalRepository);
-    // const rows = await this.proposalRepository.allByOrganisation(root.address);
-    // const promised = rows.map(r => this.proposalFactory.fromRow(r));
-    // return Promise.all(promised);
   }
 
   @bind()

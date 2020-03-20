@@ -1,7 +1,7 @@
 import { Inject, Service } from "typedi";
 import { RepositoryFactory } from "./repository.factory";
 import { Proposal } from "./proposal.row";
-import { LessThanOrEqual, Repository, SelectQueryBuilder } from "typeorm";
+import { LessThanOrEqual, MoreThanOrEqual, Repository, SelectQueryBuilder } from "typeorm";
 import { Organisation } from "./organisation.row";
 
 class OrganisationConnectionQuery {
@@ -17,11 +17,24 @@ class OrganisationConnectionQuery {
     return new OrganisationConnectionQuery(query);
   }
 
+  before(index: number, include: boolean) {
+    const cmp = include ? ">=" : ">";
+    const next = this.query.clone().andWhere(`${this.alias}.index ${cmp} :index`, {
+      index: index
+    });
+    return new OrganisationConnectionQuery(next);
+  }
+
   after(index: number, include: boolean) {
     const cmp = include ? "<=" : "<";
     const next = this.query.clone().andWhere(`${this.alias}.index ${cmp} :index`, {
       index: index
     });
+    return new OrganisationConnectionQuery(next);
+  }
+
+  skip(n: number) {
+    const next = this.query.clone().skip(n);
     return new OrganisationConnectionQuery(next);
   }
 
@@ -68,12 +81,39 @@ export class ProposalRepository {
       .getCount();
   }
 
-  async first(organisationAddress: string, n: number, after?: { index: number }) {
+  async last(organisationAddress: string, n: number, beforeCursor: { index: number }) {
+    const repository = await this.repositoryFactory.reading(Proposal);
+    const query = OrganisationConnectionQuery.build(repository, organisationAddress);
+    const totalCount = await query.getCount();
+    const before = query.before(beforeCursor.index, false);
+
+    const beforeCount = await before.getCount();
+    const offset = beforeCount - n > 0 ? beforeCount - n : 0;
+
+    const entries = await before
+      .skip(offset)
+      .take(n)
+      .getMany();
+
+    const startIndex = beforeCount - n + 1;
+    const endIndex = startIndex + n - 1;
+    const afterCount = totalCount - offset - n;
+
+    return {
+      startIndex: startIndex,
+      endIndex: endIndex,
+      hasPreviousPage: offset > 0,
+      hasNextPage: afterCount > 0,
+      entries: entries
+    };
+  }
+
+  async first(organisationAddress: string, n: number, afterCursor?: { index: number }) {
     const repository = await this.repositoryFactory.reading(Proposal);
     let query = OrganisationConnectionQuery.build(repository, organisationAddress);
     const totalCount = await query.getCount();
-    if (after?.index) {
-      query = query.after(after.index, false);
+    if (afterCursor?.index) {
+      query = query.after(afterCursor.index, false);
     }
     const afterCount = await query.getCount();
     const entries = await query.take(n).getMany();
