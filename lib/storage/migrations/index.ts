@@ -43,3 +43,4 @@ export * from "./1569249296500-AddStatusToProposal";
 export * from "./1569249296600-AddCreationTimeToOrganisation";
 export * from "./1569249296700-AddCreationIndexToOrganisation";
 export * from "./1569249296800-AddNameToApplications";
+export * from "./1569249296900-AddCreationTimeToProposals";

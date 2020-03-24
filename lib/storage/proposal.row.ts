@@ -27,4 +27,8 @@ export class Proposal {
   @Column({ type: "enum", enum: PROPOSAL_STATUS })
   // @ts-ignore
   status: PROPOSAL_STATUS;
+
+  @Column()
+  // @ts-ignore
+  createdAt: Date;
 }

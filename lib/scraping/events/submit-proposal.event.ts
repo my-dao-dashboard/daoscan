@@ -52,6 +52,7 @@ export class SubmitProposalEvent implements IScrapingEvent, SubmitProposalEventP
     proposalRow.proposer = this.proposer;
     proposalRow.payload = this.payload;
     proposalRow.status = PROPOSAL_STATUS.ACTIVE;
+    proposalRow.createdAt = eventRow.timestamp;
 
     const historyRow = new History();
     historyRow.resourceKind = RESOURCE_KIND.PROPOSAL;
