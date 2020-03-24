@@ -47,7 +47,7 @@ export class OrganisationProposalConnection {
     return page.entries.map(proposal => {
       return {
         node: {
-          createdAt: "FIXME",
+          createdAt: proposal.createdAt.toISOString(),
           index: proposal.index,
           payload: proposal.payload,
           proposer: proposal.proposer,
