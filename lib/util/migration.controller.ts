@@ -10,7 +10,8 @@ import { BlockFactory } from "../scraping/block.factory";
 import { OrganisationRepository } from "../storage/organisation.repository";
 import { HistoryRepository } from "../storage/history.repository";
 import { RESOURCE_KIND } from "../storage/resource.kind";
-import { DateTime } from "luxon";
+import { ProposalRepository } from "../storage/proposal.repository";
+import { SCRAPING_EVENT_KIND } from "../scraping/events/scraping-event.kind";
 
 @Service(MigrationController.name)
 export class MigrationController {
@@ -23,7 +24,8 @@ export class MigrationController {
     @Inject(ScrapingEventFactory.name) private readonly eventFactory: ScrapingEventFactory,
     @Inject(BlockFactory.name) private readonly blockFactory: BlockFactory,
     @Inject(OrganisationRepository.name) private readonly organisationRepository: OrganisationRepository,
-    @Inject(HistoryRepository.name) private readonly historyRepository: HistoryRepository
+    @Inject(HistoryRepository.name) private readonly historyRepository: HistoryRepository,
+    @Inject(ProposalRepository.name) private readonly proposalRepository: ProposalRepository
   ) {
     this.token = env.readString(ENV.UTIL_SECRET);
   }
@@ -50,27 +52,19 @@ export class MigrationController {
     this.ensureAuthorization(event);
     const limit = Number(event.queryStringParameters?.limit) || 100;
     let n = 0;
-    const organisations = await this.organisationRepository.oldOnes(limit);
-    for (let org of organisations) {
-      const histories = await this.historyRepository.allByResource(org.id, RESOURCE_KIND.ORGANISATION);
+    const proposals = await this.proposalRepository.toProcess(limit);
+    for (let proposal of proposals) {
+      const histories = await this.historyRepository.allByResource(proposal.id, RESOURCE_KIND.PROPOSAL);
+      console.log(histories);
       const eventIds = histories.map(h => h.eventId);
-      const events = await this.events.allByIds(eventIds);
-      if (events && events[0]) {
-        org.createdAt = DateTime.fromJSDate(events[0].timestamp);
-        await this.organisationRepository.save(org);
-      }
+      const events = await this.events.allByIdKind(eventIds, SCRAPING_EVENT_KIND.SUBMIT_PROPOSAL);
+      const promises = events.map(async e => {
+        proposal.createdAt = e.timestamp;
+        await this.proposalRepository.save(proposal);
+      });
+      await Promise.all(promises);
       n = n + 1;
     }
-    // const rawEvents = await this.events.oldOnes(limit);
-    // for (let e of rawEvents) {
-    //   const dsEvent = await this.eventFactory.fromStorage(e.id);
-    //   if (dsEvent) {
-    //     await dsEvent.revert();
-    //     await dsEvent.commit();
-    //     n = n + 1;
-    //   }
-    // }
-
     return {
       amount: n
     };

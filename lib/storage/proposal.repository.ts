@@ -127,4 +127,18 @@ export class ProposalRepository {
       entries: entries
     };
   }
+
+  async save(proposal: Proposal) {
+    const repository = await this.repositoryFactory.writing(Proposal);
+    return repository.save(proposal);
+  }
+
+  async toProcess(limit: number): Promise<Proposal[]> {
+    const repository = await this.repositoryFactory.reading(Proposal);
+    return repository
+      .createQueryBuilder("p")
+      .where("p.createdAt < '1980-01-01'")
+      .take(limit)
+      .getMany();
+  }
 }

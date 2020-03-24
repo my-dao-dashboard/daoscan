@@ -2,7 +2,7 @@ import { Inject, Service } from "typedi";
 import { RepositoryFactory } from "./repository.factory";
 import { Organisation } from "./organisation.row";
 import { PLATFORM } from "../domain/platform";
-import { LessThan, LessThanOrEqual, MoreThanOrEqual, Repository, SelectQueryBuilder } from "typeorm";
+import { LessThanOrEqual, MoreThanOrEqual, Repository, SelectQueryBuilder } from "typeorm";
 import { DateTime } from "luxon";
 
 type Cursor = { id: bigint; createdAt: DateTime };
@@ -124,16 +124,6 @@ export class OrganisationRepository {
   async count() {
     const repository = await this.repositoryFactory.reading(Organisation);
     return repository.count();
-  }
-
-  async oldOnes(take: number) {
-    const repository = await this.repositoryFactory.reading(Organisation);
-    return repository.find({
-      where: {
-        createdAt: LessThan(DateTime.fromISO("1980-01-01"))
-      },
-      take: take
-    });
   }
 
   async uniq() {

@@ -13,10 +13,21 @@ export class EventRepository {
     return repository.findOneOrFail({ id: id });
   }
 
+  async allByIdKind(ids: bigint[], kind: SCRAPING_EVENT_KIND) {
+    const repository = await this.repositoryFactory.reading(Event);
+    return repository.find({
+      where: { id: In(ids.map(id => id.toString())), kind: kind },
+      order: {
+        timestamp: "DESC"
+      },
+      take: 1
+    });
+  }
+
   async allByIds(ids: bigint[]) {
     const repository = await this.repositoryFactory.reading(Event);
     return repository.find({
-      where: { id: In(ids.map(id => id.toString())), kind: SCRAPING_EVENT_KIND.ORGANISATION_CREATED },
+      where: { id: In(ids.map(id => id.toString())) },
       order: {
         timestamp: "DESC"
       },
