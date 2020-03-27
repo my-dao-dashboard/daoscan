@@ -2,9 +2,7 @@ import { Inject, Service } from "typedi";
 import { RepositoryFactory } from "./repository.factory";
 import { Vote } from "./vote.row";
 import { VOTE_DECISION } from "../domain/vote-decision";
-import { DateTime } from "luxon";
-import { LessThanOrEqual, MoreThanOrEqual, Repository, SelectQueryBuilder } from "typeorm";
-import { Organisation } from "./organisation.row";
+import { Repository, SelectQueryBuilder } from "typeorm";
 
 type Proposal = {
   organisationAddress: string;
@@ -13,7 +11,7 @@ type Proposal = {
 
 type Cursor = {
   id: BigInt;
-  createdAt: DateTime;
+  createdAt: Date;
 };
 
 class ConnectionQuery {
@@ -41,7 +39,7 @@ class ConnectionQuery {
       .clone()
       .andWhere(`${this.alias}.createdAt >= :createdAt`, { createdAt: cursor.createdAt })
       .andWhere(`(${this.alias}.createdAt ${cmp} :createdAt OR ${this.alias}.id ${cmp} :id)`, {
-        createdAt: cursor.createdAt.toISO(),
+        createdAt: cursor.createdAt,
         id: cursor.id.toString()
       });
     return new ConnectionQuery(next);
@@ -53,7 +51,7 @@ class ConnectionQuery {
       .clone()
       .andWhere(`${this.alias}.createdAt <= :createdAt`, { createdAt: cursor.createdAt })
       .andWhere(`(${this.alias}.createdAt ${cmp} :createdAt OR ${this.alias}.id ${cmp} :id)`, {
-        createdAt: cursor.createdAt.toISO(),
+        createdAt: cursor.createdAt,
         id: cursor.id.toString()
       });
     return new ConnectionQuery(next);

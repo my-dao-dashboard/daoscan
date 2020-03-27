@@ -2,15 +2,14 @@ import { Proposal } from "../domain/proposal";
 import { IPagination } from "./pagination.interface";
 import { VoteRepository } from "../storage/vote.repository";
 import { TokenFactory } from "../domain/token.factory";
-import { DateTime } from "luxon";
 import { Mutex } from "await-semaphore";
 import { Vote as VoteRow } from "../storage/vote.row";
 import { VoteFactory } from "../domain/vote.factory";
 
 const DEFAULT_PAGE_SIZE = 25;
 
-function toCursor(cursor: { id: BigInt; createdAt: string | Date }) {
-  const payload = { id: cursor.id.toString(), createdAt: cursor.createdAt.toString() };
+function toCursor(cursor: { id: BigInt; createdAt: Date }) {
+  const payload = { id: cursor.id.toString(), createdAt: cursor.createdAt.valueOf() };
   const string = JSON.stringify(payload);
   return Buffer.from(string).toString("base64");
 }
@@ -20,7 +19,7 @@ function decodeCursor(cursor: string) {
   const payload = JSON.parse(buffer);
   return {
     id: BigInt(payload.id),
-    createdAt: DateTime.fromISO(payload.createdAt)
+    createdAt: new Date(payload.createdAt)
   };
 }
 
