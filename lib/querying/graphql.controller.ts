@@ -86,7 +86,8 @@ export class GraphqlController {
         organisations: this.accountResolver.organisations
       },
       Proposal: {
-        votes: this.proposalResolver.votes
+        votes: this.proposalResolver.votes,
+        stats: this.proposalResolver.stats
       },
       Token: {
         value: this.tokenResolver.value
