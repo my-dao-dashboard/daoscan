@@ -29,8 +29,8 @@ interface Raw {
 }
 
 export class OrganisationProposalConnection {
-  private rowsMutex = new Mutex();
-  private cached: Raw | undefined;
+  private pageMutex = new Mutex();
+  private _pageCached: Raw | undefined;
 
   constructor(
     private readonly organisation: Organisation,
@@ -75,12 +75,12 @@ export class OrganisationProposalConnection {
   }
 
   async page() {
-    return this.rowsMutex.use(async () => {
-      if (this.cached) {
-        return this.cached;
+    return this.pageMutex.use(async () => {
+      if (this._pageCached) {
+        return this._pageCached;
       } else {
-        this.cached = await this._page();
-        return this.cached;
+        this._pageCached = await this._page();
+        return this._pageCached;
       }
     });
   }

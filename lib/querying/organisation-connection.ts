@@ -23,7 +23,7 @@ function decodeCursor(cursor: string) {
 const DEFAULT_PAGE = 25;
 
 export class OrganisationConnection {
-  private _rows:
+  private _pageCache:
     | {
         startIndex: number;
         endIndex: number;
@@ -32,7 +32,7 @@ export class OrganisationConnection {
         entries: OrganisationRow[];
       }
     | undefined;
-  private rowsMutex = new Mutex();
+  private pageMutex = new Mutex();
 
   constructor(
     private readonly pagination: IPagination,
@@ -45,7 +45,7 @@ export class OrganisationConnection {
   }
 
   async pageInfo() {
-    const rows = await this.organisationRows();
+    const rows = await this.page();
     const lastEdge = rows.entries[rows.entries.length - 1];
     const firstEdge = rows.entries[0];
     const startCursor = firstEdge ? organisationToCursor(firstEdge) : null;
@@ -61,7 +61,7 @@ export class OrganisationConnection {
   }
 
   async edges() {
-    const rows = await this.organisationRows();
+    const rows = await this.page();
     return rows.entries.map(row => {
       const organisation = this.organisationFactory.fromRow(row);
       return {
@@ -71,18 +71,18 @@ export class OrganisationConnection {
     });
   }
 
-  async organisationRows() {
-    return this.rowsMutex.use(async () => {
-      if (this._rows) {
-        return this._rows;
+  async page() {
+    return this.pageMutex.use(async () => {
+      if (this._pageCache) {
+        return this._pageCache;
       } else {
-        this._rows = await this._organisationRows();
-        return this._rows;
+        this._pageCache = await this._page();
+        return this._pageCache;
       }
     });
   }
 
-  async _organisationRows() {
+  async _page() {
     if (this.pagination.before) {
       const last = this.pagination.last || DEFAULT_PAGE;
       const before = decodeCursor(this.pagination.before);
