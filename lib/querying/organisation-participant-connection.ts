@@ -23,11 +23,11 @@ export class OrganisationParticipantConnection {
 
   constructor(
     readonly organisation: Organisation,
-    readonly page: IPagination,
+    page: IPagination | undefined,
     private readonly membershipRepository: MembershipRepository
   ) {
-    this.first = page.first || DEFAULT_PAGE_SIZE;
-    this.after = page.after ? cursorToParticipantAddress(page.after) : undefined;
+    this.first = page?.first || DEFAULT_PAGE_SIZE;
+    this.after = page?.after ? cursorToParticipantAddress(page.after) : undefined;
   }
 
   totalCount(): Promise<number> {
