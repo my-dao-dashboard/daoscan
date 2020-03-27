@@ -44,3 +44,4 @@ export * from "./1569249296600-AddCreationTimeToOrganisation";
 export * from "./1569249296700-AddCreationIndexToOrganisation";
 export * from "./1569249296800-AddNameToApplications";
 export * from "./1569249296900-AddCreationTimeToProposals";
+export * from "./1569249297000-AddCreationTimeToVote";

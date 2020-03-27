@@ -59,4 +59,18 @@ export class VoteRepository {
       }
     });
   }
+
+  async toProcess(limit: number): Promise<Vote[]> {
+    const repository = await this.repositoryFactory.reading(Vote);
+    return repository
+      .createQueryBuilder("p")
+      .where("p.createdAt < '1980-01-01'")
+      .take(limit)
+      .getMany();
+  }
+
+  async save(vote: Vote): Promise<Vote> {
+    const repository = await this.repositoryFactory.writing(Vote);
+    return repository.save(vote);
+  }
 }

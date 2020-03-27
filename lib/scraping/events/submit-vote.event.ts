@@ -49,6 +49,7 @@ export class SubmitVoteEvent implements IScrapingEvent, SubmitVoteEventProps {
     voteRow.organisationAddress = this.organisationAddress;
     voteRow.proposalIndex = this.proposalIndex;
     voteRow.voter = this.voter;
+    voteRow.createdAt = eventRow.timestamp;
 
     const historyRow = new History();
     historyRow.resourceKind = RESOURCE_KIND.VOTE;

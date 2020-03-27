@@ -12,6 +12,7 @@ import { HistoryRepository } from "../storage/history.repository";
 import { RESOURCE_KIND } from "../storage/resource.kind";
 import { ProposalRepository } from "../storage/proposal.repository";
 import { SCRAPING_EVENT_KIND } from "../scraping/events/scraping-event.kind";
+import { VoteRepository } from "../storage/vote.repository";
 
 @Service(MigrationController.name)
 export class MigrationController {
@@ -25,7 +26,8 @@ export class MigrationController {
     @Inject(BlockFactory.name) private readonly blockFactory: BlockFactory,
     @Inject(OrganisationRepository.name) private readonly organisationRepository: OrganisationRepository,
     @Inject(HistoryRepository.name) private readonly historyRepository: HistoryRepository,
-    @Inject(ProposalRepository.name) private readonly proposalRepository: ProposalRepository
+    @Inject(ProposalRepository.name) private readonly proposalRepository: ProposalRepository,
+    @Inject(VoteRepository.name) private readonly voteRepository: VoteRepository
   ) {
     this.token = env.readString(ENV.UTIL_SECRET);
   }
@@ -52,15 +54,15 @@ export class MigrationController {
     this.ensureAuthorization(event);
     const limit = Number(event.queryStringParameters?.limit) || 100;
     let n = 0;
-    const proposals = await this.proposalRepository.toProcess(limit);
-    for (let proposal of proposals) {
-      const histories = await this.historyRepository.allByResource(proposal.id, RESOURCE_KIND.PROPOSAL);
+    const votes = await this.voteRepository.toProcess(limit);
+    for (let vote of votes) {
+      const histories = await this.historyRepository.allByResource(vote.id, RESOURCE_KIND.VOTE);
       console.log(histories);
       const eventIds = histories.map(h => h.eventId);
-      const events = await this.events.allByIdKind(eventIds, SCRAPING_EVENT_KIND.SUBMIT_PROPOSAL);
+      const events = await this.events.allByIdKind(eventIds, SCRAPING_EVENT_KIND.SUBMIT_VOTE);
       const promises = events.map(async e => {
-        proposal.createdAt = e.timestamp;
-        await this.proposalRepository.save(proposal);
+        vote.createdAt = e.timestamp;
+        await this.voteRepository.save(vote);
       });
       await Promise.all(promises);
       n = n + 1;

@@ -24,4 +24,8 @@ export class Vote {
   @Column({ type: "enum", enum: VOTE_DECISION })
   // @ts-ignore
   decision: VOTE_DECISION;
+
+  @Column()
+  // @ts-ignore
+  createdAt: Date;
 }

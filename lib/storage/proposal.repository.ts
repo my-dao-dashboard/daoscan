@@ -1,8 +1,7 @@
 import { Inject, Service } from "typedi";
 import { RepositoryFactory } from "./repository.factory";
 import { Proposal } from "./proposal.row";
-import { LessThanOrEqual, MoreThanOrEqual, Repository, SelectQueryBuilder } from "typeorm";
-import { Organisation } from "./organisation.row";
+import { Repository, SelectQueryBuilder } from "typeorm";
 
 class OrganisationConnectionQuery {
   private readonly alias = this.query.alias;
@@ -131,14 +130,5 @@ export class ProposalRepository {
   async save(proposal: Proposal) {
     const repository = await this.repositoryFactory.writing(Proposal);
     return repository.save(proposal);
-  }
-
-  async toProcess(limit: number): Promise<Proposal[]> {
-    const repository = await this.repositoryFactory.reading(Proposal);
-    return repository
-      .createQueryBuilder("p")
-      .where("p.createdAt < '1980-01-01'")
-      .take(limit)
-      .getMany();
   }
 }
