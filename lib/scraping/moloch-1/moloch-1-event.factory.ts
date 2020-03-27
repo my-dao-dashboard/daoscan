@@ -294,20 +294,13 @@ export class Moloch1EventFactory {
     const extendedBlock = await block.extendedBlock();
     const timestamp = await block.timestamp();
     const promised = logEvents(this.ethereum.codec, extendedBlock, SUBMIT_PROPOSAL_BLOCKCHAIN_EVENT).map(async e => {
-      const receipt = e.receipt;
-      const abi = [
-        { name: "applicant", type: "address" },
-        { name: "tokenTribute", type: "uint256" },
-        { name: "sharesRequested", type: "uint256" },
-        { name: "details", type: "string" }
-      ];
-      const parameters = this.ethereum.codec.decodeParameters(abi, "0x" + receipt.input.slice(10));
       const contract = this.ethereum.contract(MOLOCH_1_ABI as AbiItem[], e.address);
       const approvedTokenAddress = await contract.methods.approvedToken().call();
       const approvedToken = this.ethereum.contract(ERC20_TOKEN_ABI as AbiItem[], approvedTokenAddress);
       const tokenName = this.ethereum.codec.decodeString(await approvedToken.methods.name().call());
       const tokenSymbol = this.ethereum.codec.decodeString(await approvedToken.methods.symbol().call());
       const decimals = await approvedToken.methods.decimals().call();
+      const proposal = await contract.methods.proposalQueue(e.proposalIndex).call();
       const tribute = this.tokenFactory.build({
         name: tokenName,
         symbol: tokenSymbol,
@@ -332,7 +325,7 @@ export class Moloch1EventFactory {
           platform: PLATFORM.MOLOCH_1,
           payload: {
             applicant: e.applicant.toLowerCase(),
-            description: parseDetails(parameters.details),
+            description: parseDetails(proposal.details),
             sharesRequested: sharesRequested.toJSON(),
             tribute: tribute.toJSON()
           }

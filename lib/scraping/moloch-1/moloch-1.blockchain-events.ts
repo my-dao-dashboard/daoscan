@@ -56,10 +56,12 @@ export const REGISTER_MOLOCH_BLOCKCHAIN_EVENT: BlockchainEvent<RegisterMolochPar
 };
 
 export interface SubmitProposalParams {
-  applicant: string;
-  tokenTribute: string;
-  sharesRequested: string;
-  details: string;
+  proposalIndex: string
+  delegateKey: string
+  memberAddress: string
+  applicant: string
+  tokenTribute: string
+  sharesRequested: string
 }
 
 export const SUBMIT_PROPOSAL_BLOCKCHAIN_EVENT: BlockchainEvent<SubmitProposalParams> = {
