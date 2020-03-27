@@ -1,3 +1,6 @@
+import { Memoize } from "typescript-memoize";
+import { OrganisationFactory } from "./organisation.factory";
+
 export enum PROPOSAL_STATUS {
   ACTIVE = "ACTIVE",
   PASS = "PASS",
@@ -23,5 +26,10 @@ export class Proposal {
   readonly organisationAddress = this.props.organisationAddress;
   readonly status = this.props.status;
 
-  constructor(private readonly props: ProposalProps) {}
+  constructor(private readonly props: ProposalProps, private readonly organisationFactory: OrganisationFactory) {}
+
+  @Memoize()
+  async organisation() {
+    return this.organisationFactory.byAddress(this.organisationAddress);
+  }
 }

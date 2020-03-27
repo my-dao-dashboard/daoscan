@@ -19,7 +19,10 @@ export class MessariService {
     return found || symbol;
   }
 
-  async usdPrice(symbol: string): Promise<number | undefined> {
+  async usdPrice(symbol: string | undefined): Promise<number | undefined> {
+    if (!symbol) {
+      return undefined;
+    }
     const cached = this.cache.get(symbol);
     if (cached) {
       return cached;

@@ -2,8 +2,8 @@ import { MessariService } from "../querying/messari.service";
 import BigNumber from "bignumber.js";
 
 export interface TokenProps {
-  name: string;
-  symbol: string;
+  name: string | undefined;
+  symbol: string | undefined;
   amount: string;
   decimals: number;
 }
@@ -20,7 +20,7 @@ export class Token {
     const usdPerUnit = await this.messari.usdPrice(this.symbol);
     const usdPerTarget = await this.messari.usdPrice(targetSymbol);
     if (usdPerUnit && usdPerTarget) {
-      const tokenAmount = new BigNumber(this.amount).div(10 ** this.decimals);
+      const tokenAmount = this.toBigNumber();
       const targetValue = tokenAmount.multipliedBy(usdPerUnit).div(usdPerTarget);
       const amount = (targetValue.toNumber() * 10 ** 4).toFixed(0);
       return new Token(
@@ -35,6 +35,10 @@ export class Token {
     } else {
       return undefined;
     }
+  }
+
+  toBigNumber(): BigNumber {
+    return new BigNumber(this.amount).div(10 ** this.decimals);
   }
 
   toJSON() {

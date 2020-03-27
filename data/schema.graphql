@@ -90,13 +90,28 @@ type ParticipantConnectionEdge {
   node: Participant
 }
 
+type VoteConnectionEdge {
+  cursor: String
+  node: Vote
+}
+
+type ProposalVoteConnection {
+  edges: [VoteConnectionEdge]
+  pageInfo: PageInfo
+  totalCount: Int!
+  totalYesVotes: Int
+  totalNoVotes: Int
+  totalYesShares: Token
+  totalNoShares: Token
+}
+
 type Proposal {
   createdAt: String
   index: Int!
   payload: JSON
   proposer: String!
   status: ProposalStatus
-  votes: [Vote]
+  votes(page: PageQuery): ProposalVoteConnection
 }
 
 type Query {

@@ -27,20 +27,14 @@ export class Shares extends Token {
     this.bank = props.bank;
   }
 
-  async balanceOf(participantAddress: string) {
+  async balanceOf(participantAddress: string): Promise<Token> {
     switch (this.platform) {
       case PLATFORM.MOLOCH_1:
         const member = await this.token.methods.members(participantAddress).call();
-        return {
-          ...this,
-          amount: member.shares
-        };
+        return new Token({ ...this, amount: member.shares }, this.messari);
       case PLATFORM.ARAGON:
         const balance = await this.token.methods.balanceOf(participantAddress).call();
-        return {
-          ...this,
-          amount: balance
-        };
+        return new Token({ ...this, amount: balance }, this.messari);
       default:
         throw new UnreachableCaseError(this.platform);
     }
