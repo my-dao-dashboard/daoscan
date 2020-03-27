@@ -91,10 +91,9 @@ export class ProposalVoteConnection {
 
   async _page() {
     if (this.pagination.before) {
-      throw new Error("Not Implemented");
-      // const last = this.pagination.last || DEFAULT_PAGE_SIZE;
-      // const before = decodeCursor(this.pagination.before);
-      // return this.proposalRepository.last(this.organisation.address, last, before);
+      const last = this.pagination.last || DEFAULT_PAGE_SIZE;
+      const before = decodeCursor(this.pagination.before);
+      return this.voteRepository.last(this.proposal, last, before);
     } else {
       const first = this.pagination.first || DEFAULT_PAGE_SIZE;
       const after = this.pagination.after ? decodeCursor(this.pagination.after) : undefined;

@@ -128,12 +128,12 @@ export class VoteRepository {
     });
   }
 
-  async first(proposal: Proposal, take: number, after?: Cursor) {
+  async first(proposal: Proposal, take: number, cursor?: Cursor) {
     const repository = await this.repositoryFactory.reading(Vote);
     let query = ConnectionQuery.build(repository, proposal);
     const totalCount = await query.getCount();
-    if (after) {
-      query = query.after(after, false);
+    if (cursor) {
+      query = query.after(cursor, false);
     }
     const afterCount = await query.getCount();
     const entries = await query.take(take).getMany();
@@ -144,6 +144,33 @@ export class VoteRepository {
       endIndex: endIndex,
       hasNextPage: afterCount > take,
       hasPreviousPage: startIndex > 1,
+      entries: entries
+    };
+  }
+
+  async last(proposal: Proposal, take: number, cursor: Cursor) {
+    const repository = await this.repositoryFactory.reading(Vote);
+    const query = ConnectionQuery.build(repository, proposal);
+    const totalCount = await query.getCount();
+    const before = query.before(cursor, false);
+
+    const beforeCount = await before.getCount();
+    const offset = beforeCount - take > 0 ? beforeCount - take : 0;
+
+    const entries = await before
+      .skip(offset)
+      .take(take)
+      .getMany();
+
+    const startIndex = beforeCount - take + 1;
+    const endIndex = startIndex + take - 1;
+    const afterCount = totalCount - offset - take;
+
+    return {
+      startIndex: startIndex,
+      endIndex: endIndex,
+      hasPreviousPage: offset > 0,
+      hasNextPage: afterCount > 0,
       entries: entries
     };
   }
