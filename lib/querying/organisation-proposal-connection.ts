@@ -4,7 +4,7 @@ import { Organisation } from "../domain/organisation";
 import { Mutex } from "await-semaphore/index";
 import { Proposal } from "../storage/proposal.row";
 
-const DEFAULT_PAGE = 25;
+const DEFAULT_PAGE_SIZE = 25;
 
 function proposalToCursor(proposal: { index: number }) {
   const payload = { index: proposal.index };
@@ -87,11 +87,11 @@ export class OrganisationProposalConnection {
 
   async _page(): Promise<Raw> {
     if (this.pagination.before) {
-      const last = this.pagination.last || DEFAULT_PAGE;
+      const last = this.pagination.last || DEFAULT_PAGE_SIZE;
       const before = decodeCursor(this.pagination.before);
       return this.proposalRepository.last(this.organisation.address, last, before);
     } else {
-      const first = this.pagination.first || DEFAULT_PAGE;
+      const first = this.pagination.first || DEFAULT_PAGE_SIZE;
       const after = this.pagination.after ? decodeCursor(this.pagination.after) : undefined;
       return this.proposalRepository.first(this.organisation.address, first, after);
     }
