@@ -1,8 +1,6 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
 import { PLATFORM } from "../domain/platform";
 import { bigintTransformer } from "./transformers/bigint.transformer";
-import { dateTimeTransformer } from "./transformers/date-time.transformer";
-import { DateTime } from "luxon";
 
 @Entity("organisations")
 export class OrganisationRecord {
@@ -22,7 +20,7 @@ export class OrganisationRecord {
   // @ts-ignore
   address: string;
 
-  @Column("timestamp", { transformer: dateTimeTransformer })
+  @Column("timestamp")
   // @ts-ignore
-  createdAt: DateTime;
+  createdAt: Date;
 }

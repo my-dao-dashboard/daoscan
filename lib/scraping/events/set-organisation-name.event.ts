@@ -9,7 +9,6 @@ import { HistoryRecord } from "../../storage/history.record";
 import { RESOURCE_KIND } from "../../storage/resource.kind";
 import { OrganisationRecord } from "../../storage/organisation.record";
 import { EventRepository } from "../../storage/event.repository";
-import { DateTime } from "luxon";
 
 export interface SetOrganisationNameEventProps {
   blockNumber: number;
@@ -104,7 +103,7 @@ export class SetOrganisationNameEvent implements IScrapingEvent {
       organisationRow.name = this.name;
       organisationRow.address = this.address;
       organisationRow.platform = this.platform;
-      organisationRow.createdAt = DateTime.fromJSDate(event.timestamp);
+      organisationRow.createdAt = event.timestamp;
       return organisationRow;
     }
   }

@@ -2,10 +2,9 @@ import { IPagination } from "./pagination.interface";
 import { OrganisationStorage } from "../storage/organisation.storage";
 import { Mutex } from "await-semaphore/index";
 import { OrganisationFactory } from "../domain/organisation.factory";
-import { DateTime } from "luxon";
 import { OrganisationRecord as OrganisationRow } from "../storage/organisation.record";
 
-function organisationToCursor(organisation: { id: bigint; createdAt: string | DateTime }) {
+function organisationToCursor(organisation: { id: bigint; createdAt: string | Date }) {
   const payload = { id: organisation.id.toString(), createdAt: organisation.createdAt.toString() };
   const string = JSON.stringify(payload);
   return Buffer.from(string).toString("base64");
@@ -16,7 +15,7 @@ function decodeCursor(cursor: string) {
   const payload = JSON.parse(buffer);
   return {
     id: BigInt(payload.id),
-    createdAt: DateTime.fromISO(payload.createdAt)
+    createdAt: new Date(payload.createdAt)
   };
 }
 

@@ -3,10 +3,9 @@ import { RepositoryFactory } from "./repository.factory";
 import { OrganisationRecord } from "./organisation.record";
 import { PLATFORM } from "../domain/platform";
 import { LessThanOrEqual, MoreThanOrEqual, Repository, SelectQueryBuilder } from "typeorm";
-import { DateTime } from "luxon";
 import { IPage } from "./page.interface";
 
-type Cursor = { id: bigint; createdAt: DateTime };
+type Cursor = { id: bigint; createdAt: Date };
 
 class ConnectionQuery {
   private readonly alias = this.query.alias;
@@ -27,7 +26,7 @@ class ConnectionQuery {
       .clone()
       .where({ createdAt: MoreThanOrEqual(cursor.createdAt) })
       .andWhere(`(${this.alias}.createdAt ${cmp} :createdAt OR ${this.alias}.id ${cmp} :id)`, {
-        createdAt: cursor.createdAt.toISO(),
+        createdAt: cursor.createdAt.toISOString(),
         id: cursor.id.toString()
       });
     return new ConnectionQuery(next);
@@ -39,7 +38,7 @@ class ConnectionQuery {
       .clone()
       .where({ createdAt: LessThanOrEqual(cursor.createdAt) })
       .andWhere(`(${this.alias}.createdAt ${cmp} :createdAt OR ${this.alias}.id ${cmp} :id)`, {
-        createdAt: cursor.createdAt.toISO(),
+        createdAt: cursor.createdAt.toISOString(),
         id: cursor.id.toString()
       });
     return new ConnectionQuery(next);

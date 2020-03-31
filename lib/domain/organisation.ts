@@ -3,14 +3,13 @@ import { OrganisationService } from "./organisation.service";
 import { Memoize } from "typescript-memoize";
 import { Token } from "./token";
 import { PLATFORM } from "./platform";
-import { DateTime } from "luxon";
 
 interface Props {
   address: string;
   platform: PLATFORM;
   name: string;
   id: bigint;
-  createdAt: DateTime;
+  createdAt: Date;
 }
 
 export class Organisation {
@@ -23,7 +22,7 @@ export class Organisation {
 
   @Memoize()
   get createdAt(): string {
-    return this.props.createdAt.toISO();
+    return this.props.createdAt.toISOString();
   }
 
   @Memoize()
