@@ -4,6 +4,7 @@ import { OrganisationRecord } from "./organisation.record";
 import { PLATFORM } from "../domain/platform";
 import { LessThanOrEqual, MoreThanOrEqual, Repository, SelectQueryBuilder } from "typeorm";
 import { DateTime } from "luxon";
+import { IPage } from "./page.interface";
 
 type Cursor = { id: bigint; createdAt: DateTime };
 
@@ -63,8 +64,8 @@ class ConnectionQuery {
   }
 }
 
-@Service(OrganisationRepository.name)
-export class OrganisationRepository {
+@Service(OrganisationStorage.name)
+export class OrganisationStorage {
   constructor(@Inject(RepositoryFactory.name) private readonly repositoryFactory: RepositoryFactory) {}
 
   async byAddress(address: string) {
@@ -74,7 +75,7 @@ export class OrganisationRepository {
     });
   }
 
-  async first(n: number, cursor?: Cursor) {
+  async first(n: number, cursor?: Cursor): Promise<IPage<OrganisationRecord>> {
     const repository = await this.repositoryFactory.reading(OrganisationRecord);
     let query = ConnectionQuery.build(repository);
     const totalCount = await query.getCount();

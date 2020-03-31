@@ -2,7 +2,7 @@ import { IScrapingEvent } from "./scraping-event.interface";
 import { SCRAPING_EVENT_KIND } from "./scraping-event.kind";
 import { PLATFORM } from "../../domain/platform";
 import { EventRecord } from "../../storage/event.record";
-import { OrganisationRepository } from "../../storage/organisation.repository";
+import { OrganisationStorage } from "../../storage/organisation.storage";
 import { ConnectionFactory } from "../../storage/connection.factory";
 import { HistoryRepository } from "../../storage/history.repository";
 import { HistoryRecord } from "../../storage/history.record";
@@ -34,7 +34,7 @@ export class SetOrganisationNameEvent implements IScrapingEvent {
 
   constructor(
     private readonly props: SetOrganisationNameEventProps,
-    private readonly organisationRepository: OrganisationRepository,
+    private readonly organisationRepository: OrganisationStorage,
     private readonly connectionFactory: ConnectionFactory,
     private readonly historyRepository: HistoryRepository,
     private readonly eventRepository: EventRepository

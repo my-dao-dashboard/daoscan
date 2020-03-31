@@ -53,7 +53,7 @@ export class ProposalVoteConnection {
   async edges() {
     const rows = await this.page();
     const promised = rows.entries.map(async row => {
-      const vote = await this.voteFactory.fromRow(row);
+      const vote = await this.voteFactory.fromRecord(row);
       return {
         node: vote,
         cursor: toCursor(row)

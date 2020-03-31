@@ -1,6 +1,6 @@
 import { Inject, Service } from "typedi";
 import { bind } from "decko";
-import { OrganisationRepository } from "../storage/organisation.repository";
+import { OrganisationStorage } from "../storage/organisation.storage";
 import { MembershipRepository } from "../storage/membership.repository";
 import { BlockRepository } from "../storage/block.repository";
 
@@ -14,7 +14,7 @@ interface GlobalStats {
 @Service(GlobalStatsResolver.name)
 export class GlobalStatsResolver {
   constructor(
-    @Inject(OrganisationRepository.name) private readonly organisationRepository: OrganisationRepository,
+    @Inject(OrganisationStorage.name) private readonly organisationRepository: OrganisationStorage,
     @Inject(MembershipRepository.name) private readonly membershipRepository: MembershipRepository,
     @Inject(BlockRepository.name) private readonly blockRepository: BlockRepository
   ) {}

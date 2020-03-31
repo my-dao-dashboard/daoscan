@@ -8,7 +8,7 @@ import { AbiItem } from "web3-utils";
 import { Container } from "typedi";
 import { ApplicationRepository } from "../../lib/storage/application.repository";
 import ERC20_TOKEN_ABI from "../../lib/querying/erc20-token.abi.json";
-import { OrganisationRepository } from "../../lib/storage/organisation.repository";
+import { OrganisationStorage } from "../../lib/storage/organisation.storage";
 import { sleep } from "../../lib/shared/sleep";
 import { PLATFORM } from "../../lib/domain/platform";
 
@@ -18,7 +18,7 @@ const web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io
 
 axiosRetry(axios, { retries: 10, retryCondition: () => true, retryDelay: (retryCount, error) => retryCount * 1000 });
 
-const organisationRepository = Container.get(OrganisationRepository);
+const organisationRepository = Container.get(OrganisationStorage);
 const applicationRepository = Container.get(ApplicationRepository);
 
 async function main() {

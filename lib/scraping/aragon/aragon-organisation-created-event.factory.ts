@@ -7,7 +7,7 @@ import { logEvents } from "../events-from-logs";
 import { BlockchainEvent } from "../blockchain-event";
 import { OrganisationCreatedEvent, OrganisationCreatedEventProps } from "../events/organisation-created.event";
 import { EventRepository } from "../../storage/event.repository";
-import { OrganisationRepository } from "../../storage/organisation.repository";
+import { OrganisationStorage } from "../../storage/organisation.storage";
 import { HistoryRepository } from "../../storage/history.repository";
 
 interface DeployInstanceParams {
@@ -26,7 +26,7 @@ export class AragonOrganisationCreatedEventFactory {
     @Inject(EthereumService.name) private readonly ethereum: EthereumService,
     @Inject(ConnectionFactory.name) private readonly connectionFactory: ConnectionFactory,
     @Inject(EventRepository.name) private readonly eventRepository: EventRepository,
-    @Inject(OrganisationRepository.name) private readonly organisationRepository: OrganisationRepository,
+    @Inject(OrganisationStorage.name) private readonly organisationStorage: OrganisationStorage,
     @Inject(HistoryRepository.name) private readonly historyRepository: HistoryRepository
   ) {}
 
@@ -61,7 +61,7 @@ export class AragonOrganisationCreatedEventFactory {
     return new OrganisationCreatedEvent(
       json,
       this.eventRepository,
-      this.organisationRepository,
+      this.organisationStorage,
       this.historyRepository,
       this.connectionFactory
     );

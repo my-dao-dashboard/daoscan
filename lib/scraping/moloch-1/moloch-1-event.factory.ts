@@ -16,7 +16,7 @@ import { EthereumService } from "../../services/ethereum.service";
 import { OrganisationCreatedEvent } from "../events/organisation-created.event";
 import { ConnectionFactory } from "../../storage/connection.factory";
 import { EventRepository } from "../../storage/event.repository";
-import { OrganisationRepository } from "../../storage/organisation.repository";
+import { OrganisationStorage } from "../../storage/organisation.storage";
 import { AppInstalledEvent, AppInstalledEventProps } from "../events/app-installed.event";
 import { APP_ID } from "../../storage/applications.const";
 import { ApplicationRepository } from "../../storage/application.repository";
@@ -61,7 +61,7 @@ export class Moloch1EventFactory {
     @Inject(EthereumService.name) private readonly ethereum: EthereumService,
     @Inject(ConnectionFactory.name) private readonly connectionFactory: ConnectionFactory,
     @Inject(EventRepository.name) private readonly eventRepository: EventRepository,
-    @Inject(OrganisationRepository.name) private readonly organisationRepository: OrganisationRepository,
+    @Inject(OrganisationStorage.name) private readonly organisationRepository: OrganisationStorage,
     @Inject(ApplicationRepository.name) private readonly applicationRepository: ApplicationRepository,
     @Inject(MembershipRepository.name) private readonly membershipRepository: MembershipRepository,
     @Inject(DelegateRepository.name) private readonly delegateRepository: DelegateRepository,

@@ -5,7 +5,7 @@ import { EventRecord } from "../../storage/event.record";
 import { OrganisationRecord } from "../../storage/organisation.record";
 import { EventRepository } from "../../storage/event.repository";
 import { ConnectionFactory } from "../../storage/connection.factory";
-import { OrganisationRepository } from "../../storage/organisation.repository";
+import { OrganisationStorage } from "../../storage/organisation.storage";
 import { RESOURCE_KIND } from "../../storage/resource.kind";
 import { HistoryRepository } from "../../storage/history.repository";
 import { HistoryRecord } from "../../storage/history.record";
@@ -28,7 +28,7 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
   constructor(
     props: OrganisationCreatedEventProps,
     private readonly eventRepository: EventRepository,
-    private readonly organisationRepository: OrganisationRepository,
+    private readonly organisationStorage: OrganisationStorage,
     private readonly historyRepository: HistoryRepository,
     private readonly connectionFactory: ConnectionFactory
   ) {

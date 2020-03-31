@@ -4,7 +4,7 @@ import { AbiInput } from "web3-utils";
 import { EthereumService, ExtendedTransactionReceipt } from "../../services/ethereum.service";
 import { PLATFORM } from "../../domain/platform";
 import { SetOrganisationNameEvent, SetOrganisationNameEventProps } from "../events/set-organisation-name.event";
-import { OrganisationRepository } from "../../storage/organisation.repository";
+import { OrganisationStorage } from "../../storage/organisation.storage";
 import { ConnectionFactory } from "../../storage/connection.factory";
 import { HistoryRepository } from "../../storage/history.repository";
 import { EventRepository } from "../../storage/event.repository";
@@ -494,7 +494,7 @@ const KIT_SIGNATURES = new Map<string, AbiInput[]>([
 export class AragonSetOrganisationNameEventFactory {
   constructor(
     @Inject(EthereumService.name) private readonly ethereum: EthereumService,
-    @Inject(OrganisationRepository.name) private readonly organisationRepository: OrganisationRepository,
+    @Inject(OrganisationStorage.name) private readonly organisationRepository: OrganisationStorage,
     @Inject(HistoryRepository.name) private readonly historyRepository: HistoryRepository,
     @Inject(ConnectionFactory.name) private readonly connectionFactory: ConnectionFactory,
     @Inject(EventRepository.name) private readonly eventRepository: EventRepository

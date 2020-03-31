@@ -1,5 +1,5 @@
 import { IPagination } from "./pagination.interface";
-import { OrganisationRepository } from "../storage/organisation.repository";
+import { OrganisationStorage } from "../storage/organisation.storage";
 import { Mutex } from "await-semaphore/index";
 import { OrganisationFactory } from "../domain/organisation.factory";
 import { DateTime } from "luxon";
@@ -36,7 +36,7 @@ export class OrganisationConnection {
 
   constructor(
     private readonly pagination: IPagination,
-    private readonly organisationRepository: OrganisationRepository,
+    private readonly organisationRepository: OrganisationStorage,
     private readonly organisationFactory: OrganisationFactory
   ) {}
 
@@ -63,7 +63,7 @@ export class OrganisationConnection {
   async edges() {
     const rows = await this.page();
     return rows.entries.map(row => {
-      const organisation = this.organisationFactory.fromRow(row);
+      const organisation = this.organisationFactory.fromRecord(row);
       return {
         node: organisation,
         cursor: organisationToCursor(organisation)

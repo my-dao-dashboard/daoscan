@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
 import { Container } from "typedi";
-import { OrganisationRepository } from "../../lib/storage/organisation.repository";
+import { OrganisationStorage } from "../../lib/storage/organisation.storage";
 import { PLATFORM } from "../../lib/domain/platform";
 import dotenv from "dotenv";
 
@@ -13,7 +13,7 @@ const raw = JSON.parse(listString);
 const list = raw.data.organisations.nodes;
 const addresses = list.map((l: any) => l.address.toLowerCase());
 
-const organisationRepository = Container.get(OrganisationRepository);
+const organisationRepository = Container.get(OrganisationStorage);
 
 async function main() {
   const organisations = await organisationRepository.all(PLATFORM.ARAGON);

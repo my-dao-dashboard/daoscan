@@ -7,7 +7,7 @@ import { MigrationUpScenario } from "./migration-up.scenario";
 import { EventRepository } from "../storage/event.repository";
 import { ScrapingEventFactory } from "../scraping/events/scraping-event.factory";
 import { BlockFactory } from "../scraping/block.factory";
-import { OrganisationRepository } from "../storage/organisation.repository";
+import { OrganisationStorage } from "../storage/organisation.storage";
 import { HistoryRepository } from "../storage/history.repository";
 import { RESOURCE_KIND } from "../storage/resource.kind";
 import { ProposalRepository } from "../storage/proposal.repository";
@@ -24,7 +24,7 @@ export class MigrationController {
     @Inject(EventRepository.name) private readonly events: EventRepository,
     @Inject(ScrapingEventFactory.name) private readonly eventFactory: ScrapingEventFactory,
     @Inject(BlockFactory.name) private readonly blockFactory: BlockFactory,
-    @Inject(OrganisationRepository.name) private readonly organisationRepository: OrganisationRepository,
+    @Inject(OrganisationStorage.name) private readonly organisationRepository: OrganisationStorage,
     @Inject(HistoryRepository.name) private readonly historyRepository: HistoryRepository,
     @Inject(ProposalRepository.name) private readonly proposalRepository: ProposalRepository,
     @Inject(VoteRepository.name) private readonly voteRepository: VoteRepository

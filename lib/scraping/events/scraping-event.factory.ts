@@ -10,7 +10,7 @@ import { AppInstalledEvent } from "./app-installed.event";
 import { ApplicationRepository } from "../../storage/application.repository";
 import { ConnectionFactory } from "../../storage/connection.factory";
 import { OrganisationCreatedEvent } from "./organisation-created.event";
-import { OrganisationRepository } from "../../storage/organisation.repository";
+import { OrganisationStorage } from "../../storage/organisation.storage";
 import { ShareTransferEvent } from "./share-transfer.event";
 import { MembershipRepository } from "../../storage/membership.repository";
 import { AddDelegateEvent } from "./add-delegate.event";
@@ -30,7 +30,7 @@ export class ScrapingEventFactory {
     @Inject(Moloch1EventFactory.name) private readonly moloch: Moloch1EventFactory,
     @Inject(EventRepository.name) private readonly eventRepository: EventRepository,
     @Inject(ApplicationRepository.name) private readonly applicationRepository: ApplicationRepository,
-    @Inject(OrganisationRepository.name) private readonly organisationRepository: OrganisationRepository,
+    @Inject(OrganisationStorage.name) private readonly organisationStorage: OrganisationStorage,
     @Inject(MembershipRepository.name) private readonly membershipRepository: MembershipRepository,
     @Inject(DelegateRepository.name) private readonly delegateRepository: DelegateRepository,
     @Inject(HistoryRepository.name) private readonly historyRepository: HistoryRepository,
@@ -62,7 +62,7 @@ export class ScrapingEventFactory {
         return new OrganisationCreatedEvent(
           json,
           this.eventRepository,
-          this.organisationRepository,
+          this.organisationStorage,
           this.historyRepository,
           this.connectionFactory
         );
@@ -79,7 +79,7 @@ export class ScrapingEventFactory {
       case SCRAPING_EVENT_KIND.SET_ORGANISATION_NAME:
         return new SetOrganisationNameEvent(
           json,
-          this.organisationRepository,
+          this.organisationStorage,
           this.connectionFactory,
           this.historyRepository,
           this.eventRepository
