@@ -1,5 +1,5 @@
 import { BeforeInsert, BeforeUpdate, Column, Entity, PrimaryColumn } from "typeorm";
-import { bigintTransformer } from "./bigint.transformer";
+import { bigintTransformer } from "./transformers/bigint.transformer";
 import { ExtendedBlock } from "../services/ethereum.service";
 
 @Entity("blocks")

@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
-import { bigintTransformer } from "./bigint.transformer";
+import { bigintTransformer } from "./transformers/bigint.transformer";
 import { PROPOSAL_STATUS } from "../domain/proposal";
 
 @Entity("proposals")

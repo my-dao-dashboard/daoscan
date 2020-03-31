@@ -1,10 +1,6 @@
-import { Column, Entity, PrimaryColumn, ValueTransformer } from "typeorm";
-import { bigintTransformer } from "./bigint.transformer";
-
-export const addressTransformer: ValueTransformer = {
-  to: (entityValue: string) => entityValue.toLowerCase(),
-  from: (databaseValue: string): string => databaseValue.toLowerCase()
-};
+import { Column, Entity, PrimaryColumn } from "typeorm";
+import { bigintTransformer } from "./transformers/bigint.transformer";
+import { addressTransformer } from "./transformers/address.transformer";
 
 @Entity("applications")
 export class Application {

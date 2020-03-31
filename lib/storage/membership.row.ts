@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
 import { MEMBERSHIP_KIND } from "./membership.kind";
-import { bigintTransformer } from "./bigint.transformer";
+import { bigintTransformer } from "./transformers/bigint.transformer";
 
 @Entity("memberships")
 export class Membership {

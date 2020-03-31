@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
 import { PLATFORM } from "../domain/platform";
-import { bigintTransformer } from "./bigint.transformer";
-import { dateTimeTransformer } from "./date-time.transformer";
+import { bigintTransformer } from "./transformers/bigint.transformer";
+import { dateTimeTransformer } from "./transformers/date-time.transformer";
 import { DateTime } from "luxon";
 
 @Entity("organisations")
