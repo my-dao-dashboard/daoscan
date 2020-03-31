@@ -63,7 +63,7 @@ export class OrganisationResolver {
   @bind()
   async proposals(root: Organisation, args: { page?: IPagination }) {
     const page = args?.page || {};
-    return new OrganisationProposalConnection(root, page, this.proposalRepository);
+    return new OrganisationProposalConnection(root, page, this.proposalRepository, this.proposalFactory);
   }
 
   @bind()

@@ -2,9 +2,10 @@ import { IPagination } from "./pagination.interface";
 import { ProposalRepository } from "../storage/proposal.repository";
 import { Organisation } from "../domain/organisation";
 import { Mutex } from "await-semaphore/index";
-import { Proposal } from "../storage/proposal.row";
+import { Proposal as ProposalRow } from "../storage/proposal.row";
+import { ProposalFactory } from "../domain/proposal.factory";
 
-const DEFAULT_PAGE_SIZE = 25;
+const DEFAULT_PAGE_SIZE = 1;
 
 function proposalToCursor(proposal: { index: number }) {
   const payload = { index: proposal.index };
@@ -22,7 +23,7 @@ function decodeCursor(cursor: string) {
 
 interface Raw {
   startIndex: number;
-  entries: Proposal[];
+  entries: ProposalRow[];
   hasNextPage: boolean;
   endIndex: number;
   hasPreviousPage: boolean;
@@ -35,7 +36,8 @@ export class OrganisationProposalConnection {
   constructor(
     private readonly organisation: Organisation,
     private readonly pagination: IPagination,
-    private readonly proposalRepository: ProposalRepository
+    private readonly proposalRepository: ProposalRepository,
+    private readonly proposalFactory: ProposalFactory
   ) {}
 
   totalCount(): Promise<number> {
@@ -44,18 +46,14 @@ export class OrganisationProposalConnection {
 
   async edges() {
     const page = await this.page();
-    return page.entries.map(proposal => {
+    const promised = page.entries.map(async row => {
+      const proposal = await this.proposalFactory.fromRow(row);
       return {
-        node: {
-          createdAt: proposal.createdAt.toISOString(),
-          index: proposal.index,
-          payload: proposal.payload,
-          proposer: proposal.proposer,
-          status: proposal.status
-        },
+        node: proposal,
         cursor: proposalToCursor(proposal)
       };
     });
+    return Promise.all(promised);
   }
 
   async pageInfo() {
