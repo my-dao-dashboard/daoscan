@@ -1,20 +1,29 @@
-import { OrganisationRecord as OrganisationRow } from "../storage/organisation.record";
 import { Shares } from "./shares";
 import { OrganisationService } from "./organisation.service";
 import { Memoize } from "typescript-memoize";
 import { Token } from "./token";
+import { PLATFORM } from "./platform";
+import { DateTime } from "luxon";
+
+interface Props {
+  address: string;
+  platform: PLATFORM;
+  name: string;
+  id: bigint;
+  createdAt: DateTime;
+}
 
 export class Organisation {
-  readonly address = this.row.address;
-  readonly platform = this.row.platform;
-  readonly name = this.row.name;
-  readonly id = this.row.id;
+  readonly address = this.props.address;
+  readonly platform = this.props.platform;
+  readonly name = this.props.name;
+  readonly id = this.props.id;
 
-  constructor(private readonly row: OrganisationRow, private readonly service: OrganisationService) {}
+  constructor(private readonly props: Props, private readonly service: OrganisationService) {}
 
   @Memoize()
   get createdAt(): string {
-    return this.row.createdAt.toISO();
+    return this.props.createdAt.toISO();
   }
 
   @Memoize()
