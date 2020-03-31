@@ -5,7 +5,7 @@ import { Mutex } from "await-semaphore/index";
 import { Proposal as ProposalRow } from "../storage/proposal.row";
 import { ProposalFactory } from "../domain/proposal.factory";
 
-const DEFAULT_PAGE_SIZE = 1;
+const DEFAULT_PAGE_SIZE = 25;
 
 function proposalToCursor(proposal: { index: number }) {
   const payload = { index: proposal.index };
@@ -46,14 +46,13 @@ export class OrganisationProposalConnection {
 
   async edges() {
     const page = await this.page();
-    const promised = page.entries.map(async row => {
-      const proposal = await this.proposalFactory.fromRow(row);
+    return page.entries.map(row => {
+      const proposal = this.proposalFactory.fromRow(row);
       return {
         node: proposal,
         cursor: proposalToCursor(proposal)
       };
     });
-    return Promise.all(promised);
   }
 
   async pageInfo() {
