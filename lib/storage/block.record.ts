@@ -3,7 +3,7 @@ import { bigintTransformer } from "./transformers/bigint.transformer";
 import { ExtendedBlock } from "../services/ethereum.service";
 
 @Entity("blocks")
-export class Block {
+export class BlockRecord {
   @PrimaryColumn("bigint", { transformer: bigintTransformer })
   // @ts-ignore
   id: bigint;

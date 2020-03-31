@@ -1,6 +1,6 @@
 import { Inject, Service } from "typedi";
 import { RepositoryFactory } from "./repository.factory";
-import { History } from "./history.row";
+import { HistoryRecord } from "./history.record";
 import { RESOURCE_KIND } from "./resource.kind";
 
 @Service(HistoryRepository.name)
@@ -16,15 +16,15 @@ export class HistoryRepository {
   }
 
   async allByResource(resourceId: bigint, resourceKind: RESOURCE_KIND) {
-    const repository = await this.repositoryFactory.reading(History);
+    const repository = await this.repositoryFactory.reading(HistoryRecord);
     return repository.find({
       resourceId: resourceId,
       resourceKind: resourceKind
     });
   }
 
-  async byResourceOrFail(resourceId: bigint, resourceKind: RESOURCE_KIND): Promise<History> {
-    const repository = await this.repositoryFactory.reading(History);
+  async byResourceOrFail(resourceId: bigint, resourceKind: RESOURCE_KIND): Promise<HistoryRecord> {
+    const repository = await this.repositoryFactory.reading(HistoryRecord);
     return repository.findOneOrFail({
       resourceId: resourceId,
       resourceKind: resourceKind
@@ -32,7 +32,7 @@ export class HistoryRepository {
   }
 
   async allByEventIdAndKind(eventId: bigint, kind: RESOURCE_KIND) {
-    const repository = await this.repositoryFactory.reading(History);
+    const repository = await this.repositoryFactory.reading(HistoryRecord);
     return repository.find({
       where: {
         eventId: eventId,

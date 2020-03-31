@@ -3,7 +3,7 @@ import { IPagination } from "./pagination.interface";
 import { VoteRepository } from "../storage/vote.repository";
 import { TokenFactory } from "../domain/token.factory";
 import { Mutex } from "await-semaphore";
-import { Vote as VoteRow } from "../storage/vote.row";
+import { VoteRecord as VoteRow } from "../storage/vote.record";
 import { VoteFactory } from "../domain/vote.factory";
 
 const DEFAULT_PAGE_SIZE = 25;

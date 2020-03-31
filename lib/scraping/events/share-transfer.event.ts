@@ -1,16 +1,16 @@
 import { IScrapingEvent } from "./scraping-event.interface";
 import { SCRAPING_EVENT_KIND } from "./scraping-event.kind";
 import { PLATFORM } from "../../domain/platform";
-import { Event } from "../../storage/event.row";
+import { EventRecord } from "../../storage/event.record";
 import { EventRepository } from "../../storage/event.repository";
-import { Membership } from "../../storage/membership.row";
+import { MembershipRecord } from "../../storage/membership.record";
 import { MEMBERSHIP_KIND } from "../../storage/membership.kind";
 import { MembershipRepository } from "../../storage/membership.repository";
 import { ConnectionFactory } from "../../storage/connection.factory";
 import { ZERO_ADDRESS } from "../../shared/zero-address";
 import { RESOURCE_KIND } from "../../storage/resource.kind";
 import { HistoryRepository } from "../../storage/history.repository";
-import { History } from "../../storage/history.row";
+import { HistoryRecord } from "../../storage/history.record";
 import { EntityManager } from "typeorm";
 
 export interface ShareTransferEventProps {
@@ -70,12 +70,12 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
     });
   }
 
-  async saveHistory(em: EntityManager, event: Event, row: Membership) {
-    const history = new History();
+  async saveHistory(em: EntityManager, event: EventRecord, row: MembershipRecord) {
+    const history = new HistoryRecord();
     history.resourceKind = RESOURCE_KIND.MEMBERSHIP;
     history.resourceId = row.id;
     history.eventId = event.id;
-    const saved = await em.save(History, history);
+    const saved = await em.save(HistoryRecord, history);
     console.log("Saved history", saved);
   }
 
@@ -86,15 +86,15 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
     if (found) {
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {
-        await entityManager.delete(Event, found);
+        await entityManager.delete(EventRecord, found);
         console.log("Deleted event", found);
         const historyRows = await this.historyRepository.allByEventIdAndKind(found.id, RESOURCE_KIND.MEMBERSHIP);
         const resourceIds = historyRows.map(h => h.resourceId.toString());
         if (resourceIds.length > 0) {
-          const deleteMemberships = await entityManager.delete(Membership, resourceIds);
+          const deleteMemberships = await entityManager.delete(MembershipRecord, resourceIds);
           console.log("Deleted  memberships", deleteMemberships);
         }
-        const deleteHistories = await entityManager.delete(History, { eventId: found.id });
+        const deleteHistories = await entityManager.delete(HistoryRecord, { eventId: found.id });
         console.log(`Removed ${deleteHistories.affected} histories`);
       });
     } else {
@@ -103,7 +103,7 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
   }
 
   buildEventRow() {
-    const eventRow = new Event();
+    const eventRow = new EventRecord();
     eventRow.platform = this.platform;
     eventRow.blockHash = this.blockHash;
     eventRow.blockId = BigInt(this.blockNumber);
@@ -115,7 +115,7 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
   }
 
   async toRow() {
-    const toRow = new Membership();
+    const toRow = new MembershipRecord();
     toRow.accountAddress = this.to;
     toRow.organisationAddress = this.organisationAddress;
     toRow.balanceDelta = BigInt(this.amount);
@@ -124,7 +124,7 @@ export class ShareTransferEvent implements IScrapingEvent, ShareTransferEventPro
   }
 
   async fromRow() {
-    const fromRow = new Membership();
+    const fromRow = new MembershipRecord();
     fromRow.accountAddress = this.from;
     fromRow.organisationAddress = this.organisationAddress;
     fromRow.balanceDelta = BigInt(this.amount) * BigInt(-1);

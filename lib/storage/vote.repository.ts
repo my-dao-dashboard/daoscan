@@ -1,6 +1,6 @@
 import { Inject, Service } from "typedi";
 import { RepositoryFactory } from "./repository.factory";
-import { Vote } from "./vote.row";
+import { VoteRecord } from "./vote.record";
 import { VOTE_DECISION } from "../domain/vote-decision";
 import { Repository, SelectQueryBuilder } from "typeorm";
 
@@ -17,9 +17,9 @@ type Cursor = {
 class ConnectionQuery {
   private readonly alias = this.query.alias;
 
-  constructor(readonly query: SelectQueryBuilder<Vote>) {}
+  constructor(readonly query: SelectQueryBuilder<VoteRecord>) {}
 
-  static build(repository: Repository<Vote>, proposal: Proposal) {
+  static build(repository: Repository<VoteRecord>, proposal: Proposal) {
     const query = repository
       .createQueryBuilder("vote")
       .where({
@@ -81,7 +81,7 @@ export class VoteRepository {
   constructor(@Inject(RepositoryFactory.name) private readonly repositoryFactory: RepositoryFactory) {}
 
   async countByProposal(proposal: Proposal) {
-    const repository = await this.repositoryFactory.reading(Vote);
+    const repository = await this.repositoryFactory.reading(VoteRecord);
     return repository.count({
       where: {
         proposalIndex: proposal.index,
@@ -91,7 +91,7 @@ export class VoteRepository {
   }
 
   async countByProposalDecision(proposal: Proposal, decision: VOTE_DECISION) {
-    const repository = await this.repositoryFactory.reading(Vote);
+    const repository = await this.repositoryFactory.reading(VoteRecord);
     return repository.count({
       where: {
         proposalIndex: proposal.index,
@@ -102,7 +102,7 @@ export class VoteRepository {
   }
 
   async allByProposalDecision(proposal: Proposal, decision: VOTE_DECISION) {
-    const repository = await this.repositoryFactory.reading(Vote);
+    const repository = await this.repositoryFactory.reading(VoteRecord);
     return repository.find({
       where: {
         proposalIndex: proposal.index,
@@ -115,8 +115,8 @@ export class VoteRepository {
     });
   }
 
-  async allByProposal(proposal: Proposal): Promise<Vote[]> {
-    const repository = await this.repositoryFactory.reading(Vote);
+  async allByProposal(proposal: Proposal): Promise<VoteRecord[]> {
+    const repository = await this.repositoryFactory.reading(VoteRecord);
     return repository.find({
       where: {
         proposalIndex: proposal.index,
@@ -129,7 +129,7 @@ export class VoteRepository {
   }
 
   async first(proposal: Proposal, take: number, cursor?: Cursor) {
-    const repository = await this.repositoryFactory.reading(Vote);
+    const repository = await this.repositoryFactory.reading(VoteRecord);
     let query = ConnectionQuery.build(repository, proposal);
     const totalCount = await query.getCount();
     if (cursor) {
@@ -149,7 +149,7 @@ export class VoteRepository {
   }
 
   async last(proposal: Proposal, take: number, cursor: Cursor) {
-    const repository = await this.repositoryFactory.reading(Vote);
+    const repository = await this.repositoryFactory.reading(VoteRecord);
     const query = ConnectionQuery.build(repository, proposal);
     const totalCount = await query.getCount();
     const before = query.before(cursor, false);
@@ -175,8 +175,8 @@ export class VoteRepository {
     };
   }
 
-  async toProcess(limit: number): Promise<Vote[]> {
-    const repository = await this.repositoryFactory.reading(Vote);
+  async toProcess(limit: number): Promise<VoteRecord[]> {
+    const repository = await this.repositoryFactory.reading(VoteRecord);
     return repository
       .createQueryBuilder("p")
       .where("p.createdAt < '1980-01-01'")
@@ -184,8 +184,8 @@ export class VoteRepository {
       .getMany();
   }
 
-  async save(vote: Vote): Promise<Vote> {
-    const repository = await this.repositoryFactory.writing(Vote);
+  async save(vote: VoteRecord): Promise<VoteRecord> {
+    const repository = await this.repositoryFactory.writing(VoteRecord);
     return repository.save(vote);
   }
 }

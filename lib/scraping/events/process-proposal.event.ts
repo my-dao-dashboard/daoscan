@@ -1,15 +1,15 @@
 import { IScrapingEvent } from "./scraping-event.interface";
 import { SCRAPING_EVENT_KIND } from "./scraping-event.kind";
 import { PLATFORM } from "../../domain/platform";
-import { Event } from "../../storage/event.row";
-import { History } from "../../storage/history.row";
+import { EventRecord } from "../../storage/event.record";
+import { HistoryRecord } from "../../storage/history.record";
 import { RESOURCE_KIND } from "../../storage/resource.kind";
 import { ProposalRepository } from "../../storage/proposal.repository";
 import { ConnectionFactory } from "../../storage/connection.factory";
 import { PROPOSAL_STATUS } from "../../domain/proposal";
 import { EventRepository } from "../../storage/event.repository";
 import { HistoryRepository } from "../../storage/history.repository";
-import { Proposal } from "../../storage/proposal.row";
+import { ProposalRecord } from "../../storage/proposal.record";
 
 interface ProcessProposalEventProps {
   index: number;
@@ -49,7 +49,7 @@ export class ProcessProposalEvent implements IScrapingEvent {
     const eventRow = this.buildEventRow();
     const proposalRow = await this.proposalRepository.byOrganisationAndIndex(this.organisationAddress, this.index);
     if (proposalRow) {
-      const historyRow = new History();
+      const historyRow = new HistoryRecord();
       historyRow.resourceKind = RESOURCE_KIND.PROPOSAL;
       const nextStatus = this.didPass ? PROPOSAL_STATUS.PASS : PROPOSAL_STATUS.REJECT;
       historyRow.delta = {
@@ -84,23 +84,23 @@ export class ProcessProposalEvent implements IScrapingEvent {
       const historyRows = await this.historyRepository.allByEventIdAndKind(found.id, RESOURCE_KIND.PROPOSAL);
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {
-        await entityManager.delete(Event, found);
+        await entityManager.delete(EventRecord, found);
         for (let h of historyRows) {
           if (h.delta) {
-            const proposal = await entityManager.findOne(Proposal, { id: h.resourceId });
+            const proposal = await entityManager.findOne(ProposalRecord, { id: h.resourceId });
             if (proposal) {
               proposal.status = h.delta.before.status;
               await entityManager.save(proposal);
             }
           }
-          await entityManager.delete(History, h);
+          await entityManager.delete(HistoryRecord, h);
         }
       });
     }
   }
 
   buildEventRow() {
-    const eventRow = new Event();
+    const eventRow = new EventRecord();
     eventRow.platform = this.platform;
     eventRow.blockHash = this.blockHash;
     eventRow.blockId = BigInt(this.blockNumber);

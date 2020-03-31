@@ -1,5 +1,5 @@
 import { Inject, Service } from "typedi";
-import { Proposal as ProposalRow } from "../storage/proposal.row";
+import { ProposalRecord as ProposalRow } from "../storage/proposal.record";
 import { Proposal } from "./proposal";
 import { OrganisationFactory } from "./organisation.factory";
 

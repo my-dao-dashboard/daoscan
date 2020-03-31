@@ -1,14 +1,14 @@
 import { SCRAPING_EVENT_KIND } from "./scraping-event.kind";
 import { PLATFORM } from "../../domain/platform";
 import { IScrapingEvent } from "./scraping-event.interface";
-import { Event } from "../../storage/event.row";
-import { Organisation } from "../../storage/organisation.row";
+import { EventRecord } from "../../storage/event.record";
+import { OrganisationRecord } from "../../storage/organisation.record";
 import { EventRepository } from "../../storage/event.repository";
 import { ConnectionFactory } from "../../storage/connection.factory";
 import { OrganisationRepository } from "../../storage/organisation.repository";
 import { RESOURCE_KIND } from "../../storage/resource.kind";
 import { HistoryRepository } from "../../storage/history.repository";
-import { History } from "../../storage/history.row";
+import { HistoryRecord } from "../../storage/history.record";
 import { DateTime } from "luxon";
 
 export interface OrganisationCreatedEventProps {
@@ -66,13 +66,13 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
   async commit(): Promise<void> {
     const eventRow = this.buildEventRow();
 
-    const organisationRow = new Organisation();
+    const organisationRow = new OrganisationRecord();
     organisationRow.name = this.name;
     organisationRow.platform = this.platform;
     organisationRow.address = this.address;
     organisationRow.createdAt = DateTime.fromJSDate(eventRow.timestamp);
 
-    const historyRow = new History();
+    const historyRow = new HistoryRecord();
     historyRow.resourceKind = RESOURCE_KIND.ORGANISATION;
 
     const writing = await this.connectionFactory.writing();
@@ -83,7 +83,7 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
       console.log("Saved organisation", savedOrganisation);
       historyRow.eventId = savedEvent.id;
       historyRow.resourceId = savedOrganisation.id;
-      const savedHistory = await entityManager.save(History, historyRow);
+      const savedHistory = await entityManager.save(HistoryRecord, historyRow);
       console.log("Saved history", savedHistory);
     });
   }
@@ -94,15 +94,15 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
     if (found) {
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {
-        await entityManager.delete(Event, found);
+        await entityManager.delete(EventRecord, found);
         console.log("Deleted event", found);
         const historyRows = await this.historyRepository.allByEventIdAndKind(found.id, RESOURCE_KIND.ORGANISATION);
         const resourceIds = historyRows.map(h => h.resourceId.toString());
         if (resourceIds.length > 0) {
-          const deleteResult = await entityManager.delete(Organisation, resourceIds);
+          const deleteResult = await entityManager.delete(OrganisationRecord, resourceIds);
           console.log(`Deleted ${deleteResult.affected} organisations`);
         }
-        const deleteHistory = await entityManager.delete(History, { eventId: found.id });
+        const deleteHistory = await entityManager.delete(HistoryRecord, { eventId: found.id });
         console.log(`Deleted ${deleteHistory.affected} histories`);
       });
     } else {
@@ -111,7 +111,7 @@ export class OrganisationCreatedEvent implements IScrapingEvent {
   }
 
   buildEventRow() {
-    const eventRow = new Event();
+    const eventRow = new EventRecord();
     eventRow.platform = this.platform;
     eventRow.blockHash = this.blockHash;
     eventRow.blockId = BigInt(this.blockNumber);

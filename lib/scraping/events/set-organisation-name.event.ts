@@ -1,13 +1,13 @@
 import { IScrapingEvent } from "./scraping-event.interface";
 import { SCRAPING_EVENT_KIND } from "./scraping-event.kind";
 import { PLATFORM } from "../../domain/platform";
-import { Event } from "../../storage/event.row";
+import { EventRecord } from "../../storage/event.record";
 import { OrganisationRepository } from "../../storage/organisation.repository";
 import { ConnectionFactory } from "../../storage/connection.factory";
 import { HistoryRepository } from "../../storage/history.repository";
-import { History } from "../../storage/history.row";
+import { HistoryRecord } from "../../storage/history.record";
 import { RESOURCE_KIND } from "../../storage/resource.kind";
-import { Organisation } from "../../storage/organisation.row";
+import { OrganisationRecord } from "../../storage/organisation.record";
 import { EventRepository } from "../../storage/event.repository";
 import { DateTime } from "luxon";
 
@@ -45,7 +45,7 @@ export class SetOrganisationNameEvent implements IScrapingEvent {
     const organisation = await this.findOrBuildOrganisationRow(eventRow);
     const writing = await this.connectionFactory.writing();
 
-    const history = new History();
+    const history = new HistoryRecord();
     history.resourceKind = RESOURCE_KIND.ORGANISATION;
     history.delta = {
       before: {
@@ -76,31 +76,31 @@ export class SetOrganisationNameEvent implements IScrapingEvent {
       const historyRows = await this.historyRepository.allByEventIdAndKind(found.id, RESOURCE_KIND.ORGANISATION);
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {
-        await entityManager.delete(Event, found);
+        await entityManager.delete(EventRecord, found);
         for (let h of historyRows) {
           if (h.delta) {
             if (h.delta.before.isPresent) {
-              const organisation = await entityManager.findOne(Organisation, { id: h.resourceId });
+              const organisation = await entityManager.findOne(OrganisationRecord, { id: h.resourceId });
               if (organisation) {
                 organisation.name = h.delta.before.name;
                 await entityManager.save(organisation);
               }
             } else {
-              await entityManager.delete(Organisation, { id: h.resourceId });
+              await entityManager.delete(OrganisationRecord, { id: h.resourceId });
             }
           }
-          await entityManager.delete(History, h);
+          await entityManager.delete(HistoryRecord, h);
         }
       });
     }
   }
 
-  async findOrBuildOrganisationRow(event: Event) {
+  async findOrBuildOrganisationRow(event: EventRecord) {
     const foundOrganisation = await this.organisationRepository.byAddress(this.address);
     if (foundOrganisation) {
       return foundOrganisation;
     } else {
-      const organisationRow = new Organisation();
+      const organisationRow = new OrganisationRecord();
       organisationRow.name = this.name;
       organisationRow.address = this.address;
       organisationRow.platform = this.platform;
@@ -110,7 +110,7 @@ export class SetOrganisationNameEvent implements IScrapingEvent {
   }
 
   buildEventRow() {
-    const eventRow = new Event();
+    const eventRow = new EventRecord();
     eventRow.platform = this.platform;
     eventRow.blockHash = this.blockHash;
     eventRow.blockId = BigInt(this.blockNumber);

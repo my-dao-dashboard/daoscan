@@ -3,7 +3,7 @@ import { OrganisationRepository } from "../storage/organisation.repository";
 import { Mutex } from "await-semaphore/index";
 import { OrganisationFactory } from "../domain/organisation.factory";
 import { DateTime } from "luxon";
-import { Organisation as OrganisationRow } from "../storage/organisation.row";
+import { OrganisationRecord as OrganisationRow } from "../storage/organisation.record";
 
 function organisationToCursor(organisation: { id: bigint; createdAt: string | DateTime }) {
   const payload = { id: organisation.id.toString(), createdAt: organisation.createdAt.toString() };

@@ -5,7 +5,7 @@ import { dateTimeTransformer } from "./transformers/date-time.transformer";
 import { DateTime } from "luxon";
 
 @Entity("organisations")
-export class Organisation {
+export class OrganisationRecord {
   @PrimaryColumn("bigint", { transformer: bigintTransformer, generated: true })
   // @ts-ignore
   id: bigint;

@@ -1,6 +1,6 @@
 import { Inject, Service } from "typedi";
 import { RepositoryFactory } from "./repository.factory";
-import { Application } from "./application.row";
+import { ApplicationRecord } from "./application.record";
 import { APP_ID } from "./applications.const";
 import { In } from "typeorm";
 
@@ -9,12 +9,12 @@ export class ApplicationRepository {
   constructor(@Inject(RepositoryFactory.name) private readonly repositoryFactory: RepositoryFactory) {}
 
   async all() {
-    const repository = await this.repositoryFactory.reading(Application);
+    const repository = await this.repositoryFactory.reading(ApplicationRecord);
     return repository.find();
   }
 
   async organisationAddressByApplicationAddress(address: string, appId: APP_ID): Promise<string | undefined> {
-    const repository = await this.repositoryFactory.reading(Application);
+    const repository = await this.repositoryFactory.reading(ApplicationRecord);
     const applicationRow = await repository.findOne({
       address: address,
       appId: appId
@@ -27,7 +27,7 @@ export class ApplicationRepository {
   }
 
   async tokenAddress(organisationAddress: string): Promise<string | undefined> {
-    const repository = await this.repositoryFactory.reading(Application);
+    const repository = await this.repositoryFactory.reading(ApplicationRecord);
     const application = await repository.findOne({
       organisationAddress: organisationAddress.toLowerCase(),
       appId: APP_ID.SHARE
@@ -38,7 +38,7 @@ export class ApplicationRepository {
   }
 
   async byOrganisationAndAppId(organisationAddress: string, appId: APP_ID): Promise<string | undefined> {
-    const repository = await this.repositoryFactory.reading(Application);
+    const repository = await this.repositoryFactory.reading(ApplicationRecord);
     const application = await repository.findOne({
       organisationAddress: organisationAddress,
       appId: appId
@@ -49,7 +49,7 @@ export class ApplicationRepository {
   }
 
   async bankAddress(organisationAddress: string): Promise<string | undefined> {
-    const repository = await this.repositoryFactory.reading(Application);
+    const repository = await this.repositoryFactory.reading(ApplicationRecord);
     const application = await repository.findOne({
       organisationAddress: organisationAddress,
       appId: APP_ID.ARAGON_VAULT
@@ -60,13 +60,13 @@ export class ApplicationRepository {
   }
 
   async byAddress(address: string) {
-    const repository = await this.repositoryFactory.reading(Application);
+    const repository = await this.repositoryFactory.reading(ApplicationRecord);
     return repository.findOne({ address });
   }
 
   async allByIds(ids: bigint[]) {
     if (ids.length > 0) {
-      const repository = await this.repositoryFactory.reading(Application);
+      const repository = await this.repositoryFactory.reading(ApplicationRecord);
       return repository.find({
         where: {
           id: In(ids.map(id => id.toString()))
@@ -78,7 +78,7 @@ export class ApplicationRepository {
   }
 
   async allByOrganisationAddress(organisationAddress: string) {
-    const repository = await this.repositoryFactory.reading(Application);
+    const repository = await this.repositoryFactory.reading(ApplicationRecord);
     return repository.find({
       organisationAddress: organisationAddress
     });

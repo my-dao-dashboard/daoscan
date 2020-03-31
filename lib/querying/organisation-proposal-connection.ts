@@ -2,7 +2,7 @@ import { IPagination } from "./pagination.interface";
 import { ProposalRepository } from "../storage/proposal.repository";
 import { Organisation } from "../domain/organisation";
 import { Mutex } from "await-semaphore/index";
-import { Proposal as ProposalRow } from "../storage/proposal.row";
+import { ProposalRecord as ProposalRow } from "../storage/proposal.record";
 import { ProposalFactory } from "../domain/proposal.factory";
 
 const DEFAULT_PAGE_SIZE = 25;

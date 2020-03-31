@@ -1,10 +1,9 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
 import { bigintTransformer } from "./transformers/bigint.transformer";
-import { PLATFORM } from "../domain/platform";
 import { VOTE_DECISION } from "../domain/vote-decision";
 
 @Entity("votes")
-export class Vote {
+export class VoteRecord {
   @PrimaryColumn("bigint", { transformer: bigintTransformer, generated: true })
   // @ts-ignore
   id: bigint;

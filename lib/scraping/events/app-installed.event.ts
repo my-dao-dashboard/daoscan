@@ -1,13 +1,13 @@
 import { SCRAPING_EVENT_KIND } from "./scraping-event.kind";
 import { PLATFORM } from "../../domain/platform";
 import { IScrapingEvent } from "./scraping-event.interface";
-import { Event } from "../../storage/event.row";
+import { EventRecord } from "../../storage/event.record";
 import { EventRepository } from "../../storage/event.repository";
-import { Application } from "../../storage/application.row";
+import { ApplicationRecord } from "../../storage/application.record";
 import { ConnectionFactory } from "../../storage/connection.factory";
 import { ApplicationRepository } from "../../storage/application.repository";
 import { RESOURCE_KIND } from "../../storage/resource.kind";
-import { History } from "../../storage/history.row";
+import { HistoryRecord } from "../../storage/history.record";
 import { HistoryRepository } from "../../storage/history.repository";
 import { applicationNameById } from "../../storage/applications.const";
 
@@ -71,13 +71,13 @@ export class AppInstalledEvent implements IScrapingEvent {
   async commit(): Promise<void> {
     console.log("Committing event", this.toJSON());
     const [eventRow, found] = await this.findRow();
-    const applicationRow = new Application();
+    const applicationRow = new ApplicationRecord();
     applicationRow.address = this.proxyAddress;
     applicationRow.appId = this.appId;
     applicationRow.name = await applicationNameById(applicationRow.appId);
     applicationRow.organisationAddress = this.organisationAddress;
 
-    const history = new History();
+    const history = new HistoryRecord();
     history.resourceKind = RESOURCE_KIND.APPLICATION;
 
     const writing = await this.connectionFactory.writing();
@@ -99,15 +99,15 @@ export class AppInstalledEvent implements IScrapingEvent {
     if (found) {
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {
-        await entityManager.delete(Event, found);
+        await entityManager.delete(EventRecord, found);
         console.log("Deleted event", found);
         const historyEntries = await this.historyRepository.allByEventIdAndKind(found.id, RESOURCE_KIND.APPLICATION);
         const resourceIds = historyEntries.map(h => h.resourceId.toString());
         if (resourceIds.length > 0) {
-          const deleteResult = await entityManager.delete(Application, resourceIds);
+          const deleteResult = await entityManager.delete(ApplicationRecord, resourceIds);
           console.log(`Deleted ${deleteResult.affected} applications`);
         }
-        const deleteHistory = await entityManager.delete(History, { eventId: found.id });
+        const deleteHistory = await entityManager.delete(HistoryRecord, { eventId: found.id });
         console.log(`Delete ${deleteHistory.affected} histories`);
       });
     } else {
@@ -115,8 +115,8 @@ export class AppInstalledEvent implements IScrapingEvent {
     }
   }
 
-  async findRow(): Promise<[Event, Event | undefined]> {
-    const eventRow = new Event();
+  async findRow(): Promise<[EventRecord, EventRecord | undefined]> {
+    const eventRow = new EventRecord();
     eventRow.platform = this.platform;
     eventRow.blockHash = this.blockHash;
     eventRow.blockId = BigInt(this.blockNumber);

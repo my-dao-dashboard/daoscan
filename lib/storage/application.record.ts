@@ -1,9 +1,9 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
-import { MEMBERSHIP_KIND } from "./membership.kind";
 import { bigintTransformer } from "./transformers/bigint.transformer";
+import { addressTransformer } from "./transformers/address.transformer";
 
-@Entity("memberships")
-export class Membership {
+@Entity("applications")
+export class ApplicationRecord {
   @PrimaryColumn("bigint", { transformer: bigintTransformer, generated: true })
   // @ts-ignore
   id: bigint;
@@ -14,13 +14,13 @@ export class Membership {
 
   @Column()
   // @ts-ignore
-  accountAddress: string; // member address
+  appId: string;
 
-  @Column("numeric", { transformer: bigintTransformer })
+  @Column("varchar", { transformer: addressTransformer })
   // @ts-ignore
-  balanceDelta: bigint; // member address
+  address: string;
 
   @Column()
   // @ts-ignore
-  kind: MEMBERSHIP_KIND;
+  name: string;
 }

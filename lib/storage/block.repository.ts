@@ -1,13 +1,13 @@
 import { Inject, Service } from "typedi";
 import { RepositoryFactory } from "./repository.factory";
-import { Block } from "./block.row";
+import { BlockRecord } from "./block.record";
 
 @Service(BlockRepository.name)
 export class BlockRepository {
   constructor(@Inject(RepositoryFactory.name) private readonly repositoryFactory: RepositoryFactory) {}
 
   async latest() {
-    const repository = await this.repositoryFactory.reading(Block);
+    const repository = await this.repositoryFactory.reading(BlockRecord);
     const raw = await repository
       .createQueryBuilder("block")
       .select(`MAX(id)`, "max")
@@ -20,18 +20,18 @@ export class BlockRepository {
     return Boolean(found);
   }
 
-  async byId(id: bigint): Promise<Block | undefined> {
-    const repository = await this.repositoryFactory.reading(Block);
+  async byId(id: bigint): Promise<BlockRecord | undefined> {
+    const repository = await this.repositoryFactory.reading(BlockRecord);
     return repository.findOne({ id });
   }
 
-  async allByIds(ids: bigint[]): Promise<Block[]> {
-    const repository = await this.repositoryFactory.reading(Block);
+  async allByIds(ids: bigint[]): Promise<BlockRecord[]> {
+    const repository = await this.repositoryFactory.reading(BlockRecord);
     return repository.findByIds(ids);
   }
 
-  async save(row: Block) {
-    const repository = await this.repositoryFactory.writing(Block);
+  async save(row: BlockRecord) {
+    const repository = await this.repositoryFactory.writing(BlockRecord);
     await repository.save(row);
   }
 }

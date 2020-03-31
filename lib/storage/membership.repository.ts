@@ -1,10 +1,10 @@
 import { Inject, Service } from "typedi";
 import { RepositoryFactory } from "./repository.factory";
-import { Membership } from "./membership.row";
+import { MembershipRecord } from "./membership.record";
 import { QueryBuilder } from "typeorm";
 
 function participantsQuery(
-  qb: QueryBuilder<Membership>,
+  qb: QueryBuilder<MembershipRecord>,
   alias: string,
   organisationAddress: string,
   after?: string,
@@ -29,7 +29,7 @@ export class MembershipRepository {
   constructor(@Inject(RepositoryFactory.name) private readonly repositoryFactory: RepositoryFactory) {}
 
   async membershipsCount(): Promise<number> {
-    const repository = await this.repositoryFactory.reading(Membership);
+    const repository = await this.repositoryFactory.reading(MembershipRecord);
     const raw = await repository
       .createQueryBuilder("membership")
       .select('count(distinct ("accountAddress", "organisationAddress"))', "count")
@@ -38,7 +38,7 @@ export class MembershipRepository {
   }
 
   async participantsCount(): Promise<number> {
-    const repository = await this.repositoryFactory.reading(Membership);
+    const repository = await this.repositoryFactory.reading(MembershipRecord);
     const raw = await repository
       .createQueryBuilder("membership")
       .select('COUNT(DISTINCT("accountAddress"))', "count")
@@ -47,7 +47,7 @@ export class MembershipRepository {
   }
 
   async allOrganisationAddresses(accountAddress: string) {
-    const membershipRepository = await this.repositoryFactory.reading(Membership);
+    const membershipRepository = await this.repositoryFactory.reading(MembershipRecord);
     const records = await membershipRepository
       .createQueryBuilder("membership")
       .where("membership.accountAddress = :accountAddress", { accountAddress: accountAddress })
@@ -58,7 +58,7 @@ export class MembershipRepository {
   }
 
   async countByOrganisationAddress(organisationAddress: string) {
-    const repository = await this.repositoryFactory.reading(Membership);
+    const repository = await this.repositoryFactory.reading(MembershipRecord);
     const raw = await repository
       .createQueryBuilder("membership")
       .select('count(distinct ("accountAddress"))', "count")
@@ -72,7 +72,7 @@ export class MembershipRepository {
     first: number,
     after: string | undefined
   ): Promise<string[]> {
-    const repository = await this.repositoryFactory.reading(Membership);
+    const repository = await this.repositoryFactory.reading(MembershipRecord);
     const queryBuilder = repository.createQueryBuilder("m");
     const query = participantsQuery(queryBuilder, "m", organisationAddress, after, first);
     const records = await query.getRawMany();
@@ -80,7 +80,7 @@ export class MembershipRepository {
   }
 
   async hasMoreByOrganisationAddress(organisationAddress: string, afterAddress: string): Promise<number> {
-    const repository = await this.repositoryFactory.reading(Membership);
+    const repository = await this.repositoryFactory.reading(MembershipRecord);
     const qq = repository.manager
       .createQueryBuilder()
       .select("COUNT(*)")
@@ -91,8 +91,8 @@ export class MembershipRepository {
     return Number(result.count);
   }
 
-  async byAddressInOrganisation(organisationAddress: string, accountAddress: string): Promise<Membership | undefined> {
-    const repository = await this.repositoryFactory.reading(Membership);
+  async byAddressInOrganisation(organisationAddress: string, accountAddress: string): Promise<MembershipRecord | undefined> {
+    const repository = await this.repositoryFactory.reading(MembershipRecord);
     return repository.findOne({
       organisationAddress: organisationAddress,
       accountAddress: accountAddress

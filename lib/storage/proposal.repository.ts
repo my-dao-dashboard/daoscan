@@ -1,14 +1,14 @@
 import { Inject, Service } from "typedi";
 import { RepositoryFactory } from "./repository.factory";
-import { Proposal } from "./proposal.row";
+import { ProposalRecord } from "./proposal.record";
 import { Repository, SelectQueryBuilder } from "typeorm";
 
 class OrganisationConnectionQuery {
   private readonly alias = this.query.alias;
 
-  constructor(readonly query: SelectQueryBuilder<Proposal>) {}
+  constructor(readonly query: SelectQueryBuilder<ProposalRecord>) {}
 
-  static build(repository: Repository<Proposal>, organisationAddress: string) {
+  static build(repository: Repository<ProposalRecord>, organisationAddress: string) {
     const query = repository
       .createQueryBuilder("proposal")
       .orderBy({ "proposal.index": "DESC" })
@@ -56,7 +56,7 @@ export class ProposalRepository {
   constructor(@Inject(RepositoryFactory.name) private readonly repositoryFactory: RepositoryFactory) {}
 
   async byOrganisationAndIndex(organisationAddress: string, index: number) {
-    const repository = await this.repositoryFactory.reading(Proposal);
+    const repository = await this.repositoryFactory.reading(ProposalRecord);
     return repository.findOne({
       organisationAddress,
       index
@@ -64,7 +64,7 @@ export class ProposalRepository {
   }
 
   async allByOrganisation(organisationAddress: string) {
-    const repository = await this.repositoryFactory.reading(Proposal);
+    const repository = await this.repositoryFactory.reading(ProposalRecord);
     return repository
       .createQueryBuilder("proposal")
       .where("proposal.organisationAddress = :organisationAddress", { organisationAddress: organisationAddress })
@@ -73,7 +73,7 @@ export class ProposalRepository {
   }
 
   async countByOrganisation(organisationAddress: string): Promise<number> {
-    const repository = await this.repositoryFactory.reading(Proposal);
+    const repository = await this.repositoryFactory.reading(ProposalRecord);
     return repository
       .createQueryBuilder("proposal")
       .where("proposal.organisationAddress = :organisationAddress", { organisationAddress: organisationAddress })
@@ -81,7 +81,7 @@ export class ProposalRepository {
   }
 
   async last(organisationAddress: string, n: number, beforeCursor: { index: number }) {
-    const repository = await this.repositoryFactory.reading(Proposal);
+    const repository = await this.repositoryFactory.reading(ProposalRecord);
     const query = OrganisationConnectionQuery.build(repository, organisationAddress);
     const totalCount = await query.getCount();
     const before = query.before(beforeCursor.index, false);
@@ -108,7 +108,7 @@ export class ProposalRepository {
   }
 
   async first(organisationAddress: string, n: number, afterCursor?: { index: number }) {
-    const repository = await this.repositoryFactory.reading(Proposal);
+    const repository = await this.repositoryFactory.reading(ProposalRecord);
     let query = OrganisationConnectionQuery.build(repository, organisationAddress);
     const totalCount = await query.getCount();
     if (afterCursor?.index) {
@@ -127,8 +127,8 @@ export class ProposalRepository {
     };
   }
 
-  async save(proposal: Proposal) {
-    const repository = await this.repositoryFactory.writing(Proposal);
+  async save(proposal: ProposalRecord) {
+    const repository = await this.repositoryFactory.writing(ProposalRecord);
     return repository.save(proposal);
   }
 }

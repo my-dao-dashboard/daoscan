@@ -8,7 +8,7 @@ interface Delta {
 }
 
 @Entity("history")
-export class History {
+export class HistoryRecord {
   @PrimaryColumn("bigint", { transformer: bigintTransformer, generated: true })
   // @ts-ignore
   id: bigint;

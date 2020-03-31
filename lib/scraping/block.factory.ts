@@ -2,7 +2,7 @@ import { Inject, Service } from "typedi";
 import { EthereumService } from "../services/ethereum.service";
 import { Block } from "./block";
 import { BlockRepository } from "../storage/block.repository";
-import { Block as Row } from "../storage/block.row";
+import { BlockRecord as Row } from "../storage/block.record";
 import { CommandFactory } from "./command.factory";
 
 @Service(BlockFactory.name)

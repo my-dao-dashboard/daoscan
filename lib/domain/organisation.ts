@@ -1,4 +1,4 @@
-import { Organisation as OrganisationRow } from "../storage/organisation.row";
+import { OrganisationRecord as OrganisationRow } from "../storage/organisation.record";
 import { Shares } from "./shares";
 import { OrganisationService } from "./organisation.service";
 import { Memoize } from "typescript-memoize";

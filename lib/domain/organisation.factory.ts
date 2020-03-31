@@ -3,7 +3,7 @@ import { Organisation } from "./organisation";
 import { EthereumService } from "../services/ethereum.service";
 import { OrganisationRepository } from "../storage/organisation.repository";
 import { OrganisationService } from "./organisation.service";
-import { Organisation as OrganisationRow } from "../storage/organisation.row";
+import { OrganisationRecord as OrganisationRow } from "../storage/organisation.record";
 
 @Service(OrganisationFactory.name)
 export class OrganisationFactory {

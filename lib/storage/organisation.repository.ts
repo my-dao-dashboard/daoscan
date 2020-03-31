@@ -1,6 +1,6 @@
 import { Inject, Service } from "typedi";
 import { RepositoryFactory } from "./repository.factory";
-import { Organisation } from "./organisation.row";
+import { OrganisationRecord } from "./organisation.record";
 import { PLATFORM } from "../domain/platform";
 import { LessThanOrEqual, MoreThanOrEqual, Repository, SelectQueryBuilder } from "typeorm";
 import { DateTime } from "luxon";
@@ -10,9 +10,9 @@ type Cursor = { id: bigint; createdAt: DateTime };
 class ConnectionQuery {
   private readonly alias = this.query.alias;
 
-  constructor(readonly query: SelectQueryBuilder<Organisation>) {}
+  constructor(readonly query: SelectQueryBuilder<OrganisationRecord>) {}
 
-  static build(repository: Repository<Organisation>) {
+  static build(repository: Repository<OrganisationRecord>) {
     const query = repository.createQueryBuilder("org").orderBy({
       "org.createdAt": "DESC",
       "org.id": "DESC"
@@ -68,14 +68,14 @@ export class OrganisationRepository {
   constructor(@Inject(RepositoryFactory.name) private readonly repositoryFactory: RepositoryFactory) {}
 
   async byAddress(address: string) {
-    const repository = await this.repositoryFactory.reading(Organisation);
+    const repository = await this.repositoryFactory.reading(OrganisationRecord);
     return repository.findOne({
       address: address
     });
   }
 
   async first(n: number, cursor?: Cursor) {
-    const repository = await this.repositoryFactory.reading(Organisation);
+    const repository = await this.repositoryFactory.reading(OrganisationRecord);
     let query = ConnectionQuery.build(repository);
     const totalCount = await query.getCount();
     if (cursor) {
@@ -95,7 +95,7 @@ export class OrganisationRepository {
   }
 
   async last(n: number, cursor: Cursor) {
-    const repository = await this.repositoryFactory.reading(Organisation);
+    const repository = await this.repositoryFactory.reading(OrganisationRecord);
     const query = ConnectionQuery.build(repository);
     const totalCount = await query.getCount();
     const before = query.before(cursor, false);
@@ -122,12 +122,12 @@ export class OrganisationRepository {
   }
 
   async count() {
-    const repository = await this.repositoryFactory.reading(Organisation);
+    const repository = await this.repositoryFactory.reading(OrganisationRecord);
     return repository.count();
   }
 
   async uniq() {
-    const repository = await this.repositoryFactory.reading(Organisation);
+    const repository = await this.repositoryFactory.reading(OrganisationRecord);
     const raw = await repository
       .createQueryBuilder("organisation")
       .select('count(distinct ("address"))', "count")
@@ -135,13 +135,13 @@ export class OrganisationRepository {
     return Number(raw.count);
   }
 
-  async save(row: Organisation): Promise<void> {
-    const repository = await this.repositoryFactory.writing(Organisation);
+  async save(row: OrganisationRecord): Promise<void> {
+    const repository = await this.repositoryFactory.writing(OrganisationRecord);
     await repository.save(row);
   }
 
-  async all(platform: PLATFORM): Promise<Organisation[]> {
-    const repository = await this.repositoryFactory.reading(Organisation);
+  async all(platform: PLATFORM): Promise<OrganisationRecord[]> {
+    const repository = await this.repositoryFactory.reading(OrganisationRecord);
     return repository
       .createQueryBuilder("organisation")
       .where({ platform })
@@ -150,7 +150,7 @@ export class OrganisationRepository {
   }
 
   async byId(id: bigint) {
-    const repository = await this.repositoryFactory.reading(Organisation);
+    const repository = await this.repositoryFactory.reading(OrganisationRecord);
     return repository.findOne({ id: id });
   }
 }

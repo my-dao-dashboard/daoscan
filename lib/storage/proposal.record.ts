@@ -3,7 +3,7 @@ import { bigintTransformer } from "./transformers/bigint.transformer";
 import { PROPOSAL_STATUS } from "../domain/proposal";
 
 @Entity("proposals")
-export class Proposal {
+export class ProposalRecord {
   @PrimaryColumn("bigint", { transformer: bigintTransformer, generated: true })
   // @ts-ignore
   id: bigint;

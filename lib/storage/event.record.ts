@@ -5,7 +5,7 @@ import { bigintTransformer } from "./transformers/bigint.transformer";
 import { SCRAPING_EVENT_KIND } from "../scraping/events/scraping-event.kind";
 
 @Entity("events")
-export class Event {
+export class EventRecord {
   @PrimaryColumn("bigint", { transformer: bigintTransformer, generated: true })
   // @ts-ignore
   id: bigint;

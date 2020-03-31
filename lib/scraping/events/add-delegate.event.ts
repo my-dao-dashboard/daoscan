@@ -1,13 +1,13 @@
 import { IScrapingEvent } from "./scraping-event.interface";
 import { SCRAPING_EVENT_KIND } from "./scraping-event.kind";
 import { PLATFORM } from "../../domain/platform";
-import { Event } from "../../storage/event.row";
+import { EventRecord } from "../../storage/event.record";
 import { ConnectionFactory } from "../../storage/connection.factory";
-import { Delegate } from "../../storage/delegate.row";
+import { DelegateRecord } from "../../storage/delegate.record";
 import { EventRepository } from "../../storage/event.repository";
 import { RESOURCE_KIND } from "../../storage/resource.kind";
 import { HistoryRepository } from "../../storage/history.repository";
-import { History } from "../../storage/history.row";
+import { HistoryRecord } from "../../storage/history.record";
 
 export interface AddDelegateEventProps {
   platform: PLATFORM;
@@ -70,12 +70,12 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
   async commit(): Promise<void> {
     const eventRow = this.buildEventRow();
 
-    const delegateRow = new Delegate();
+    const delegateRow = new DelegateRecord();
     delegateRow.address = this.address;
     delegateRow.delegateFor = this.delegateFor;
     delegateRow.organisationAddress = this.organisationAddress;
 
-    const historyRow = new History();
+    const historyRow = new HistoryRecord();
     historyRow.resourceKind = RESOURCE_KIND.DELEGATE;
 
     const writing = await this.connectionFactory.writing();
@@ -86,7 +86,7 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
       console.log("Saved delegate", savedDelegate);
       historyRow.resourceId = savedDelegate.id;
       historyRow.eventId = eventRow.id;
-      const savedHistoryRow = await entityManager.save(History, historyRow);
+      const savedHistoryRow = await entityManager.save(HistoryRecord, historyRow);
       console.log("Saved history", savedHistoryRow);
     });
   }
@@ -97,11 +97,11 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
     if (foundEvent) {
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {
-        await entityManager.delete(Event, foundEvent);
+        await entityManager.delete(EventRecord, foundEvent);
         console.log("Deleted event", foundEvent);
         const historyRows = await this.historyRepository.allByEventIdAndKind(foundEvent.id, RESOURCE_KIND.DELEGATE);
         const resourceIds = historyRows.map(h => h.resourceId.toString());
-        const deleteResult = await entityManager.delete(Delegate, resourceIds);
+        const deleteResult = await entityManager.delete(DelegateRecord, resourceIds);
         console.log(`Deleted ${deleteResult.affected} delegates`);
       });
     } else {
@@ -110,7 +110,7 @@ export class AddDelegateEvent implements IScrapingEvent, AddDelegateEventProps {
   }
 
   buildEventRow() {
-    const eventRow = new Event();
+    const eventRow = new EventRecord();
     eventRow.platform = this.platform;
     eventRow.blockHash = this.blockHash;
     eventRow.blockId = BigInt(this.blockNumber);

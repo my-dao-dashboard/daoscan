@@ -1,7 +1,7 @@
 import { Proposal } from "../domain/proposal";
 import { VoteRepository } from "../storage/vote.repository";
 import { VOTE_DECISION } from "../domain/vote-decision";
-import { Vote } from "../storage/vote.row";
+import { VoteRecord } from "../storage/vote.record";
 import { Shares } from "../domain/shares";
 import BigNumber from "bignumber.js";
 import { TokenFactory } from "../domain/token.factory";
@@ -31,7 +31,7 @@ export class ProposalStats {
     return this.votesToShares(yesVotes);
   }
 
-  private async votesToShares(votes: Vote[]) {
+  private async votesToShares(votes: VoteRecord[]) {
     const organisation = await this.proposal.organisation();
     const shares: Shares | undefined = await organisation?.shares();
     const sharesPerVote = await Promise.all(votes.map(async vote => shares?.balanceOf(vote.voter)));

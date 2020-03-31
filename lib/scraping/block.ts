@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { BlockRepository } from "../storage/block.repository";
-import { Block as Row } from "../storage/block.row";
+import { BlockRecord as Row } from "../storage/block.record";
 import { Command } from "./command";
 import { EthereumService, ExtendedBlock, ExtendedTransactionReceipt } from "../services/ethereum.service";
 import { CommandFactory } from "./command.factory";

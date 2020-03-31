@@ -9,7 +9,7 @@ import { APP_ID } from "../../lib/storage/applications.const";
 import * as csv from "csv-writer";
 import { AbiItem } from "web3-utils";
 import crypto from "crypto";
-import { Application } from "../../lib/storage/application.row";
+import { ApplicationRecord } from "../../lib/storage/application.record";
 import _ from "lodash";
 
 dotenv.config({ path: path.resolve(__dirname, ".env") });
@@ -137,7 +137,7 @@ async function isVerified(address: string): Promise<[boolean, string]> {
   }
 }
 
-async function fetchOne(application: Application) {
+async function fetchOne(application: ApplicationRecord) {
   if (!EXCLUDED.includes(application.appId)) {
     const contract = new web3.eth.Contract(PROXY_ABI as AbiItem[], application.address);
     const verified = await isVerified(application.address);

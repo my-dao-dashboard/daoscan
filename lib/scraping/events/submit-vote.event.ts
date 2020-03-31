@@ -1,11 +1,11 @@
 import { IScrapingEvent } from "./scraping-event.interface";
 import { SCRAPING_EVENT_KIND } from "./scraping-event.kind";
 import { PLATFORM } from "../../domain/platform";
-import { History } from "../../storage/history.row";
+import { HistoryRecord } from "../../storage/history.record";
 import { RESOURCE_KIND } from "../../storage/resource.kind";
-import { Event } from "../../storage/event.row";
+import { EventRecord } from "../../storage/event.record";
 import { VOTE_DECISION } from "../../domain/vote-decision";
-import { Vote } from "../../storage/vote.row";
+import { VoteRecord } from "../../storage/vote.record";
 import { ConnectionFactory } from "../../storage/connection.factory";
 import { EventRepository } from "../../storage/event.repository";
 import { HistoryRepository } from "../../storage/history.repository";
@@ -44,14 +44,14 @@ export class SubmitVoteEvent implements IScrapingEvent, SubmitVoteEventProps {
   async commit(): Promise<void> {
     const eventRow = this.buildEventRow();
 
-    const voteRow = new Vote();
+    const voteRow = new VoteRecord();
     voteRow.decision = this.decision;
     voteRow.organisationAddress = this.organisationAddress;
     voteRow.proposalIndex = this.proposalIndex;
     voteRow.voter = this.voter;
     voteRow.createdAt = eventRow.timestamp;
 
-    const historyRow = new History();
+    const historyRow = new HistoryRecord();
     historyRow.resourceKind = RESOURCE_KIND.VOTE;
     const writing = await this.connectionFactory.writing();
     await writing.transaction(async entityManager => {
@@ -74,14 +74,14 @@ export class SubmitVoteEvent implements IScrapingEvent, SubmitVoteEventProps {
       const resourceIds = historyRows.map(h => h.resourceId.toString());
       const writing = await this.connectionFactory.writing();
       await writing.transaction(async entityManager => {
-        const deleteEvents = await entityManager.delete(Event, eventRow);
+        const deleteEvents = await entityManager.delete(EventRecord, eventRow);
         console.log(`Saved ${deleteEvents.affected} events`);
         if (historyRows.length > 0) {
-          const deleteHistory = await entityManager.delete(History, historyRows);
+          const deleteHistory = await entityManager.delete(HistoryRecord, historyRows);
           console.log(`Deleted ${deleteHistory.affected} history entries`);
         }
         if (resourceIds.length > 0) {
-          const deleteProposals = await entityManager.delete(Vote, resourceIds);
+          const deleteProposals = await entityManager.delete(VoteRecord, resourceIds);
           console.log(`Deleted ${deleteProposals.affected} votes`);
         }
       });
@@ -91,7 +91,7 @@ export class SubmitVoteEvent implements IScrapingEvent, SubmitVoteEventProps {
   }
 
   buildEventRow() {
-    const eventRow = new Event();
+    const eventRow = new EventRecord();
     eventRow.platform = this.platform;
     eventRow.blockHash = this.blockHash;
     eventRow.blockId = BigInt(this.blockNumber);

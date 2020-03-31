@@ -1,5 +1,5 @@
 import { Inject, Service } from "typedi";
-import { Vote as VoteRow } from "../storage/vote.row";
+import { VoteRecord as VoteRow } from "../storage/vote.record";
 import { Vote } from "./vote";
 import { OrganisationFactory } from "./organisation.factory";
 
