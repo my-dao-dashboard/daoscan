@@ -72,7 +72,7 @@ export class OrganisationResolver {
   async proposal(root: Organisation, args: { index: number }) {
     const row = await this.proposalRepository.byOrganisationAndIndex(root.address, args.index);
     if (row) {
-      return this.proposalFactory.fromRow(row);
+      return this.proposalFactory.fromRecord(row);
     } else {
       return undefined;
     }

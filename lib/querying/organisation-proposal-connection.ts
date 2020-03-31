@@ -47,7 +47,7 @@ export class OrganisationProposalConnection {
   async edges() {
     const page = await this.page();
     return page.entries.map(row => {
-      const proposal = this.proposalFactory.fromRow(row);
+      const proposal = this.proposalFactory.fromRecord(row);
       return {
         node: proposal,
         cursor: proposalToCursor(proposal)

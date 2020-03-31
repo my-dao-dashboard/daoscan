@@ -1,5 +1,5 @@
 import { Inject, Service } from "typedi";
-import { ProposalRecord as ProposalRow } from "../storage/proposal.record";
+import { ProposalRecord } from "../storage/proposal.record";
 import { Proposal } from "./proposal";
 import { OrganisationRepository } from "./organisation.repository";
 
@@ -7,17 +7,7 @@ import { OrganisationRepository } from "./organisation.repository";
 export class ProposalFactory {
   constructor(@Inject(OrganisationRepository.name) private readonly organisationRepository: OrganisationRepository) {}
 
-  fromRow(row: ProposalRow) {
-    return new Proposal(
-      {
-        index: row.index,
-        proposer: row.proposer,
-        createdAt: row.createdAt,
-        payload: row.payload,
-        organisationAddress: row.organisationAddress,
-        status: row.status
-      },
-      this.organisationRepository
-    );
+  fromRecord(record: ProposalRecord) {
+    return new Proposal(record, this.organisationRepository);
   }
 }
