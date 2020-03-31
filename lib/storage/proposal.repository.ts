@@ -24,10 +24,10 @@ class OrganisationConnectionQuery {
     return new OrganisationConnectionQuery(next);
   }
 
-  after(index: number, include: boolean) {
+  after(cursor: { index: number }, include: boolean) {
     const cmp = include ? "<=" : "<";
     const next = this.query.clone().andWhere(`${this.alias}.index ${cmp} :index`, {
-      index: index
+      index: cursor.index
     });
     return new OrganisationConnectionQuery(next);
   }
@@ -107,21 +107,21 @@ export class ProposalRepository {
     };
   }
 
-  async first(organisationAddress: string, n: number, afterCursor?: { index: number }) {
+  async first(organisationAddress: string, take: number, afterCursor?: { index: number }) {
     const repository = await this.repositoryFactory.reading(ProposalRecord);
     let query = OrganisationConnectionQuery.build(repository, organisationAddress);
     const totalCount = await query.getCount();
-    if (afterCursor?.index) {
-      query = query.after(afterCursor.index, false);
+    if (afterCursor) {
+      query = query.after(afterCursor, false);
     }
     const afterCount = await query.getCount();
-    const entries = await query.take(n).getMany();
+    const entries = await query.take(take).getMany();
     const startIndex = totalCount - afterCount + 1;
     const endIndex = startIndex + entries.length - 1;
     return {
       startIndex: startIndex,
       endIndex: endIndex,
-      hasNextPage: afterCount > n,
+      hasNextPage: afterCount > take,
       hasPreviousPage: startIndex > 1,
       entries: entries
     };

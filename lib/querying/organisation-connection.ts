@@ -2,60 +2,39 @@ import { IPagination } from "./pagination.interface";
 import { OrganisationStorage } from "../storage/organisation.storage";
 import { Mutex } from "await-semaphore/index";
 import { OrganisationFactory } from "../domain/organisation.factory";
-import { OrganisationRecord as OrganisationRow } from "../storage/organisation.record";
+import { OrganisationRecord } from "../storage/organisation.record";
+import { OrganisationConnectionCursor } from "../storage/organisation-connection.cursor";
+import { Page } from "../storage/page";
 
-function organisationToCursor(organisation: { id: bigint; createdAt: string | Date }) {
-  const payload = { id: organisation.id.toString(), createdAt: organisation.createdAt.toString() };
-  const string = JSON.stringify(payload);
-  return Buffer.from(string).toString("base64");
-}
-
-function decodeCursor(cursor: string) {
-  const buffer = Buffer.from(cursor, "base64").toString();
-  const payload = JSON.parse(buffer);
-  return {
-    id: BigInt(payload.id),
-    createdAt: new Date(payload.createdAt)
-  };
-}
-
-const DEFAULT_PAGE = 25;
+const DEFAULT_PAGE = 1;
 
 export class OrganisationConnection {
-  private _pageCache:
-    | {
-        startIndex: number;
-        endIndex: number;
-        hasNextPage: boolean;
-        hasPreviousPage: boolean;
-        entries: OrganisationRow[];
-      }
-    | undefined;
+  private _pageCache: Page<OrganisationRecord> | undefined;
   private pageMutex = new Mutex();
 
   constructor(
     private readonly pagination: IPagination,
-    private readonly organisationRepository: OrganisationStorage,
+    private readonly organisationStorage: OrganisationStorage,
     private readonly organisationFactory: OrganisationFactory
   ) {}
 
   async totalCount() {
-    return this.organisationRepository.count();
+    return this.organisationStorage.count();
   }
 
   async pageInfo() {
-    const rows = await this.page();
-    const lastEdge = rows.entries[rows.entries.length - 1];
-    const firstEdge = rows.entries[0];
-    const startCursor = firstEdge ? organisationToCursor(firstEdge) : null;
-    const endCursor = lastEdge ? organisationToCursor(lastEdge) : null;
+    const page = await this.page();
+    const lastEdge = page.entries[page.entries.length - 1];
+    const firstEdge = page.entries[0];
+    const startCursor = firstEdge ? OrganisationConnectionCursor.build(firstEdge) : null;
+    const endCursor = lastEdge ? OrganisationConnectionCursor.build(lastEdge) : null;
     return {
-      endCursor: endCursor,
-      startCursor: startCursor,
-      hasNextPage: rows.hasNextPage,
-      hasPreviousPage: rows.hasPreviousPage,
-      startIndex: rows.startIndex,
-      endIndex: rows.endIndex
+      endCursor: endCursor?.encode(),
+      startCursor: startCursor?.encode(),
+      hasNextPage: page.hasNextPage,
+      hasPreviousPage: page.hasPreviousPage,
+      startIndex: page.startIndex,
+      endIndex: page.endIndex
     };
   }
 
@@ -65,7 +44,7 @@ export class OrganisationConnection {
       const organisation = this.organisationFactory.fromRecord(row);
       return {
         node: organisation,
-        cursor: organisationToCursor(organisation)
+        cursor: OrganisationConnectionCursor.build(organisation).encode()
       };
     });
   }
@@ -82,14 +61,15 @@ export class OrganisationConnection {
   }
 
   async _page() {
+    const query = await this.organisationStorage.connectionQuery();
     if (this.pagination.before) {
-      const last = this.pagination.last || DEFAULT_PAGE;
-      const before = decodeCursor(this.pagination.before);
-      return this.organisationRepository.last(last, before);
+      const take = this.pagination.last || DEFAULT_PAGE;
+      const before = OrganisationConnectionCursor.decode(this.pagination.before);
+      return Page.before(query, take, before);
     } else {
-      const first = this.pagination.first || DEFAULT_PAGE;
-      const after = this.pagination.after ? decodeCursor(this.pagination.after) : undefined;
-      return this.organisationRepository.first(first, after);
+      const take = this.pagination.first || DEFAULT_PAGE;
+      const after = this.pagination.after ? OrganisationConnectionCursor.decode(this.pagination.after) : undefined;
+      return Page.after(query, take, after);
     }
   }
 }

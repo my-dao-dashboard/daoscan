@@ -33,7 +33,7 @@ export class SetOrganisationNameEvent implements IScrapingEvent {
 
   constructor(
     private readonly props: SetOrganisationNameEventProps,
-    private readonly organisationRepository: OrganisationStorage,
+    private readonly organisationStorage: OrganisationStorage,
     private readonly connectionFactory: ConnectionFactory,
     private readonly historyRepository: HistoryRepository,
     private readonly eventRepository: EventRepository
@@ -95,7 +95,7 @@ export class SetOrganisationNameEvent implements IScrapingEvent {
   }
 
   async findOrBuildOrganisationRow(event: EventRecord) {
-    const foundOrganisation = await this.organisationRepository.byAddress(this.address);
+    const foundOrganisation = await this.organisationStorage.byAddress(this.address);
     if (foundOrganisation) {
       return foundOrganisation;
     } else {
