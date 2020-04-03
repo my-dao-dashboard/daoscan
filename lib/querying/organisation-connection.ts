@@ -6,7 +6,7 @@ import { OrganisationRecord } from "../storage/organisation.record";
 import { OrganisationConnectionCursor } from "../storage/organisation-connection.cursor";
 import { Page } from "../storage/page";
 
-const DEFAULT_PAGE = 1;
+const DEFAULT_PAGE = 25;
 
 export class OrganisationConnection {
   private _pageCache: Page<OrganisationRecord> | undefined;
