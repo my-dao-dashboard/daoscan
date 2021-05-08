@@ -25,7 +25,7 @@
     "pg": "^7.17.1",
     "reflect-metadata": "^0.1.13",
     "typedi": "^0.8.0",
-    "typeorm": "^0.2.22",
+    "typeorm": "^0.2.25",
     "typescript-memoize": "^1.0.0-alpha.3",
     "uuid": "^3.3.3",
     "web3": "^1.2.4"
